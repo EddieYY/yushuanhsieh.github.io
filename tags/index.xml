@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Tags on Cherie&#39;s Tech Blog</title>
+    <title>Tags on 文組工程師</title>
     <link>https://yushuanhsieh.github.io/tags/</link>
-    <description>Recent content in Tags on Cherie&#39;s Tech Blog</description>
+    <description>Recent content in Tags on 文組工程師</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     
@@ -11,7 +11,7 @@
     
     
     <item>
-      <title>[Life] 三月起，在竹北定區生活</title>
+      <title>三月起，在竹北定區生活</title>
       <link>https://yushuanhsieh.github.io/post/2020-03-31-march/</link>
       <pubDate>Tue, 31 Mar 2020 08:00:00 +0800</pubDate>
       
@@ -22,7 +22,7 @@
     </item>
     
     <item>
-      <title>[Life] 2月雜談</title>
+      <title>2月雜談</title>
       <link>https://yushuanhsieh.github.io/post/2020-02-24-february/</link>
       <pubDate>Mon, 24 Feb 2020 08:00:00 +0800</pubDate>
       
