@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        Microprocessor System Lab. - Cross Compiler - Cherie&#39;s Tech Blog
+      </title>
+    <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  
+  <meta name="theme-color" content="#000000" />
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <meta name="description" content="前言 其實整個課程已經看完了，只是因為寫 blog 需要準備很多資料，畢竟有些部分老師快速帶過，所以生產文章的速度遠不及看課程速度XD 這次要說的是 Cross Compiler，因為如果是安裝像是 SW4STM32 IDE，它所有 cross compiler 設定都已經備妥妥了，使用者只要按一個蟲蟲鍵便能快速 Debugger，不過實際上它背後執行許多程序，只是因為都被自動配置好了，因此使用者不太需要去處理這些額外的環境設定。" />
+  <meta name="generator" content="Hugo 0.67.0 with theme pure" />
+  <title>Microprocessor System Lab. - Cross Compiler - Cherie&#39;s Tech Blog</title>
+  
+  
+  <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
+  
+    
+    <link rel="stylesheet" href="https://yushuanhsieh.github.io/scss/cherie.min.25e69b63f709fdfaf070b38e72e556d2a25931840ee2fcdc62b4aa0b9803e9ba.css" async>
+  
+  <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
+  <meta property="og:title" content="Microprocessor System Lab. - Cross Compiler" />
+<meta property="og:description" content="前言 其實整個課程已經看完了，只是因為寫 blog 需要準備很多資料，畢竟有些部分老師快速帶過，所以生產文章的速度遠不及看課程速度XD 這次要說的是 Cross Compiler，因為如果是安裝像是 SW4STM32 IDE，它所有 cross compiler 設定都已經備妥妥了，使用者只要按一個蟲蟲鍵便能快速 Debugger，不過實際上它背後執行許多程序，只是因為都被自動配置好了，因此使用者不太需要去處理這些額外的環境設定。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2018-11-04-mcu-cross-compiler/" />
+<meta property="article:published_time" content="2018-11-04T08:00:00+08:00" />
+<meta property="article:modified_time" content="2018-11-04T08:00:00+08:00" />
+<meta itemprop="name" content="Microprocessor System Lab. - Cross Compiler">
+<meta itemprop="description" content="前言 其實整個課程已經看完了，只是因為寫 blog 需要準備很多資料，畢竟有些部分老師快速帶過，所以生產文章的速度遠不及看課程速度XD 這次要說的是 Cross Compiler，因為如果是安裝像是 SW4STM32 IDE，它所有 cross compiler 設定都已經備妥妥了，使用者只要按一個蟲蟲鍵便能快速 Debugger，不過實際上它背後執行許多程序，只是因為都被自動配置好了，因此使用者不太需要去處理這些額外的環境設定。">
+<meta itemprop="datePublished" content="2018-11-04T08:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2018-11-04T08:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="223">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Microprocessor System Lab. - Cross Compiler"/>
+<meta name="twitter:description" content="前言 其實整個課程已經看完了，只是因為寫 blog 需要準備很多資料，畢竟有些部分老師快速帶過，所以生產文章的速度遠不及看課程速度XD 這次要說的是 Cross Compiler，因為如果是安裝像是 SW4STM32 IDE，它所有 cross compiler 設定都已經備妥妥了，使用者只要按一個蟲蟲鍵便能快速 Debugger，不過實際上它背後執行許多程序，只是因為都被自動配置好了，因此使用者不太需要去處理這些額外的環境設定。"/>
+
+  <!--[if lte IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+    <![endif]-->
+
+  <!--[if lt IE 9]>
+      <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+  </head>
+
+  
+  
+
+  <body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage"><header class="header" itemscope itemtype="http://schema.org/WPHeader">
+    <div class="slimContent">
+      <div class="navbar-header">
+        <div class="profile-block text-center">
+          <a id="avatar" href="" target="_blank">
+            <img class="img-circle img-rotate" src="https://yushuanhsieh.github.io/author.jpg" width="200" height="200">
+          </a>
+          <h2 id="name" class="hidden-xs hidden-sm">Cherie Hsieh</h2>
+          <h3 id="title" class="hidden-xs hidden-sm hidden-md">Software Engineer</h3>
+          <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>Taiwan</small>
+        </div><div class="search" id="search-form-wrap">
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i
+                        class="icon icon-search"></i></button>
+            </span>
+        </div>
+        <div class="ins-search">
+            <div class="ins-search-mask"></div>
+            <div class="ins-search-container">
+                <div class="ins-input-wrapper">
+                    <input type="text" class="ins-search-input" placeholder="Type something..."
+                        x-webkit-speech />
+                    <button type="button" class="close ins-close ins-selectable" data-dismiss="modal"
+                        aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="ins-section-wrapper">
+                    <div class="ins-section-container"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+        <ul class="nav navbar-nav main-nav">
+            <li class="menu-item menu-item-home">
+                <a href="/">
+                  <span class="menu-title">Home</span>
+                </a>
+            </li>
+            <li class="menu-item menu-item-categories">
+                <a href="/categories/">
+                  <span class="menu-title">Categories</span>
+                </a>
+            </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+<aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title"> Categories</h3>
+    <div class="widget-body">
+        <ul class="category-list">
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/c/" class="category-list-link">c</a><span class="category-list-count">3</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">5</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/other/" class="category-list-link">other</a><span class="category-list-count">7</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/study/" class="category-list-link">study</a><span class="category-list-count">9</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/web/" class="category-list-link">web</a><span class="category-list-count">28</span></li>
+        </ul>
+    </div>
+</div>
+      
+<div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+        <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-03-31-march/" class="title">[Life] 三月起，在竹北定區生活</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-03-31 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-03-31</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-02-24-february/" class="title">[Life] 2月雜談</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-02-24 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-02-24</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-21-golang-router/" class="title">Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-21 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-21</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-19-memory-allocator-implicit-free-list/" class="title">Implement Memory Allocator - Implicit Free List</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-19 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-19</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2019-12-30-2019-review/" class="title">2019 年度回顧</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2019-12-30 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-12-30</time>
+                    </p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+  </div>
+</aside>
+
+    
+    
+<main class="main" role="main"><div class="content">
+  <article id="single-" class="article article-type-single" itemscope
+    itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      <h1 itemprop="name">
+  <a
+    class="article-title"
+    href="/post/2018-11-04-mcu-cross-compiler/"
+    >
+    
+      
+        <span class="title-cat">Other</span>
+      
+    Microprocessor System Lab. - Cross Compiler</a>
+</h1>
+
+      <div class="article-meta">
+        
+<span class="article-date">
+  <i class="icon icon-calendar-check"></i>&nbsp;
+<a href="https://yushuanhsieh.github.io/post/2018-11-04-mcu-cross-compiler/" class="article-date">
+  <time datetime="2018-11-04 08:00:00 &#43;0800 CST" itemprop="datePublished">2018-11-04</time>
+</a>
+</span>
+<span class="article-category">
+  <i class="icon icon-folder"></i>
+  
+    <a class="article-category-link" href="/categories/other/"> Other </a>
+  
+</span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2018-11-04-mcu-cross-compiler/#comments"
+            class="article-comment-link">Comments</a></span>
+      </div>
+    </div>
+    <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
+      <h2 id="前言">前言</h2>
+<p>其實整個課程已經看完了，只是因為寫 blog 需要準備很多資料，畢竟有些部分老師快速帶過，所以生產文章的速度遠不及看課程速度XD 這次要說的是 Cross Compiler，因為如果是安裝像是 <code>SW4STM32</code> IDE，它所有 cross compiler 設定都已經備妥妥了，使用者只要按一個蟲蟲鍵便能快速 Debugger，不過實際上它背後執行許多程序，只是因為都被自動配置好了，因此使用者不太需要去處理這些額外的環境設定。</p>
+<h2 id="cross-compiler">Cross compiler</h2>
+<p>當我們在開發 Embedded software 時，通常情況下，都是在自己所使用、性能比較好的 host PC 進行程式碼編寫和 compile，接著把 compile 過後的執行檔燒在開發板上（畢竟開發板的執行效率不如自己手上的電腦好，如果直接使用開發板來 compile，會 compile 到天荒地老吧）。</p>
+<p>不過，大部分人使用的電腦都是 x86 系列，如果直接在電腦上使用一般 compiler，就只會編出僅供 x86 辨識的執行檔，而想要 compile 出其他 CPU 可以辨識的執行檔，就必須透過 <strong>cross compiler</strong> 的協助才行。</p>
+<p><img src="http://1.bp.blogspot.com/-vcFB6vudSTs/UvIFwsB5zMI/AAAAAAAADw8/sIuPoi6Fkes/s1600/toolchain_definintion.bmp" alt="img">
+<em>source: <a href="http://abhishekmourya.blogspot.com/2014/02/cross-compiling-toolchain.html">http://abhishekmourya.blogspot.com/2014/02/cross-compiling-toolchain.html</a></em></p>
+<p>至於 cross compiler 取得方式也很簡單，像是使用 ARM 系列 CPU，就能直接在官網上下載到專屬的 <a href="https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads">GNU Embedded Toolchain for Arm</a> 來幫你處理這些 cross compile 問題。</p>
+<p>如果使用 IDE，我們也可以查看他的 builder 設定，來得知 IDE 是怎樣設定 cross compiler 。以 <code>SW4STM32</code> 為例，打開它 project setting，並點選 C/C++ builder，就會看到相關的 compiler 設置。</p>
+<pre><code>arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DSTM32F4 -DSTM32F401RETx -DNUCLEO_F401RE -DDEBUG -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c
+</code></pre><h3 id="what-is-arm-none-eabi--">What is arm-none-eabi- ?</h3>
+<p>從上面可以發現，同樣是使用 gcc，上面的 gcc 加了 <code>arm-none-eabi-</code> 這個 prefix，那麼 <code>arm-none-eabi-</code> 是什麼呢？簡單來說， cross compiler 有通俗的命名原則。</p>
+<p><strong>arch-vendor-(os-)abi</strong></p>
+<ul>
+<li>arch is for architecture: arm, mips, x86, i686&hellip;</li>
+<li>vendor is tool chain supplier: apple, Codesourcery, Linux, os is for operating system: linux, none (bare metal)</li>
+<li>abi is for application binary interface convention: eabi(embedded application binary interface), gnueabi, gnueabihf</li>
+</ul>
+<p>如此一來，只要看到 cross compiler 的命名方式，很快就可以知道它 compile 出來的檔案適合用在怎樣的平台上。</p>
+<p>舉例來說，我的 STM32F4 project 最基本就包含 <code>arm-none-eabi-gcc</code> 和 <code>arm-none-eabi-as</code> (for assembly language)，讓我可以編寫 C 和 assembly 兩種語言的程式碼。</p>
+<h2 id="config-linker-script-with-cross-compiler">Config Linker script with cross compiler</h2>
+<p>通常我們在把 C code file compile 成可以被執行的 binary 執行檔，會經過以下流程，其中很重要的是，我們必須把所需的 object files 透過 Linker 連結在一起，才能 compile 出完整的執行檔。所以在使用 cross compiler 時，也必須告知其 linker file。</p>
+<pre><code>arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -T&quot;/my-project/MCU/mcu-example/LinkerScript.ld&quot; -Wl,-Map=output.map -Wl,--gc-sections -lm
+</code></pre><p><img src="https://images.slideplayer.com/27/9191896/slides/slide_6.jpg" alt="imgs"></p>
+<h2 id="結論">結論</h2>
+<p>Cross compiler 可以讓我們在開發不同平台的軟體時， compile 出其對應的執行檔案。除了上面例子有提到的 <code>arm-none-eabi-gcc</code>，還有其他像是 <code>arm-none-linux-gnueabi-gcc</code> 這些不同 compiler，如果之後接觸到 Embedded Linux System，就必須換用到適合 Linux 的 cross compiler 了！</p>
+<h2 id="reference">Reference</h2>
+<ul>
+<li><a href="https://slideplayer.com/slide/9191896/">https://slideplayer.com/slide/9191896/</a></li>
+<li><a href="http://ocw.nctu.edu.tw/course_detail-v.php?bgid=9&amp;gid=0&amp;nid=246&amp;v5=1_MWy4ReHIE">http://ocw.nctu.edu.tw/course_detail-v.php?bgid=9&amp;gid=0&amp;nid=246&amp;v5=1_MWy4ReHIE</a></li>
+</ul>
+
+    </div>
+    <div class="article-footer">
+<blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    <li class="post-copyright-link hidden-xs">
+      <strong>Permalink: </strong>
+      <a href="https://yushuanhsieh.github.io/post/2018-11-04-mcu-cross-compiler/" title="Microprocessor System Lab. - Cross Compiler" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2018-11-04-mcu-cross-compiler/</a>
+    </li>
+  </ul>
+</blockquote>
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="https://yushuanhsieh.github.io/author.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">Cherie Hsieh</span><small class="ml-1x">Software Engineer</small></a></h3>
+        <div>Gopher</div>
+      </div>
+    </figure>
+  </div>
+</div>
+    </div>
+  </article>
+
+</div><nav class="bar bar-footer clearfix" data-stick-bottom>
+    <div class="bar-inner">
+        <ul class="pager pull-left">
+            <li class="prev">
+                <a href="https://yushuanhsieh.github.io/post/2018-11-02-aug-study/" title="10月份自我學習日誌回顧"><i
+                        class="icon icon-angle-left"
+                        aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
+            </li>
+            <li class="next">
+                <a href="https://yushuanhsieh.github.io/post/2018-11-15-node-red/"
+                    title="Node-Red - Node 坑坑紀錄"><span>Newer&nbsp;&nbsp;</span><i
+                        class="icon icon-angle-right" aria-hidden="true"></i></a>
+            </li>
+            
+        </ul>
+        <div class="bar-right">
+        </div>
+    </div>
+</nav>
+
+</main><footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+  <div class="copyright">
+    &copy;2017  -
+    2020
+    <div class="publishby">
+        Theme by <a href="https://github.com/xiaoheiAh" target="_blank"> xiaoheiAh </a>base on<a href="https://github.com/xiaoheiAh/hugo-theme-pure" target="_blank"> pure</a>.
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+<script>
+    window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/javascript.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/c.min.js" defer></script><script>
+    hljs.configure({
+        tabReplace: '    ', 
+        classPrefix: ''     
+        
+    })
+    hljs.initHighlightingOnLoad();
+</script>
+<script src="https://yushuanhsieh.github.io/js/application.min.bdeb64b910570b6c41badc6a05b7afb0c8ad9efd8525de3c7257d59e786326a3.js"></script>
+<script src="https://yushuanhsieh.github.io/js/plugin.min.51ff8c7317566f82259170fa36e09c4493adc9b9378b427a01ad3f017ebac7dd.js"></script>
+
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            ROOT_URL: 'https:\/\/yushuanhsieh.github.io',
+            CONTENT_URL: 'https:\/\/yushuanhsieh.github.io\/searchindex.json ',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script type="text/javascript" src="https://yushuanhsieh.github.io/js/insight.min.a343cd9a5a7698336b28ef3a7c16a3a1b1d2d5fb17dc8ed04022bbe08cc5459073a15bdafa3a8a58cdd56080784bdd69fa70b1ae8597565c799c57ed00f0e120.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+<script>
+    tocbot.init({
+        
+        tocSelector: '.js-toc',
+        
+        contentSelector: '.js-toc-content',
+        
+        headingSelector: 'h1, h2, h3',
+        
+        hasInnerContainers: true,
+    });
+</script>
+
+
+  </body>
+</html>

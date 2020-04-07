@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        AngularJS - Two way data binding - Cherie&#39;s Tech Blog
+      </title>
+    <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  
+  <meta name="theme-color" content="#000000" />
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <meta name="description" content="前言 最近開始接觸前端技術，預計以Angular和NodeJS為主。之前其實有稍微點一些網頁相關技能，不過大概都才Lv.1，知道大概怎麼使用，卻不太清楚背後的原理和概念。所以這次在學習的時候，會著重在框架理論和實作方式上，希望自己除了能應用這些框架之外，還可以了解這些框架背後的原理，並且進而有能力比較各框架之間的好壞。雖然Angular目前已經出到v5.1.0，但起點會從Angular1開始學起，之後文章預計會去比較新版的Angular和Angular1有怎樣的差異，以及新版的運作方式可以帶來怎樣的好處。
+Angular1主打特色之一包含 Two-way data binding (這邊先不在意這種方式帶來怎樣的壞處xD)，這篇文章紀錄 Two-way data binding 的原理和實現方式，以及對網站來說會帶來怎樣的影響。文章將不會示範如何去應用 Two-way data binding，因為我覺得隨便 Google 就可以找到很多例子，就不特別介紹了。" />
+  <meta name="generator" content="Hugo 0.67.0 with theme pure" />
+  <title>AngularJS - Two way data binding - Cherie&#39;s Tech Blog</title>
+  
+  
+  <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
+  
+    
+    <link rel="stylesheet" href="https://yushuanhsieh.github.io/scss/cherie.min.25e69b63f709fdfaf070b38e72e556d2a25931840ee2fcdc62b4aa0b9803e9ba.css" async>
+  
+  <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
+  <meta property="og:title" content="AngularJS - Two way data binding" />
+<meta property="og:description" content="前言 最近開始接觸前端技術，預計以Angular和NodeJS為主。之前其實有稍微點一些網頁相關技能，不過大概都才Lv.1，知道大概怎麼使用，卻不太清楚背後的原理和概念。所以這次在學習的時候，會著重在框架理論和實作方式上，希望自己除了能應用這些框架之外，還可以了解這些框架背後的原理，並且進而有能力比較各框架之間的好壞。雖然Angular目前已經出到v5.1.0，但起點會從Angular1開始學起，之後文章預計會去比較新版的Angular和Angular1有怎樣的差異，以及新版的運作方式可以帶來怎樣的好處。
+Angular1主打特色之一包含 Two-way data binding (這邊先不在意這種方式帶來怎樣的壞處xD)，這篇文章紀錄 Two-way data binding 的原理和實現方式，以及對網站來說會帶來怎樣的影響。文章將不會示範如何去應用 Two-way data binding，因為我覺得隨便 Google 就可以找到很多例子，就不特別介紹了。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2017-12-08-two-way-binding/" />
+<meta property="article:published_time" content="2017-12-08T21:00:00+08:00" />
+<meta property="article:modified_time" content="2017-12-08T21:00:00+08:00" />
+<meta itemprop="name" content="AngularJS - Two way data binding">
+<meta itemprop="description" content="前言 最近開始接觸前端技術，預計以Angular和NodeJS為主。之前其實有稍微點一些網頁相關技能，不過大概都才Lv.1，知道大概怎麼使用，卻不太清楚背後的原理和概念。所以這次在學習的時候，會著重在框架理論和實作方式上，希望自己除了能應用這些框架之外，還可以了解這些框架背後的原理，並且進而有能力比較各框架之間的好壞。雖然Angular目前已經出到v5.1.0，但起點會從Angular1開始學起，之後文章預計會去比較新版的Angular和Angular1有怎樣的差異，以及新版的運作方式可以帶來怎樣的好處。
+Angular1主打特色之一包含 Two-way data binding (這邊先不在意這種方式帶來怎樣的壞處xD)，這篇文章紀錄 Two-way data binding 的原理和實現方式，以及對網站來說會帶來怎樣的影響。文章將不會示範如何去應用 Two-way data binding，因為我覺得隨便 Google 就可以找到很多例子，就不特別介紹了。">
+<meta itemprop="datePublished" content="2017-12-08T21:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2017-12-08T21:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="329">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="AngularJS - Two way data binding"/>
+<meta name="twitter:description" content="前言 最近開始接觸前端技術，預計以Angular和NodeJS為主。之前其實有稍微點一些網頁相關技能，不過大概都才Lv.1，知道大概怎麼使用，卻不太清楚背後的原理和概念。所以這次在學習的時候，會著重在框架理論和實作方式上，希望自己除了能應用這些框架之外，還可以了解這些框架背後的原理，並且進而有能力比較各框架之間的好壞。雖然Angular目前已經出到v5.1.0，但起點會從Angular1開始學起，之後文章預計會去比較新版的Angular和Angular1有怎樣的差異，以及新版的運作方式可以帶來怎樣的好處。
+Angular1主打特色之一包含 Two-way data binding (這邊先不在意這種方式帶來怎樣的壞處xD)，這篇文章紀錄 Two-way data binding 的原理和實現方式，以及對網站來說會帶來怎樣的影響。文章將不會示範如何去應用 Two-way data binding，因為我覺得隨便 Google 就可以找到很多例子，就不特別介紹了。"/>
+
+  <!--[if lte IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+    <![endif]-->
+
+  <!--[if lt IE 9]>
+      <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+  </head>
+
+  
+  
+
+  <body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage"><header class="header" itemscope itemtype="http://schema.org/WPHeader">
+    <div class="slimContent">
+      <div class="navbar-header">
+        <div class="profile-block text-center">
+          <a id="avatar" href="" target="_blank">
+            <img class="img-circle img-rotate" src="https://yushuanhsieh.github.io/author.jpg" width="200" height="200">
+          </a>
+          <h2 id="name" class="hidden-xs hidden-sm">Cherie Hsieh</h2>
+          <h3 id="title" class="hidden-xs hidden-sm hidden-md">Software Engineer</h3>
+          <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>Taiwan</small>
+        </div><div class="search" id="search-form-wrap">
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i
+                        class="icon icon-search"></i></button>
+            </span>
+        </div>
+        <div class="ins-search">
+            <div class="ins-search-mask"></div>
+            <div class="ins-search-container">
+                <div class="ins-input-wrapper">
+                    <input type="text" class="ins-search-input" placeholder="Type something..."
+                        x-webkit-speech />
+                    <button type="button" class="close ins-close ins-selectable" data-dismiss="modal"
+                        aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="ins-section-wrapper">
+                    <div class="ins-section-container"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+        <ul class="nav navbar-nav main-nav">
+            <li class="menu-item menu-item-home">
+                <a href="/">
+                  <span class="menu-title">Home</span>
+                </a>
+            </li>
+            <li class="menu-item menu-item-categories">
+                <a href="/categories/">
+                  <span class="menu-title">Categories</span>
+                </a>
+            </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+<aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title"> Categories</h3>
+    <div class="widget-body">
+        <ul class="category-list">
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/c/" class="category-list-link">c</a><span class="category-list-count">3</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">5</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/other/" class="category-list-link">other</a><span class="category-list-count">7</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/study/" class="category-list-link">study</a><span class="category-list-count">9</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/web/" class="category-list-link">web</a><span class="category-list-count">28</span></li>
+        </ul>
+    </div>
+</div>
+      
+<div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+        <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-03-31-march/" class="title">[Life] 三月起，在竹北定區生活</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-03-31 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-03-31</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-02-24-february/" class="title">[Life] 2月雜談</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-02-24 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-02-24</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-21-golang-router/" class="title">Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-21 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-21</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-19-memory-allocator-implicit-free-list/" class="title">Implement Memory Allocator - Implicit Free List</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-19 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-19</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2019-12-30-2019-review/" class="title">2019 年度回顧</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2019-12-30 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-12-30</time>
+                    </p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+  </div>
+</aside>
+
+    
+    
+<main class="main" role="main"><div class="content">
+  <article id="single-" class="article article-type-single" itemscope
+    itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      <h1 itemprop="name">
+  <a
+    class="article-title"
+    href="/post/2017-12-08-two-way-binding/"
+    >
+    
+      
+        <span class="title-cat">Web</span>
+      
+    AngularJS - Two way data binding</a>
+</h1>
+
+      <div class="article-meta">
+        
+<span class="article-date">
+  <i class="icon icon-calendar-check"></i>&nbsp;
+<a href="https://yushuanhsieh.github.io/post/2017-12-08-two-way-binding/" class="article-date">
+  <time datetime="2017-12-08 21:00:00 &#43;0800 CST" itemprop="datePublished">2017-12-08</time>
+</a>
+</span>
+<span class="article-category">
+  <i class="icon icon-folder"></i>
+  
+    <a class="article-category-link" href="/categories/web/"> Web </a>
+  
+</span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2017-12-08-two-way-binding/#comments"
+            class="article-comment-link">Comments</a></span>
+      </div>
+    </div>
+    <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
+      <h2 id="前言">前言</h2>
+<p>最近開始接觸前端技術，預計以Angular和NodeJS為主。之前其實有稍微點一些網頁相關技能，不過大概都才Lv.1，知道大概怎麼使用，卻不太清楚背後的原理和概念。所以這次在學習的時候，會著重在框架理論和實作方式上，希望自己除了能應用這些框架之外，還可以了解這些框架背後的原理，並且進而有能力比較各框架之間的好壞。雖然Angular目前已經出到v5.1.0，但起點會從Angular1開始學起，之後文章預計會去比較新版的Angular和Angular1有怎樣的差異，以及新版的運作方式可以帶來怎樣的好處。</p>
+<p>Angular1主打特色之一包含 Two-way data binding (這邊先不在意這種方式帶來怎樣的壞處xD)，這篇文章紀錄 Two-way data binding 的原理和實現方式，以及對網站來說會帶來怎樣的影響。文章將不會示範如何去應用 Two-way data binding，因為我覺得隨便 Google 就可以找到很多例子，就不特別介紹了。</p>
+<h2 id="one-way-data-binding--two-way-data-binding">One-way data binding &amp; Two-way data binding</h2>
+<h3 id="one-way-data-binding">One-way data binding</h3>
+<p>Angular 官方給的 One-way data binding 說明是指 template system 結合 model data 所產出的結果網頁，也就是說，我們會按照 template engine 要求來編寫一份  template file，然後當 browser 接收到資料時（可能是透過Ajax），就會透過 Template engine 將 data 放入指定的欄位中，並 render 出完整的 HTML file。
+<img src="https://docs.angularjs.org/img/One_Way_Data_Binding.png" alt="One-way data binding"></p>
+<!-- raw HTML omitted -->
+<h3 id="two-way-data-binding">Two-way data binding</h3>
+<p>為了解決上述所討論到的問題，例如：我們希望當使用者輸入資料時，對應的資料也能隨之更新。 Angular1 框架提供了 Two-way data binding 的機制，當網頁中的欄位資訊變動時， data 也會跟著變化，反之亦然。</p>
+<h2 id="涉及名詞">涉及名詞</h2>
+<h3 id="scope">$scope</h3>
+<p>scope object 在官方說法是一個 data-model(和 Model-Controller-View 中的 model 不同，Angular 的 MVC model 叫做 service)，當 Angular controller object 形成時，會透過 dependency injection 的方式來引入一個新的 scope object。scope 聯繫著 controller 和 view (HTML DOM)，並且用來監控特定 data-model 的變化並觸發 event。
+![Angular1-Scope]({{ site.url }}/assets/images/Angular1-scope.png)</p>
+<h3 id="watch--watch-list">$watch() / watch list</h3>
+<p>$watch 是 $scope 中的一個 method <code>$watch(watchExpression, listener, [objectEquality]);</code>，負責註冊 listener 和對應的 watchExpression，當 watchExpression 變化時，就會執行 listener callback。 watch list 則是指同一個scope中所有的 $watch 集合。<br>
+**注意：**這裡的 $watch 運作方式和 observer pattern 不同。</p>
+<p>典型的使用方式：$watch method 會在開發者使用 ng-model = &lsquo;dataName&rsquo; 來綁定到 $scope data 時被觸發 <code>function setupModelWatcher(ctrl)</code>，每綁定一個 data 就會執行一次 $watch method，這也就是為什麼會有多個 $watch 所組成的 watch list。
+![Angular1-watch]({{ site.url }}/assets/images/Angular1-watch.png)</p>
+<h3 id="digest">$digest()</h3>
+<p>$digest 也是 $scope 中的 method 之一，負責尋訪當前 scope 及子 scope 中的所有 watchers，在執行過程中發現某個 watch 的 watchExpression 值有改變，則會執行該 watch 所設定好的 listener callback。</p>
+<h3 id="browser-event">Browser event</h3>
+<p>除了關心 Angular1 架構之外，也要看一下瀏覽器執行與 Angular 之間的關聯性。這邊會用到的就是 Browser event。瀏覽器提供不同 Web API 來觸發各種 Event，例如 onclick / onChange，Angular 框架也是依賴這些既有 event API 來運作。</p>
+<h2 id="運作原理">運作原理</h2>
+<p>![Angular1-process]({{ site.url }}/assets/images/Angular1-process.png)</p>
+<p>使用 Angular1 框架時，如果要使用 click 事件，我們會寫 <code>ng-click = &quot;ctrl.functionName(args)&quot;</code> ，而 ng-click directive 能透過 Angular1 中的 $compiler 展開成 onclick() 的原生 Web API。所以當使用者點擊某個 Button 時，其實就是觸發 Browser click event ，然後進入 angular 框架中。</p>
+<p>接著，指定 Controller 中的 $scope.$digest() 會被觸發，開始執行 digest process loop。每次 loop 都會檢查 watch list 中的 $watch watchExpression 值是否有變更，如果有就執行它的 registered listener。這個 loop 會持續到它檢查所有的 watch 都沒有變動，才會停止，然後進行最後的 update DOM 步驟。這個檢查流程又被稱為 <strong>dirty-checking</strong> ，意味當值有變動過，則 dirty: true，直到 dirty: false 才會退出 loop。</p>
+<p>我想這樣說明應該很快就可以看出這樣的流程有什麼問題，確實，為了能達到 Two-way data binding 的效果，程式必須執行至少兩次 digest loop 去檢查和調用 callback，進而影響整個執行效率。當然這個 loop 是有上限的，為了避免無限迴圈， <strong>這個 loop 被限定最多只會執行十次</strong> ，超過則會跳出 Error。不過不管這麼說，這樣的方式看起來是有比較有缺陷一些，在後續的 Angular 版本中也已針對這議題作改善。</p>
+<p>另外，如果當前 scope 中有其他子 scope ，程式也會觸發子 scope 的 $digest 來檢查子 scope 的 watch list。簡單來說就是一環扣著一環，這個代價也是蠻高的。</p>
+<h2 id="觸發-digest-情況整理">觸發 $digest 情況整理</h2>
+<p>整理一下會觸發 $scope.$digest method 的情形：</p>
+<ol>
+<li>DOM event</li>
+<li>Ajax callback</li>
+<li>Timer with callback</li>
+<li>Browser location change</li>
+<li>Manual invocation ($scope.$apply())</li>
+</ol>
+<h2 id="two-way-data-binding-相關議題">Two-way data binding 相關議題</h2>
+<ol>
+<li>較低效率且耗費資源 (Dirty-checking)</li>
+<li>當遇到多筆資料需要大量更新，數據間依賴性又很嚴重時，就會發生問題。（Dirty-checking次數影響）</li>
+</ol>
+<h2 id="參考資源">參考資源</h2>
+<ol>
+<li><a href="https://www.youtube.com/watch?v=SYuc1oSjhgY">AngularJS - Understanding digest cycle</a></li>
+<li><a href="https://docs.angularjs.org/api/ng/type/$rootScope.Scope">$scope object 以及 $watch() $digest()等官方說明 </a></li>
+</ol>
+
+    </div>
+    <div class="article-footer">
+<blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    <li class="post-copyright-link hidden-xs">
+      <strong>Permalink: </strong>
+      <a href="https://yushuanhsieh.github.io/post/2017-12-08-two-way-binding/" title="AngularJS - Two way data binding" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2017-12-08-two-way-binding/</a>
+    </li>
+  </ul>
+</blockquote>
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="https://yushuanhsieh.github.io/author.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">Cherie Hsieh</span><small class="ml-1x">Software Engineer</small></a></h3>
+        <div>Gopher</div>
+      </div>
+    </figure>
+  </div>
+</div>
+    </div>
+  </article>
+
+</div><nav class="bar bar-footer clearfix" data-stick-bottom>
+    <div class="bar-inner">
+        <ul class="pager pull-left">
+            <li class="prev">
+                <a href="https://yushuanhsieh.github.io/post/2017-10-08-ci-tools/" title="新手入門 - Gitlab Continuous Integration &amp; Deployment"><i
+                        class="icon icon-angle-left"
+                        aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
+            </li>
+            <li class="next">
+                <a href="https://yushuanhsieh.github.io/post/2018-01-06-angular-formly-basic-usage/"
+                    title="AngularJS - angular-formly study notes"><span>Newer&nbsp;&nbsp;</span><i
+                        class="icon icon-angle-right" aria-hidden="true"></i></a>
+            </li>
+            
+        </ul>
+        <div class="bar-right">
+        </div>
+    </div>
+</nav>
+
+</main><footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+  <div class="copyright">
+    &copy;2017  -
+    2020
+    <div class="publishby">
+        Theme by <a href="https://github.com/xiaoheiAh" target="_blank"> xiaoheiAh </a>base on<a href="https://github.com/xiaoheiAh/hugo-theme-pure" target="_blank"> pure</a>.
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+<script>
+    window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/javascript.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/c.min.js" defer></script><script>
+    hljs.configure({
+        tabReplace: '    ', 
+        classPrefix: ''     
+        
+    })
+    hljs.initHighlightingOnLoad();
+</script>
+<script src="https://yushuanhsieh.github.io/js/application.min.bdeb64b910570b6c41badc6a05b7afb0c8ad9efd8525de3c7257d59e786326a3.js"></script>
+<script src="https://yushuanhsieh.github.io/js/plugin.min.51ff8c7317566f82259170fa36e09c4493adc9b9378b427a01ad3f017ebac7dd.js"></script>
+
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            ROOT_URL: 'https:\/\/yushuanhsieh.github.io',
+            CONTENT_URL: 'https:\/\/yushuanhsieh.github.io\/searchindex.json ',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script type="text/javascript" src="https://yushuanhsieh.github.io/js/insight.min.a343cd9a5a7698336b28ef3a7c16a3a1b1d2d5fb17dc8ed04022bbe08cc5459073a15bdafa3a8a58cdd56080784bdd69fa70b1ae8597565c799c57ed00f0e120.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+<script>
+    tocbot.init({
+        
+        tocSelector: '.js-toc',
+        
+        contentSelector: '.js-toc-content',
+        
+        headingSelector: 'h1, h2, h3',
+        
+        hasInnerContainers: true,
+    });
+</script>
+
+
+  </body>
+</html>

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        Tail Recursion in Go - Cherie&#39;s Tech Blog
+      </title>
+    <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  
+  <meta name="theme-color" content="#000000" />
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <meta name="description" content="前言 最近在實驗效能分析時，有使用到 Tail Recursion 寫法，因此也好奇在 Go 中是否有跟 C 一樣進行 Tail Recursion optimization 優化。在文章中，首先會用 C asm 來說明 tail call optimization，接著 dump Go asm code 來觀察結果。" />
+  <meta name="generator" content="Hugo 0.67.0 with theme pure" />
+  <title>Tail Recursion in Go - Cherie&#39;s Tech Blog</title>
+  
+  
+  <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
+  
+    
+    <link rel="stylesheet" href="https://yushuanhsieh.github.io/scss/cherie.min.25e69b63f709fdfaf070b38e72e556d2a25931840ee2fcdc62b4aa0b9803e9ba.css" async>
+  
+  <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
+  <meta property="og:title" content="Tail Recursion in Go" />
+<meta property="og:description" content="前言 最近在實驗效能分析時，有使用到 Tail Recursion 寫法，因此也好奇在 Go 中是否有跟 C 一樣進行 Tail Recursion optimization 優化。在文章中，首先會用 C asm 來說明 tail call optimization，接著 dump Go asm code 來觀察結果。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2019-06-22-tail-recuriosn-optimization/" />
+<meta property="article:published_time" content="2019-06-14T08:00:00+08:00" />
+<meta property="article:modified_time" content="2019-06-14T08:00:00+08:00" />
+<meta itemprop="name" content="Tail Recursion in Go">
+<meta itemprop="description" content="前言 最近在實驗效能分析時，有使用到 Tail Recursion 寫法，因此也好奇在 Go 中是否有跟 C 一樣進行 Tail Recursion optimization 優化。在文章中，首先會用 C asm 來說明 tail call optimization，接著 dump Go asm code 來觀察結果。">
+<meta itemprop="datePublished" content="2019-06-14T08:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2019-06-14T08:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="1073">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Tail Recursion in Go"/>
+<meta name="twitter:description" content="前言 最近在實驗效能分析時，有使用到 Tail Recursion 寫法，因此也好奇在 Go 中是否有跟 C 一樣進行 Tail Recursion optimization 優化。在文章中，首先會用 C asm 來說明 tail call optimization，接著 dump Go asm code 來觀察結果。"/>
+
+  <!--[if lte IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+    <![endif]-->
+
+  <!--[if lt IE 9]>
+      <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+  </head>
+
+  
+  
+
+  <body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage"><header class="header" itemscope itemtype="http://schema.org/WPHeader">
+    <div class="slimContent">
+      <div class="navbar-header">
+        <div class="profile-block text-center">
+          <a id="avatar" href="" target="_blank">
+            <img class="img-circle img-rotate" src="https://yushuanhsieh.github.io/author.jpg" width="200" height="200">
+          </a>
+          <h2 id="name" class="hidden-xs hidden-sm">Cherie Hsieh</h2>
+          <h3 id="title" class="hidden-xs hidden-sm hidden-md">Software Engineer</h3>
+          <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>Taiwan</small>
+        </div><div class="search" id="search-form-wrap">
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i
+                        class="icon icon-search"></i></button>
+            </span>
+        </div>
+        <div class="ins-search">
+            <div class="ins-search-mask"></div>
+            <div class="ins-search-container">
+                <div class="ins-input-wrapper">
+                    <input type="text" class="ins-search-input" placeholder="Type something..."
+                        x-webkit-speech />
+                    <button type="button" class="close ins-close ins-selectable" data-dismiss="modal"
+                        aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="ins-section-wrapper">
+                    <div class="ins-section-container"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+        <ul class="nav navbar-nav main-nav">
+            <li class="menu-item menu-item-home">
+                <a href="/">
+                  <span class="menu-title">Home</span>
+                </a>
+            </li>
+            <li class="menu-item menu-item-categories">
+                <a href="/categories/">
+                  <span class="menu-title">Categories</span>
+                </a>
+            </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+<aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title"> Categories</h3>
+    <div class="widget-body">
+        <ul class="category-list">
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/c/" class="category-list-link">c</a><span class="category-list-count">3</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">5</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/other/" class="category-list-link">other</a><span class="category-list-count">7</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/study/" class="category-list-link">study</a><span class="category-list-count">9</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/web/" class="category-list-link">web</a><span class="category-list-count">28</span></li>
+        </ul>
+    </div>
+</div>
+      
+<div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+        <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-03-31-march/" class="title">[Life] 三月起，在竹北定區生活</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-03-31 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-03-31</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-02-24-february/" class="title">[Life] 2月雜談</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-02-24 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-02-24</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-21-golang-router/" class="title">Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-21 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-21</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-19-memory-allocator-implicit-free-list/" class="title">Implement Memory Allocator - Implicit Free List</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-19 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-19</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2019-12-30-2019-review/" class="title">2019 年度回顧</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2019-12-30 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-12-30</time>
+                    </p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+  </div>
+</aside>
+
+    
+    
+<main class="main" role="main"><div class="content">
+  <article id="single-" class="article article-type-single" itemscope
+    itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      <h1 itemprop="name">
+  <a
+    class="article-title"
+    href="/post/2019-06-22-tail-recuriosn-optimization/"
+    >
+    
+      
+        <span class="title-cat">Web</span>
+      
+    Tail Recursion in Go</a>
+</h1>
+
+      <div class="article-meta">
+        
+<span class="article-date">
+  <i class="icon icon-calendar-check"></i>&nbsp;
+<a href="https://yushuanhsieh.github.io/post/2019-06-22-tail-recuriosn-optimization/" class="article-date">
+  <time datetime="2019-06-14 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-06-14</time>
+</a>
+</span>
+<span class="article-category">
+  <i class="icon icon-folder"></i>
+  
+    <a class="article-category-link" href="/categories/web/"> Web </a>
+  
+</span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2019-06-22-tail-recuriosn-optimization/#comments"
+            class="article-comment-link">Comments</a></span>
+      </div>
+    </div>
+    <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
+      <h2 id="前言">前言</h2>
+<p>最近在實驗效能分析時，有使用到 Tail Recursion 寫法，因此也好奇在 Go 中是否有跟 C 一樣進行 Tail Recursion optimization 優化。在文章中，首先會用 C asm 來說明 tail call optimization，接著 dump Go asm code 來觀察結果。</p>
+<h2 id="tail-call">Tail Call</h2>
+<p>在說明 Tail Recursion Optimization 之前，先來說說 <a href="https://en.wikipedia.org/wiki/Tail_call">Tail Call</a>。 Tail Call 概念很簡單，就是在 function 的最後語句執行另一個 function call。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">search</span>(<span style="color:#66d9ef">int</span> data)
+{
+  <span style="color:#66d9ef">return</span> advanced_search(data);
+}
+</code></pre></div><p>要注意的是， <code>Tail Call</code> 意指最後的行為只允許使用 function call，所以以下的寫法就不是 <code>Tail Call</code>，因為它需要先進行 <code>2 * 1 + funcB(a-1)</code> 的運算，才能返回。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">non_tail</span>(<span style="color:#66d9ef">int</span> a)
+{
+ <span style="color:#66d9ef">if</span> (a <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">1</span>)
+ {
+   <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+ }
+ <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> funcB(a<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>);
+}
+</code></pre></div><h2 id="tail-recursion">Tail recursion</h2>
+<p>Tail Call 可以應用在 Recursion 上，在尾端再次呼叫自身程式，就被稱為 <code>Tail recursion</code>。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">search</span>(<span style="color:#66d9ef">int</span> data)
+{
+  <span style="color:#75715e">// some conditions..
+</span><span style="color:#75715e"></span>  
+  <span style="color:#66d9ef">return</span> search(data); <span style="color:#75715e">// call itself.
+</span><span style="color:#75715e"></span>}
+</code></pre></div><p>提到 Tail recursion，很多人常用的例子是透過將 Recursion 改寫成 Tail recursion 的方式，來改善 <strong>Find Fibonacci Number</strong> 的效能。回想當初我們在初學習實作 Fibonacci Number 所使用的 Recursion 寫法：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">recursion_fib</span>(<span style="color:#66d9ef">int</span> n)
+{
+  <span style="color:#66d9ef">if</span> (n <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">1</span>) 
+    <span style="color:#66d9ef">return</span> n;
+  <span style="color:#66d9ef">return</span>  recursion_fib(n <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">+</span> recursion_fib(n <span style="color:#f92672">-</span> <span style="color:#ae81ff">2</span>);
+}
+</code></pre></div><p>可以改寫成 <code>Tail recursion</code> 版本：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">tail_recursion_fib</span>(<span style="color:#66d9ef">int</span> n, <span style="color:#66d9ef">int</span> left, <span style="color:#66d9ef">int</span> right)
+{
+  <span style="color:#66d9ef">if</span> (n <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>)
+  {
+    <span style="color:#66d9ef">return</span> left;
+  }
+  <span style="color:#66d9ef">return</span> tail_recursion_fib(n<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, right, left <span style="color:#f92672">+</span> right);
+}
+</code></pre></div><p>透過以上改寫，我們就能避免掉因為 Recursion 造成的 <a href="http://www-inst.eecs.berkeley.edu/~cs61bl/r//cur/trees/fibonacci-tree.html">Fibonacci Trees</a>，進而提升執行效率（<a href="https://hackmd.io/@sysprog/rJ8BOjGGl?type=view#Fibonacci-sequence">Fibonacci with recursion and tail recursion 效率比較</a>）。</p>
+<p>不過，單就上面我們無法看出 <code>Tail recursion</code> 的優勢，以上面提到的 Fibonacci Number 為例，將 Recursion 改成 Tail recursion，因為減少一個自身的 function 運算，避免 Recursion 發散，本來就對效能有所提升。</p>
+<h2 id="tail-recursion-optimization">Tail recursion Optimization</h2>
+<p>之所以採用 <code>Tail recursion</code> 寫法的主要原因，是因為很多語言可以透過 compile 將 <code>Tail recursion</code> 的效能最佳化，以避免因為執行到 function 而需要為它建立新的 <a href="https://www.cs.auckland.ac.nz/software/AlgAnim/stacks.html">Stack Frame</a>。</p>
+<p><img src="https://www.cs.auckland.ac.nz/software/AlgAnim/fig/stackframe.gif" alt="stack frame"></p>
+<p>舉例:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">tail</span>(<span style="color:#66d9ef">int</span> a, <span style="color:#66d9ef">int</span> result)
+{
+  <span style="color:#66d9ef">if</span> (a <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>)
+  {
+    <span style="color:#66d9ef">return</span> result;
+  }
+  <span style="color:#66d9ef">return</span> tail(a<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> result);
+}
+</code></pre></div><p>![study]({{ site.url }}/assets/images/tail-recursion-2.png)</p>
+<p>可以看到在 <code>Tail recursion Optimization</code> 部分，只需要把處理過後的數值儲存起來，接著跳轉到同一個 function 最前端重複執行即可。反過來看，如果沒有經過優化的話，那麼就需要耗費 stack 空間為相同的 function 建立新的 stack frame。</p>
+<h2 id="tail-recursion-optimization--iteration">Tail Recursion (Optimization) / Iteration</h2>
+<p>看到這裡或許你會覺得很奇怪，這樣透過 <code>Tail recursion Optimization</code> 所產生的結果不就跟 <code>iteration</code> 差不多嗎？</p>
+<p>其實 Iteration 與 Tail Recursion 在大部分情況下可以相互轉換。</p>
+<blockquote>
+<p>All iterative functions can be converted to recursion because iteration is just a special case of recursion <strong>(tail recursion)</strong>. In functional languages like Scheme, iteration is defined as tail recursion.
+(<a href="http://www.ocf.berkeley.edu">www.ocf.berkeley.edu</a>)</p>
+</blockquote>
+<p>只是差別在於如果沒有經過 Optimization 階段，那麼 Tail Recursion 會需要處理額外的 stack frame，因此比 Iteration 慢。而 Tail recursion Optimization 後，就能有跟 Iteration 相似的表現。</p>
+<blockquote>
+<p>In functional programming languages, tail call elimination is often guaranteed by the language standard, allowing tail recursion to use a similar amount of memory as an equivalent loop.
+(<a href="https://en.wikipedia.org/wiki/Tail_call">https://en.wikipedia.org/wiki/Tail_call</a>)</p>
+</blockquote>
+<h2 id="使用-tail-recursion-的時機">使用 <code>Tail Recursion</code> 的時機</h2>
+<ol>
+<li>Language 有支援 Tail Recursion Optimization（如果沒有支援，就有可能讓 stack 空間耗盡）。</li>
+<li>提升 code 的簡潔與可讀性。</li>
+<li>需要操作 recursive data structures 像是 linklist or tree 等
+。</li>
+</ol>
+<h2 id="效能實驗">效能實驗</h2>
+<p>簡單實驗一下會在有無 <code>Tail recursion Optimization</code> 的情況下，會有多少差距。</p>
+<h3 id="機器">機器</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">Raspberry B3 ARM Cortex-A53 <span style="color:#ae81ff">64</span> bit
+gcc target: aarch64-linux-gnu
+</code></pre></div><h3 id="test-code">Test code</h3>
+<p>測試程式則是大家熟悉的 Fibonacci Number</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">tail_recursion_fib</span>(<span style="color:#66d9ef">int</span> n, <span style="color:#66d9ef">int</span> left, <span style="color:#66d9ef">int</span> right)
+{
+  <span style="color:#66d9ef">if</span> (n <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>)
+  {
+    <span style="color:#66d9ef">return</span> left;
+  }
+  <span style="color:#66d9ef">return</span> tail_recursion_fib(n<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, right, left <span style="color:#f92672">+</span> right);
+}
+</code></pre></div><p>首先，先把 c file compile 成沒有優化過後的 assembly code file。
+（之所以不直接用 -Os 來進行 code 優化，是因為 -Os 會影響很多 assembly code，不好進行評估）</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">gcc -S tail.c
+</code></pre></div><p>可以獲得 *.s 的 assembly code file。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c">tail_fib:
+        stp     x29, x30, [sp, <span style="color:#f92672">-</span><span style="color:#ae81ff">32</span>] <span style="color:#75715e">// 移動 stack pointer
+</span><span style="color:#75715e"></span>        add     x29, sp, <span style="color:#ae81ff">0</span>
+        str     w0, [x29, <span style="color:#ae81ff">28</span>]
+        str     w1, [x29, <span style="color:#ae81ff">24</span>]
+        str     w2, [x29, <span style="color:#ae81ff">20</span>]
+        ldr     w0, [x29, <span style="color:#ae81ff">28</span>]
+        cmp     w0, <span style="color:#ae81ff">0</span>
+        bne     .L2
+        ldr     w0, [x29, <span style="color:#ae81ff">24</span>]
+        b       .L3
+.L2:
+        ldr     w0, [x29, <span style="color:#ae81ff">28</span>]
+        sub     w3, w0, <span style="color:#960050;background-color:#1e0010">#</span><span style="color:#ae81ff">1</span>
+        ldr     w1, [x29, <span style="color:#ae81ff">24</span>]
+        ldr     w0, [x29, <span style="color:#ae81ff">20</span>]
+        add     w0, w1, w0
+        mov     w2, w0
+        ldr     w1, [x29, <span style="color:#ae81ff">20</span>]
+        mov     w0, w3
+        bl      tail_fib <span style="color:#75715e">// branch 執行 function
+</span><span style="color:#75715e"></span>.L3:
+        ldp     x29, x30, [sp], <span style="color:#ae81ff">32</span>
+        ret
+        .size   tail_fib, .<span style="color:#f92672">-</span>tail_fib
+        .section        .rodata
+        .align  <span style="color:#ae81ff">3</span>
+</code></pre></div><p>然後參照優化行為，把 <code>bl tail_fib</code> 改成 goto 到原有 stack frame head：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c">tail_fib:
+        stp     x29, x30, [sp, <span style="color:#f92672">-</span><span style="color:#ae81ff">32</span>]<span style="color:#f92672">!</span>
+        add     x29, sp, <span style="color:#ae81ff">0</span>
+	b	.L5
+.L5:
+        str     w0, [x29, <span style="color:#ae81ff">28</span>]
+        str     w1, [x29, <span style="color:#ae81ff">24</span>]
+        str     w2, [x29, <span style="color:#ae81ff">20</span>]
+        ldr     w0, [x29, <span style="color:#ae81ff">28</span>]
+        cmp     w0, <span style="color:#ae81ff">0</span>
+        bne     .L2
+        ldr     w0, [x29, <span style="color:#ae81ff">24</span>]
+        b       .L3
+.L2:
+        ldr     w0, [x29, <span style="color:#ae81ff">28</span>]
+        sub     w3, w0, <span style="color:#960050;background-color:#1e0010">#</span><span style="color:#ae81ff">1</span>
+        ldr     w1, [x29, <span style="color:#ae81ff">24</span>]
+        ldr     w0, [x29, <span style="color:#ae81ff">20</span>]
+        add     w0, w1, w0
+        mov     w2, w0
+        ldr     w1, [x29, <span style="color:#ae81ff">20</span>]
+        mov     w0, w3
+	b	.L5 <span style="color:#75715e">// 用途類似 x86 的 jmp. 跳至 .L5 避免移動 SP
+</span><span style="color:#75715e"></span>.L3:
+        ldp     x29, x30, [sp], <span style="color:#ae81ff">32</span>
+        ret
+        .size   tail_fib, .<span style="color:#f92672">-</span>tail_fib
+        .section        .rodata
+        .align  <span style="color:#ae81ff">3</span>
+</code></pre></div><p>另外也提供  <code>x86_64-apple-darwin</code> 的 assembly code，可以很清楚看出 <code>Tail Recursion Optimization</code>。(說明一下，由於 <code>aarch64-linux-gnu</code> 在經過 compiler 優化後變化很大，如果不熟悉 assembly code 的話，可能看不出差異點，所以提供 x86_64-apple-darwin 版本)</p>
+<p>Normal</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c">LBB0_2:
+	movl	<span style="color:#f92672">-</span><span style="color:#ae81ff">8</span>(<span style="color:#f92672">%</span>rbp), <span style="color:#f92672">%</span>eax
+	subl	<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">1</span>, <span style="color:#f92672">%</span>eax
+	movl	<span style="color:#f92672">-</span><span style="color:#ae81ff">16</span>(<span style="color:#f92672">%</span>rbp), <span style="color:#f92672">%</span>esi
+	movl	<span style="color:#f92672">-</span><span style="color:#ae81ff">12</span>(<span style="color:#f92672">%</span>rbp), <span style="color:#f92672">%</span>ecx
+	addl	<span style="color:#f92672">-</span><span style="color:#ae81ff">16</span>(<span style="color:#f92672">%</span>rbp), <span style="color:#f92672">%</span>ecx
+	movl	<span style="color:#f92672">%</span>eax, <span style="color:#f92672">%</span>edi
+	movl	<span style="color:#f92672">%</span>ecx, <span style="color:#f92672">%</span>edx
+	callq	_tail_fib <span style="color:#75715e">// call function and then move down SP
+</span><span style="color:#75715e"></span>	movl	<span style="color:#f92672">%</span>eax, <span style="color:#f92672">-</span><span style="color:#ae81ff">4</span>(<span style="color:#f92672">%</span>rbp)
+</code></pre></div><p>Optimization</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c">LBB0_3:                                 <span style="color:#960050;background-color:#1e0010">##</span> <span style="color:#f92672">=&gt;</span>This Inner Loop Header: Depth<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>
+	movl	<span style="color:#f92672">%</span>edx, <span style="color:#f92672">%</span>esi
+	decl	<span style="color:#f92672">%</span>edi
+	movl	<span style="color:#f92672">%</span>eax, <span style="color:#f92672">%</span>edx
+	addl	<span style="color:#f92672">%</span>esi, <span style="color:#f92672">%</span>edx
+	incl	<span style="color:#f92672">%</span>ecx
+	movl	<span style="color:#f92672">%</span>esi, <span style="color:#f92672">%</span>eax
+	jne	LBB0_3 <span style="color:#75715e">// Use loop
+</span></code></pre></div><h3 id="result">Result</h3>
+<p>在 recusion 數量少的情況下，效率沒有太多變化，不過當到了 recusive function call 多的時候，就會看出兩者之間的時間差距。</p>
+<p>![study]({{ site.url }}/assets/images/tail-recursion.png)</p>
+<h2 id="recursion-in-go">Recursion in Go</h2>
+<p>在說明 Tail Recursion in Go 之前，先來說說 Recursion 在 Go 的表現。回想在 default stack size 8MB 使用 Recursion 都有可能會遇到 stack overflow 情況，更何況是在每個 goroutine init stack size 為 2 KB (go version 1.12.X) 開發。</p>
+<p>幸好的是使用 Go 時，遇到 stack 沒空間，那麼 runtime 就會幫 goroutine 擴展 stack size，好讓程式能執行下去。不過相對應的代價是需要處理 grow stack 部分而導致影響執行時間。也因此 Recursion 在 Go 下更要謹慎使用。</p>
+<h2 id="tail-recursion-optimization-in-go">Tail Recursion Optimization in Go</h2>
+<p>終於進入到正式主題了，那個 Go 到底沒有支援 <code>Tail Recursion Optimization</code> 呢？</p>
+<p>答案是<strong>目前沒有</strong>(go version 1.12.X)。</p>
+<p>之前有蠻多相關的討論，例如：</p>
+<ul>
+<li><a href="https://github.com/golang/go/issues/22624">proposal: Go 2: add become statement to support tail calls</a></li>
+<li><a href="https://github.com/golang/go/issues/16798">proposal: cmd/compile: add tail call optimization for self-recursion only</a></li>
+</ul>
+<p>主要原因在於：</p>
+<ol>
+<li>Make stack traces clean</li>
+<li>大部分情況下，tail recursion 可以 rewrite 成 loop，所以必要性不是太高</li>
+</ol>
+<p>基於上面兩點，Go lang 維護者覺得目前應該專注在其他更重要的議題上，因此這個功能預計在 go 2.0 也不會做。</p>
+<p>當然，你也可以用 gccgo 來 compile go file，由於是採用 gcc compiler，所以透過優化選項就可以編譯成 <code>Tail Recursion Optimization</code> 版本。</p>
+<h2 id="實驗分析">實驗分析</h2>
+<h3 id="test-code-1">Test code</h3>
+<p>一樣使用 <code>Fibonacci Number</code> Tail Recursion 寫法為例：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">TailRecursionFib</span>(<span style="color:#a6e22e">n</span>, <span style="color:#a6e22e">left</span>, <span style="color:#a6e22e">right</span> <span style="color:#66d9ef">int</span>) <span style="color:#66d9ef">int</span> {
+	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> {
+		<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">left</span>
+	}
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">TailRecursionFib</span>(<span style="color:#a6e22e">n</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#a6e22e">right</span>, <span style="color:#a6e22e">left</span><span style="color:#f92672">+</span><span style="color:#a6e22e">right</span>)
+}
+</code></pre></div><h3 id="assembly-code-with-go-compiler">Assembly code with Go compiler</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#e6db74">&#34;&#34;</span>.TailRecursionFib STEXT size<span style="color:#f92672">=</span><span style="color:#ae81ff">121</span> args<span style="color:#f92672">=</span><span style="color:#ae81ff">0x20</span> locals<span style="color:#f92672">=</span><span style="color:#ae81ff">0x28</span>
+  <span style="color:#ae81ff">0x0000</span> <span style="color:#ae81ff">00000</span> (main.go:<span style="color:#ae81ff">38</span>)	TEXT	<span style="color:#e6db74">&#34;&#34;</span>.TailRecursionFib(SB), ABIInternal, <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">40</span><span style="color:#f92672">-</span><span style="color:#ae81ff">32</span>
+  <span style="color:#ae81ff">0x0000</span> <span style="color:#ae81ff">00000</span> (main.go:<span style="color:#ae81ff">38</span>)	MOVQ	(TLS), CX
+  <span style="color:#ae81ff">0x0009</span> <span style="color:#ae81ff">0000</span><span style="color:#ae81ff">9</span> (main.go:<span style="color:#ae81ff">38</span>)	CMPQ	SP, <span style="color:#ae81ff">16</span>(CX)
+  <span style="color:#ae81ff">0x000d</span> <span style="color:#ae81ff">00013</span> (main.go:<span style="color:#ae81ff">38</span>)	JLS	<span style="color:#ae81ff">114</span>
+  <span style="color:#ae81ff">0x000f</span> <span style="color:#ae81ff">00015</span> (main.go:<span style="color:#ae81ff">38</span>)	SUBQ	<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">40</span>, SP
+  <span style="color:#ae81ff">0x0013</span> <span style="color:#ae81ff">0001</span><span style="color:#ae81ff">9</span> (main.go:<span style="color:#ae81ff">38</span>)	MOVQ	BP, <span style="color:#ae81ff">32</span>(SP)
+  <span style="color:#ae81ff">0x0018</span> <span style="color:#ae81ff">00024</span> (main.go:<span style="color:#ae81ff">38</span>)	LEAQ	<span style="color:#ae81ff">32</span>(SP), BP
+  <span style="color:#ae81ff">0x001d</span> <span style="color:#ae81ff">0002</span><span style="color:#ae81ff">9</span> (main.go:<span style="color:#ae81ff">38</span>)	FUNCDATA	<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">0</span>, gclocals<span style="color:#960050;background-color:#1e0010">·</span><span style="color:#ae81ff">33</span>cdeccccebe80329f1fdbee7f5874cb(SB)
+  <span style="color:#ae81ff">0x001d</span> <span style="color:#ae81ff">0002</span><span style="color:#ae81ff">9</span> (main.go:<span style="color:#ae81ff">38</span>)	FUNCDATA	<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">1</span>, gclocals<span style="color:#960050;background-color:#1e0010">·</span><span style="color:#ae81ff">33</span>cdeccccebe80329f1fdbee7f5874cb(SB)
+  <span style="color:#ae81ff">0x001d</span> <span style="color:#ae81ff">0002</span><span style="color:#ae81ff">9</span> (main.go:<span style="color:#ae81ff">38</span>)	FUNCDATA	<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">3</span>, gclocals<span style="color:#960050;background-color:#1e0010">·</span><span style="color:#ae81ff">33</span>cdeccccebe80329f1fdbee7f5874cb(SB)
+  <span style="color:#ae81ff">0x001d</span> <span style="color:#ae81ff">0002</span><span style="color:#ae81ff">9</span> (main.go:<span style="color:#ae81ff">39</span>)	PCDATA	<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">2</span>, <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">0</span>
+  <span style="color:#ae81ff">0x001d</span> <span style="color:#ae81ff">0002</span><span style="color:#ae81ff">9</span> (main.go:<span style="color:#ae81ff">39</span>)	PCDATA	<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">0</span>, <span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">0</span>
+  <span style="color:#ae81ff">0x001d</span> <span style="color:#ae81ff">0002</span><span style="color:#ae81ff">9</span> (main.go:<span style="color:#ae81ff">39</span>)	MOVQ	<span style="color:#e6db74">&#34;&#34;</span>.n<span style="color:#f92672">+</span><span style="color:#ae81ff">48</span>(SP), AX
+  <span style="color:#ae81ff">0x0022</span> <span style="color:#ae81ff">00034</span> (main.go:<span style="color:#ae81ff">39</span>)	TESTQ	AX, AX
+  <span style="color:#ae81ff">0x0025</span> <span style="color:#ae81ff">00037</span> (main.go:<span style="color:#ae81ff">39</span>)	JNE	<span style="color:#ae81ff">59</span>
+  <span style="color:#ae81ff">0x0027</span> <span style="color:#ae81ff">0003</span><span style="color:#ae81ff">9</span> (main.go:<span style="color:#ae81ff">40</span>)	MOVQ	<span style="color:#e6db74">&#34;&#34;</span>.left<span style="color:#f92672">+</span><span style="color:#ae81ff">56</span>(SP), AX
+  <span style="color:#ae81ff">0x002c</span> <span style="color:#ae81ff">00044</span> (main.go:<span style="color:#ae81ff">40</span>)	MOVQ	AX, <span style="color:#e6db74">&#34;&#34;</span>.<span style="color:#f92672">~</span>r3<span style="color:#f92672">+</span><span style="color:#ae81ff">72</span>(SP)
+  <span style="color:#ae81ff">0x0031</span> <span style="color:#ae81ff">0004</span><span style="color:#ae81ff">9</span> (main.go:<span style="color:#ae81ff">40</span>)	MOVQ	<span style="color:#ae81ff">32</span>(SP), BP
+  <span style="color:#ae81ff">0x0036</span> <span style="color:#ae81ff">00054</span> (main.go:<span style="color:#ae81ff">40</span>)	ADDQ	<span style="color:#960050;background-color:#1e0010">$</span><span style="color:#ae81ff">40</span>, SP
+  <span style="color:#ae81ff">0x003a</span> <span style="color:#ae81ff">0005</span><span style="color:#ae81ff">8</span> (main.go:<span style="color:#ae81ff">40</span>)	RET
+  <span style="color:#ae81ff">0x003b</span> <span style="color:#ae81ff">0005</span><span style="color:#ae81ff">9</span> (main.go:<span style="color:#ae81ff">42</span>)	DECQ	AX
+  <span style="color:#ae81ff">0x003e</span> <span style="color:#ae81ff">00062</span> (main.go:<span style="color:#ae81ff">42</span>)	MOVQ	AX, (SP)
+  <span style="color:#ae81ff">0x0042</span> <span style="color:#ae81ff">00066</span> (main.go:<span style="color:#ae81ff">42</span>)	MOVQ	<span style="color:#e6db74">&#34;&#34;</span>.right<span style="color:#f92672">+</span><span style="color:#ae81ff">64</span>(SP), AX
+  <span style="color:#ae81ff">0x0047</span> <span style="color:#ae81ff">00071</span> (main.go:<span style="color:#ae81ff">42</span>)	MOVQ	AX, <span style="color:#ae81ff">8</span>(SP)
+  <span style="color:#ae81ff">0x004c</span> <span style="color:#ae81ff">00076</span> (main.go:<span style="color:#ae81ff">42</span>)	MOVQ	<span style="color:#e6db74">&#34;&#34;</span>.left<span style="color:#f92672">+</span><span style="color:#ae81ff">56</span>(SP), CX
+  <span style="color:#ae81ff">0x0051</span> <span style="color:#ae81ff">000</span><span style="color:#ae81ff">81</span> (main.go:<span style="color:#ae81ff">42</span>)	ADDQ	CX, AX
+  <span style="color:#ae81ff">0x0054</span> <span style="color:#ae81ff">000</span><span style="color:#ae81ff">84</span> (main.go:<span style="color:#ae81ff">42</span>)	MOVQ	AX, <span style="color:#ae81ff">16</span>(SP)
+  <span style="color:#ae81ff">0x0059</span> <span style="color:#ae81ff">000</span><span style="color:#ae81ff">89</span> (main.go:<span style="color:#ae81ff">42</span>)	CALL	<span style="color:#e6db74">&#34;&#34;</span>.TailRecursionFib(SB) <span style="color:#75715e">// Call itself
+</span></code></pre></div><h3 id="效能">效能</h3>
+<p>執行時，可以明顯看出在 grow stack size 時出現的執行時間高峰，進而降低整體速度。</p>
+<p>![study]({{ site.url }}/assets/images/stack-size-comp.png)</p>
+<h3 id="tail-recursion-vs-iteration">Tail Recursion v.s. Iteration</h3>
+<p>![study]({{ site.url }}/assets/images/fib-comp.png)</p>
+<p>如果是 Go 的話，使用 Iteration 的效能會遠比 Tail Recursion 好。</p>
+<h2 id="references">References</h2>
+<ol>
+<li><a href="https://en.wikipedia.org/wiki/Tail_call">https://en.wikipedia.org/wiki/Tail_call</a></li>
+<li><a href="https://www.cs.auckland.ac.nz/software/AlgAnim/stacks.html">https://www.cs.auckland.ac.nz/software/AlgAnim/stacks.html</a></li>
+<li><a href="https://www.ocf.berkeley.edu/~shidi/cs61a/wiki/Iteration_vs._recursion">https://www.ocf.berkeley.edu/~shidi/cs61a/wiki/Iteration_vs._recursion</a></li>
+<li><a href="https://www.ardanlabs.com/blog/2013/09/recursion-and-tail-calls-in-go_26.html">https://www.ardanlabs.com/blog/2013/09/recursion-and-tail-calls-in-go_26.html</a></li>
+<li><a href="https://gcc.gnu.org/wiki/SplitStacks">https://gcc.gnu.org/wiki/SplitStacks</a></li>
+</ol>
+
+    </div>
+    <div class="article-footer">
+<blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    <li class="post-copyright-link hidden-xs">
+      <strong>Permalink: </strong>
+      <a href="https://yushuanhsieh.github.io/post/2019-06-22-tail-recuriosn-optimization/" title="Tail Recursion in Go" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2019-06-22-tail-recuriosn-optimization/</a>
+    </li>
+  </ul>
+</blockquote>
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="https://yushuanhsieh.github.io/author.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">Cherie Hsieh</span><small class="ml-1x">Software Engineer</small></a></h3>
+        <div>Gopher</div>
+      </div>
+    </figure>
+  </div>
+</div>
+    </div>
+  </article>
+
+</div><nav class="bar bar-footer clearfix" data-stick-bottom>
+    <div class="bar-inner">
+        <ul class="pager pull-left">
+            <li class="prev">
+                <a href="https://yushuanhsieh.github.io/post/2019-06-04-study-201906/" title="2019/05月份自我學習回顧"><i
+                        class="icon icon-angle-left"
+                        aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
+            </li>
+            <li class="next">
+                <a href="https://yushuanhsieh.github.io/post/2019-06-15-side-project/"
+                    title="Side Project for daily study trello"><span>Newer&nbsp;&nbsp;</span><i
+                        class="icon icon-angle-right" aria-hidden="true"></i></a>
+            </li>
+            
+        </ul>
+        <div class="bar-right">
+        </div>
+    </div>
+</nav>
+
+</main><footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+  <div class="copyright">
+    &copy;2017  -
+    2020
+    <div class="publishby">
+        Theme by <a href="https://github.com/xiaoheiAh" target="_blank"> xiaoheiAh </a>base on<a href="https://github.com/xiaoheiAh/hugo-theme-pure" target="_blank"> pure</a>.
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+<script>
+    window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/javascript.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/c.min.js" defer></script><script>
+    hljs.configure({
+        tabReplace: '    ', 
+        classPrefix: ''     
+        
+    })
+    hljs.initHighlightingOnLoad();
+</script>
+<script src="https://yushuanhsieh.github.io/js/application.min.bdeb64b910570b6c41badc6a05b7afb0c8ad9efd8525de3c7257d59e786326a3.js"></script>
+<script src="https://yushuanhsieh.github.io/js/plugin.min.51ff8c7317566f82259170fa36e09c4493adc9b9378b427a01ad3f017ebac7dd.js"></script>
+
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            ROOT_URL: 'https:\/\/yushuanhsieh.github.io',
+            CONTENT_URL: 'https:\/\/yushuanhsieh.github.io\/searchindex.json ',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script type="text/javascript" src="https://yushuanhsieh.github.io/js/insight.min.a343cd9a5a7698336b28ef3a7c16a3a1b1d2d5fb17dc8ed04022bbe08cc5459073a15bdafa3a8a58cdd56080784bdd69fa70b1ae8597565c799c57ed00f0e120.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+<script>
+    tocbot.init({
+        
+        tocSelector: '.js-toc',
+        
+        contentSelector: '.js-toc-content',
+        
+        headingSelector: 'h1, h2, h3',
+        
+        hasInnerContainers: true,
+    });
+</script>
+
+
+  </body>
+</html>

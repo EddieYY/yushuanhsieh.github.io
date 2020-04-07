@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        Google Sign-in with OAuth 2.0 - Cherie&#39;s Tech Blog
+      </title>
+    <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  
+  <meta name="theme-color" content="#000000" />
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <meta name="description" content="前言： 由於目前專案是以 Embedded System 為主，比較少有機會接入第三方 api 的機會，所以這次 side project 就以 Google Sign-in for Web application with Go 的流程當作練習。由於網路上可以找到很多範例，所以在以下文章中會側重在原理 &#43; 為什麼要這樣做，希望除了寫 code 之外，還能建立起基本概念。" />
+  <meta name="generator" content="Hugo 0.67.0 with theme pure" />
+  <title>Google Sign-in with OAuth 2.0 - Cherie&#39;s Tech Blog</title>
+  
+  
+  <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
+  
+    
+    <link rel="stylesheet" href="https://yushuanhsieh.github.io/scss/cherie.min.25e69b63f709fdfaf070b38e72e556d2a25931840ee2fcdc62b4aa0b9803e9ba.css" async>
+  
+  <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
+  <meta property="og:title" content="Google Sign-in with OAuth 2.0" />
+<meta property="og:description" content="前言： 由於目前專案是以 Embedded System 為主，比較少有機會接入第三方 api 的機會，所以這次 side project 就以 Google Sign-in for Web application with Go 的流程當作練習。由於網路上可以找到很多範例，所以在以下文章中會側重在原理 &#43; 為什麼要這樣做，希望除了寫 code 之外，還能建立起基本概念。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2018-08-25-go-google-oauth/" />
+<meta property="article:published_time" content="2018-08-25T08:00:00+08:00" />
+<meta property="article:modified_time" content="2018-08-25T08:00:00+08:00" />
+<meta itemprop="name" content="Google Sign-in with OAuth 2.0">
+<meta itemprop="description" content="前言： 由於目前專案是以 Embedded System 為主，比較少有機會接入第三方 api 的機會，所以這次 side project 就以 Google Sign-in for Web application with Go 的流程當作練習。由於網路上可以找到很多範例，所以在以下文章中會側重在原理 &#43; 為什麼要這樣做，希望除了寫 code 之外，還能建立起基本概念。">
+<meta itemprop="datePublished" content="2018-08-25T08:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2018-08-25T08:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="571">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Google Sign-in with OAuth 2.0"/>
+<meta name="twitter:description" content="前言： 由於目前專案是以 Embedded System 為主，比較少有機會接入第三方 api 的機會，所以這次 side project 就以 Google Sign-in for Web application with Go 的流程當作練習。由於網路上可以找到很多範例，所以在以下文章中會側重在原理 &#43; 為什麼要這樣做，希望除了寫 code 之外，還能建立起基本概念。"/>
+
+  <!--[if lte IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+    <![endif]-->
+
+  <!--[if lt IE 9]>
+      <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+  </head>
+
+  
+  
+
+  <body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage"><header class="header" itemscope itemtype="http://schema.org/WPHeader">
+    <div class="slimContent">
+      <div class="navbar-header">
+        <div class="profile-block text-center">
+          <a id="avatar" href="" target="_blank">
+            <img class="img-circle img-rotate" src="https://yushuanhsieh.github.io/author.jpg" width="200" height="200">
+          </a>
+          <h2 id="name" class="hidden-xs hidden-sm">Cherie Hsieh</h2>
+          <h3 id="title" class="hidden-xs hidden-sm hidden-md">Software Engineer</h3>
+          <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>Taiwan</small>
+        </div><div class="search" id="search-form-wrap">
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i
+                        class="icon icon-search"></i></button>
+            </span>
+        </div>
+        <div class="ins-search">
+            <div class="ins-search-mask"></div>
+            <div class="ins-search-container">
+                <div class="ins-input-wrapper">
+                    <input type="text" class="ins-search-input" placeholder="Type something..."
+                        x-webkit-speech />
+                    <button type="button" class="close ins-close ins-selectable" data-dismiss="modal"
+                        aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="ins-section-wrapper">
+                    <div class="ins-section-container"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+        <ul class="nav navbar-nav main-nav">
+            <li class="menu-item menu-item-home">
+                <a href="/">
+                  <span class="menu-title">Home</span>
+                </a>
+            </li>
+            <li class="menu-item menu-item-categories">
+                <a href="/categories/">
+                  <span class="menu-title">Categories</span>
+                </a>
+            </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+<aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title"> Categories</h3>
+    <div class="widget-body">
+        <ul class="category-list">
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/c/" class="category-list-link">c</a><span class="category-list-count">3</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">5</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/other/" class="category-list-link">other</a><span class="category-list-count">7</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/study/" class="category-list-link">study</a><span class="category-list-count">9</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/web/" class="category-list-link">web</a><span class="category-list-count">28</span></li>
+        </ul>
+    </div>
+</div>
+      
+<div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+        <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-03-31-march/" class="title">[Life] 三月起，在竹北定區生活</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-03-31 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-03-31</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-02-24-february/" class="title">[Life] 2月雜談</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-02-24 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-02-24</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-21-golang-router/" class="title">Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-21 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-21</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-19-memory-allocator-implicit-free-list/" class="title">Implement Memory Allocator - Implicit Free List</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-19 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-19</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2019-12-30-2019-review/" class="title">2019 年度回顧</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2019-12-30 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-12-30</time>
+                    </p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+  </div>
+</aside>
+
+    
+    
+<main class="main" role="main"><div class="content">
+  <article id="single-" class="article article-type-single" itemscope
+    itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      <h1 itemprop="name">
+  <a
+    class="article-title"
+    href="/post/2018-08-25-go-google-oauth/"
+    >
+    
+      
+        <span class="title-cat">Go</span>
+      
+    Google Sign-in with OAuth 2.0</a>
+</h1>
+
+      <div class="article-meta">
+        
+<span class="article-date">
+  <i class="icon icon-calendar-check"></i>&nbsp;
+<a href="https://yushuanhsieh.github.io/post/2018-08-25-go-google-oauth/" class="article-date">
+  <time datetime="2018-08-25 08:00:00 &#43;0800 CST" itemprop="datePublished">2018-08-25</time>
+</a>
+</span>
+<span class="article-category">
+  <i class="icon icon-folder"></i>
+  
+    <a class="article-category-link" href="/categories/go/"> Go </a>
+  
+</span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2018-08-25-go-google-oauth/#comments"
+            class="article-comment-link">Comments</a></span>
+      </div>
+    </div>
+    <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
+      <h2 id="前言">前言：</h2>
+<p>由於目前專案是以 Embedded System 為主，比較少有機會接入第三方 api 的機會，所以這次 side project 就以 Google Sign-in for Web application with Go 的流程當作練習。由於網路上可以找到很多範例，所以在以下文章中會側重在原理 + 為什麼要這樣做，希望除了寫 code 之外，還能建立起基本概念。</p>
+<h2 id="oauth-20">Oauth 2.0</h2>
+<p>要實作 Google Sign-in 流程之前，不免要來簡單提到 Oauth 2.0。 OAuth 是一個用於授權認證的標準協議(RFC 6749)，與一般網站常用到的個人帳號驗證機制不同的地方是，OAuth 強調<strong>第三方應用程式授權機制</strong>，所以它的內容有明確定義出各角色定義，包含：</p>
+<ul>
+<li>resource owner</li>
+<li>resource server</li>
+<li>client</li>
+<li>authorization server</li>
+</ul>
+<p>以這次要實作的場景為例，使用者要透過 Google 帳號來登入我的網站，這裡 <code>resource owner</code> 是指使用者，<code>client</code> 是指我的網站，<code>resource server</code> 和 <code>authorization server</code> 則都是指 Google 所提供的服務。</p>
+<h3 id="為什麼用-oauth-20">為什麼用 Oauth 2.0</h3>
+<p>上面有提到，Oauth 主要精神是提供第三方授權驗證機制，今天使用者要用 Google 帳號登入我的網站，帳號擁有者不是我而是 Google ，那我必須要有個方法去取得使用者在 Google 的資訊，所以 Google 提供了 Oauth 的授權流程，讓我能先引導使用者前往指定的 Google 授權頁面，授權頁面上會告知使用者我需要的的資料範圍，當使用者確認授權之後， Google 會傳送一組 token 給我，而我就可以用這組 token 去跟 Google 相關資源 Server 要資料。</p>
+<h2 id="實作流程">實作流程</h2>
+<p>Oauth 2.0 中定義了四個取得認證的模式：<code>Authorization Code Grant(授權碼)</code> | <code>Implicit Grant(簡化)</code> | <code>Resource Owner Password Credentials Grant(使用者密碼)</code> | <code>Client Credentials Grant(客戶端)</code>
+，四個模式的實際差異可以參考 <a href="https://tools.ietf.org/html/rfc6749">The OAuth 2.0 Authorization Framework</a> 第4節，在這邊不多加贅述差異，本次實作是使用 <code>Authorization Code Grant</code> 的方式來進行，而目前常見的實作方式為 <code>Authorization Code Grant</code> | <code>Implicit Grant</code>，不過 <code>Implicit Grant</code> 主要流程是在 browser 上進行，可能會有 token 暴露風險。</p>
+<h3 id="step-1-建立授權-request">Step 1. 建立授權 Request</h3>
+<h4 id="故事場景">故事場景</h4>
+<p>使用者想要使用 Google 帳號登入我的網站，但是我必須確認這個使用者確實為 Google 用戶，因此我需要先將使用者引導到 Google 授權頁面，同時告知我需要取得使用者基本資訊，讓使用者決定要不要將資訊資料授權給我。</p>
+<p>根據上麵所敘述的場景，首先要做的是建立一個<strong>發送給 Google Authorization Server 的請求</strong>來引導用戶轉向到該 Server，而請求中需要包含你的 Web Application 資訊以供 Google Server 辨識。一個簡單的 Google Authorization Server 請求如下:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">https://accounts.google.com/o/oauth2/v2/auth?
+scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly<span style="color:#960050;background-color:#1e0010">&amp;</span>
+state=state_parameter_passthrough_value<span style="color:#960050;background-color:#1e0010">&amp;</span>
+redirect_uri=http%3A%2F%2Foauth2.example.com%2Fcallback<span style="color:#960050;background-color:#1e0010">&amp;</span>
+client_id=client_id
+</code></pre></div><p>從上面一串網址，可以知道我們需要填入的基本參數有 <code>scope</code> | <code>client_id</code> | <code>redirect_uri</code> 這幾項，其中 <code>client_id</code> 是需要透過申請憑證來取得，這樣 Google Authorization Server 才會知道來者何人～因此在寫 code 之前，先前往 (Google 憑證頁面)[https://console.developers.google.com/apis/credentials] 申請憑證，有了憑證之後，就使用 Google 所提供的 Golang lib 來建立請求吧！</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#f92672">import</span> (
+  <span style="color:#e6db74">&#34;golang.org/x/oauth2&#34;</span>
+  <span style="color:#e6db74">&#34;golang.org/x/oauth2/google&#34;</span>
+)
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">CreateGoogleOAuthURL</span>() <span style="color:#66d9ef">string</span> {
+  <span style="color:#75715e">// 使用 lib 產生一個特定 config instance
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">config</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">oauth2</span>.<span style="color:#a6e22e">Config</span>{
+    <span style="color:#75715e">//憑證的 client_id
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">ClientID</span>: <span style="color:#e6db74">&#34;Your ID&#34;</span>,
+    <span style="color:#75715e">//憑證的 client_secret
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">ClientSecret</span>: <span style="color:#e6db74">&#34;Your Secret&#34;</span>,
+    <span style="color:#75715e">//當 Google auth server 驗證過後，接收從 Google auth server 傳來的資訊
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">RedirectURL</span>:  <span style="color:#e6db74">&#34;http://localhost:8080/google-login-callback&#34;</span>,
+    <span style="color:#75715e">//告知 Google auth server 授權範圍，在這邊是取得用戶基本資訊和Email，Scopes 為 Google 提供
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">Scopes</span>: []<span style="color:#66d9ef">string</span>{
+      <span style="color:#e6db74">&#34;https://www.googleapis.com/auth/userinfo.email&#34;</span>,
+      <span style="color:#e6db74">&#34;https://www.googleapis.com/auth/userinfo.profile&#34;</span>,
+    },
+    <span style="color:#75715e">//指的是 Google auth server 的 endpoint，用 lib 預設值即可
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">Endpoint</span>: <span style="color:#a6e22e">google</span>.<span style="color:#a6e22e">Endpoint</span>,
+   }
+
+   <span style="color:#75715e">//產生出 config instance 後，就可以使用 func AuthCodeURL 建立請求網址
+</span><span style="color:#75715e"></span>   <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">config</span>.<span style="color:#a6e22e">AuthCodeURL</span>(<span style="color:#e6db74">&#34;state&#34;</span>)
+}
+</code></pre></div><h4 id="configauthcodeurl-所需要的參數-state-是指什麼呢"><code>config.AuthCodeURL</code> 所需要的參數 <code>state</code> 是指什麼呢？</h4>
+<p>在上面範例中，可以看到:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">requestUrl</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">config</span>.<span style="color:#a6e22e">AuthCodeURL</span>(<span style="color:#e6db74">&#34;state&#34;</span>)
+</code></pre></div><p>這個 state 是為了防止 <code>CSRF(跨站請求偽造)</code> 攻擊而設置的。建議可以透過<strong>隨機產生</strong>的方式來產生出一個 state，當 Google server 驗證完後，會原封不動地把 state 再回傳給網站 server，如此一來我們就可以驗證 state 是否為網站所發出的 state，以確保正確性。</p>
+<h3 id="step-2-引導使用者前往授權頁面來確認授權">Step 2. 引導使用者前往授權頁面來確認授權</h3>
+<p>有了請求網址，我們就可以將使用者導引到該網址去進行授權：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">LoginWithGoogleOAuth</span>(<span style="color:#a6e22e">c</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">gin</span>.<span style="color:#a6e22e">Context</span>) {
+	<span style="color:#a6e22e">redirectURL</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">CreateGoogleOAuthURL</span>()
+	<span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">Redirect</span>(<span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">StatusSeeOther</span>, <span style="color:#a6e22e">redirectURL</span>) <span style="color:#75715e">// http.StatusSeeOther 為 303
+</span><span style="color:#75715e"></span>}
+</code></pre></div><p>在授權頁面上，可以看到你所設定的 scope 和網站資訊，以便使用者進行授權確認。</p>
+<h4 id="http-status-code">Http Status code</h4>
+<p>這邊要注意的地方是，Http Status code 必須為 3xx 系列，才能正確執行轉址，此外，建議 Status code 為 303，因為 303 明確定義出：</p>
+<ul>
+<li>重定向到新地址時，客戶端必須使用<code>GET</code>方法請求新地址。</li>
+<li>客戶端收到的新的URI，不是原始請求資源的替代引用。</li>
+</ul>
+<p>不過有個缺點，許多HTTP/1.1版以前的瀏覽器不能正確理解303狀態，所以也能使用 302 替代。</p>
+<h3 id="step-3-接收-google-authorization-server-的回應">Step 3. 接收 Google Authorization Server 的回應</h3>
+<p>當使用者在授權頁面執行動作時，Google Authorization Server 就會向第一個步驟所設定的 <code>redirect_url</code> 發送回應，讓你得知使用者要不要進行授權。如果使用者同意的話，你會接收到以下回應</p>
+<pre><code>https://oauth2.example.com/auth?code=4/P7q7W91a-oMsCeLvIaQm6bTrgtp7&amp;state=state_parameter_passthrough_value
+</code></pre><p>最重要的是後面 <code>code=4/P7q7W91a-oMsCeLvIaQm6bTrgtp7</code> 這一段，根據 OAuth 流程，Google Authorization Server 並不會直接回應 token ，而是會給一組 code 表示使用者許可授權，而我們必須再拿這組 code 外加憑證申請到的 <code>client_secret</code> 去跟 Google 索取 token。此外， OAuth 2.0 建議 code 有效時間最多只有 10 分鐘，所以基本上在拿到 code 之後，就會緊接換 token 的流程。</p>
+<p>在這串回應中還有夾帶我們所發出去的 <code>state</code> ，此時也要進行驗證，確保這個 state 和發出去的值為一致。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// check state，這邊的 c 指的是 c *gin.Context
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">s</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">Query</span>(<span style="color:#e6db74">&#34;state&#34;</span>)
+<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">s</span> <span style="color:#f92672">!=</span> <span style="color:#e6db74">&#34;state_parameter_passthrough_value&#34;</span> {
+  <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">AbortWithError</span>(<span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">StatusUnauthorized</span>,, <span style="color:#e6db74">&#34;error message&#34;</span>)
+  <span style="color:#66d9ef">return</span>
+}
+</code></pre></div><h3 id="step-4-使用換取-access-token並且拿-token-去跟-google-server-索取授權資料">Step 4. 使用換取 access token，並且拿 token 去跟 Google Server 索取授權資料</h3>
+<p>有了 <code>code</code> 之後，我們就可以換取 access token，並且使用這組 access token 獲得我們所需要的資料。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// 這邊的 c 指的是 c *gin.Context
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">code</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">Query</span>(<span style="color:#e6db74">&#34;code&#34;</span>)
+<span style="color:#75715e">// 拿 code 跟 Google Server 交換 token
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">token</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">config</span>.<span style="color:#a6e22e">Exchange</span>(<span style="color:#a6e22e">oauth2</span>.<span style="color:#a6e22e">NoContext</span>, <span style="color:#a6e22e">code</span>)
+</code></pre></div><p>Google Server 的回應範例：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+  <span style="color:#f92672">&#34;access_token&#34;</span>:<span style="color:#e6db74">&#34;1/fFAGRNJru1FTz70BzhT3Zg&#34;</span>,
+  <span style="color:#f92672">&#34;expires_in&#34;</span>:<span style="color:#ae81ff">3920</span>,
+  <span style="color:#f92672">&#34;token_type&#34;</span>:<span style="color:#e6db74">&#34;Bearer&#34;</span>,
+  <span style="color:#f92672">&#34;refresh_token&#34;</span>:<span style="color:#e6db74">&#34;1/xEoDL4iW3cxlI7yDbSRFYNG01kVKM2C-259HOF2aQbI&#34;</span>
+}
+</code></pre></div><h4 id="如何處理-token">如何處理 token</h4>
+<p>在 Google OAuth 2.0 官方文件有提到，在拿到回應之後，最好把 <code>access_token</code> 和 <code>refresh_token</code> 都保存在一個長期有效的安全地方，例如有人會存在 shared session。 <code>refresh_token</code> 這組 token 是當 <code>access_token</code> 過期時，可以拿 <code>refresh_token</code> 再去交換一組有效的 <code>access_token</code>。</p>
+<blockquote>
+<p>Important: Your application should store both tokens in a secure, long-lived location that is accessible between different invocations of your application. The refresh token enables your application to obtain a new access token if the one that you have expires. As such, if your application loses the refresh token, the user will need to repeat the OAuth 2.0 consent flow so that your application can obtain a new refresh token.</p>
+</blockquote>
+<p>最後，就拿 <code>access_token</code> 去 Google 指定的 Server 位置取資料吧！</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// 這個 client 是 http wrapper，讓你可以直接使用 `client.Get` ，它會執行時會自動在網址後方帶上 access_token 字段
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">client</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">config</span>.<span style="color:#a6e22e">Client</span>(<span style="color:#a6e22e">oauth2</span>.<span style="color:#a6e22e">NoContext</span>, <span style="color:#a6e22e">token</span>)
+<span style="color:#a6e22e">res</span>, <span style="color:#a6e22e">getErr</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">client</span>.<span style="color:#a6e22e">Get</span>(<span style="color:#e6db74">&#34;https://www.googleapis.com/oauth2/v3/userinfo&#34;</span>)
+<span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">Body</span>.<span style="color:#a6e22e">Close</span>()
+<span style="color:#75715e">// 讀取返回的資料
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">rawData</span>, <span style="color:#a6e22e">_</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">ioutil</span>.<span style="color:#a6e22e">ReadAll</span>(<span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">Body</span>)
+</code></pre></div><h4 id="refresh_token"><code>refresh_token</code></h4>
+<p>上面有提到 <code>Implicit Grant</code> 的模式，在此模式之下，是不會有 <code>refresh_token</code> 的功能。</p>
+<h2 id="reference">Reference</h2>
+<ol>
+<li><a href="https://developers.google.com/identity/protocols/OAuth2WebServer">https://developers.google.com/identity/protocols/OAuth2WebServer</a></li>
+<li><a href="https://tools.ietf.org/html/rfc6749">https://tools.ietf.org/html/rfc6749</a></li>
+</ol>
+
+    </div>
+    <div class="article-footer">
+<blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    <li class="post-copyright-link hidden-xs">
+      <strong>Permalink: </strong>
+      <a href="https://yushuanhsieh.github.io/post/2018-08-25-go-google-oauth/" title="Google Sign-in with OAuth 2.0" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2018-08-25-go-google-oauth/</a>
+    </li>
+  </ul>
+</blockquote>
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="https://yushuanhsieh.github.io/author.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">Cherie Hsieh</span><small class="ml-1x">Software Engineer</small></a></h3>
+        <div>Gopher</div>
+      </div>
+    </figure>
+  </div>
+</div>
+    </div>
+  </article>
+
+</div><nav class="bar bar-footer clearfix" data-stick-bottom>
+    <div class="bar-inner">
+        <ul class="pager pull-left">
+            <li class="prev">
+                <a href="https://yushuanhsieh.github.io/post/2018-08-11-go-fundamental-array/" title="Go Fundamental - Array"><i
+                        class="icon icon-angle-left"
+                        aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
+            </li>
+            <li class="next">
+                <a href="https://yushuanhsieh.github.io/post/2018-09-09-go-tar-file/"
+                    title="Go - Archive files with archive/tar lib"><span>Newer&nbsp;&nbsp;</span><i
+                        class="icon icon-angle-right" aria-hidden="true"></i></a>
+            </li>
+            
+        </ul>
+        <div class="bar-right">
+        </div>
+    </div>
+</nav>
+
+</main><footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+  <div class="copyright">
+    &copy;2017  -
+    2020
+    <div class="publishby">
+        Theme by <a href="https://github.com/xiaoheiAh" target="_blank"> xiaoheiAh </a>base on<a href="https://github.com/xiaoheiAh/hugo-theme-pure" target="_blank"> pure</a>.
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+<script>
+    window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/javascript.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/c.min.js" defer></script><script>
+    hljs.configure({
+        tabReplace: '    ', 
+        classPrefix: ''     
+        
+    })
+    hljs.initHighlightingOnLoad();
+</script>
+<script src="https://yushuanhsieh.github.io/js/application.min.bdeb64b910570b6c41badc6a05b7afb0c8ad9efd8525de3c7257d59e786326a3.js"></script>
+<script src="https://yushuanhsieh.github.io/js/plugin.min.51ff8c7317566f82259170fa36e09c4493adc9b9378b427a01ad3f017ebac7dd.js"></script>
+
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            ROOT_URL: 'https:\/\/yushuanhsieh.github.io',
+            CONTENT_URL: 'https:\/\/yushuanhsieh.github.io\/searchindex.json ',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script type="text/javascript" src="https://yushuanhsieh.github.io/js/insight.min.a343cd9a5a7698336b28ef3a7c16a3a1b1d2d5fb17dc8ed04022bbe08cc5459073a15bdafa3a8a58cdd56080784bdd69fa70b1ae8597565c799c57ed00f0e120.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+<script>
+    tocbot.init({
+        
+        tocSelector: '.js-toc',
+        
+        contentSelector: '.js-toc-content',
+        
+        headingSelector: 'h1, h2, h3',
+        
+        hasInnerContainers: true,
+    });
+</script>
+
+
+  </body>
+</html>

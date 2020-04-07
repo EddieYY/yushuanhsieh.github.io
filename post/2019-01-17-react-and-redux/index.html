@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        使用 React-Redux 注意事項和運作原理 - Cherie&#39;s Tech Blog
+      </title>
+    <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  
+  <meta name="theme-color" content="#000000" />
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <meta name="description" content="前言 網路上有很多關於如何使用 redux and react-redux 的教學文章，所以在這邊就不寫如何去應用，而是會著重在一些可能會忽略的細節以及大概的 實作原理。其實這些細節都寫在官網上，不過一般在教學文章內較少著墨，所以特別摘錄出來，讓大家在使用 react-redux 時能注意到可能會發生的問題。
+mapStateToProps Issues 首先來談談在建立 connectHOC 常用到的 mapStateToProps，由於這個 function 關係到 component props，所以就容易產生沒有發生 render 或是 render 次數過多的問題。" />
+  <meta name="generator" content="Hugo 0.67.0 with theme pure" />
+  <title>使用 React-Redux 注意事項和運作原理 - Cherie&#39;s Tech Blog</title>
+  
+  
+  <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
+  
+    
+    <link rel="stylesheet" href="https://yushuanhsieh.github.io/scss/cherie.min.25e69b63f709fdfaf070b38e72e556d2a25931840ee2fcdc62b4aa0b9803e9ba.css" async>
+  
+  <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
+  <meta property="og:title" content="使用 React-Redux 注意事項和運作原理" />
+<meta property="og:description" content="前言 網路上有很多關於如何使用 redux and react-redux 的教學文章，所以在這邊就不寫如何去應用，而是會著重在一些可能會忽略的細節以及大概的 實作原理。其實這些細節都寫在官網上，不過一般在教學文章內較少著墨，所以特別摘錄出來，讓大家在使用 react-redux 時能注意到可能會發生的問題。
+mapStateToProps Issues 首先來談談在建立 connectHOC 常用到的 mapStateToProps，由於這個 function 關係到 component props，所以就容易產生沒有發生 render 或是 render 次數過多的問題。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2019-01-17-react-and-redux/" />
+<meta property="article:published_time" content="2019-01-17T08:00:00+08:00" />
+<meta property="article:modified_time" content="2019-01-17T08:00:00+08:00" />
+<meta itemprop="name" content="使用 React-Redux 注意事項和運作原理">
+<meta itemprop="description" content="前言 網路上有很多關於如何使用 redux and react-redux 的教學文章，所以在這邊就不寫如何去應用，而是會著重在一些可能會忽略的細節以及大概的 實作原理。其實這些細節都寫在官網上，不過一般在教學文章內較少著墨，所以特別摘錄出來，讓大家在使用 react-redux 時能注意到可能會發生的問題。
+mapStateToProps Issues 首先來談談在建立 connectHOC 常用到的 mapStateToProps，由於這個 function 關係到 component props，所以就容易產生沒有發生 render 或是 render 次數過多的問題。">
+<meta itemprop="datePublished" content="2019-01-17T08:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2019-01-17T08:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="791">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="使用 React-Redux 注意事項和運作原理"/>
+<meta name="twitter:description" content="前言 網路上有很多關於如何使用 redux and react-redux 的教學文章，所以在這邊就不寫如何去應用，而是會著重在一些可能會忽略的細節以及大概的 實作原理。其實這些細節都寫在官網上，不過一般在教學文章內較少著墨，所以特別摘錄出來，讓大家在使用 react-redux 時能注意到可能會發生的問題。
+mapStateToProps Issues 首先來談談在建立 connectHOC 常用到的 mapStateToProps，由於這個 function 關係到 component props，所以就容易產生沒有發生 render 或是 render 次數過多的問題。"/>
+
+  <!--[if lte IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+    <![endif]-->
+
+  <!--[if lt IE 9]>
+      <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+  </head>
+
+  
+  
+
+  <body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage"><header class="header" itemscope itemtype="http://schema.org/WPHeader">
+    <div class="slimContent">
+      <div class="navbar-header">
+        <div class="profile-block text-center">
+          <a id="avatar" href="" target="_blank">
+            <img class="img-circle img-rotate" src="https://yushuanhsieh.github.io/author.jpg" width="200" height="200">
+          </a>
+          <h2 id="name" class="hidden-xs hidden-sm">Cherie Hsieh</h2>
+          <h3 id="title" class="hidden-xs hidden-sm hidden-md">Software Engineer</h3>
+          <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>Taiwan</small>
+        </div><div class="search" id="search-form-wrap">
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i
+                        class="icon icon-search"></i></button>
+            </span>
+        </div>
+        <div class="ins-search">
+            <div class="ins-search-mask"></div>
+            <div class="ins-search-container">
+                <div class="ins-input-wrapper">
+                    <input type="text" class="ins-search-input" placeholder="Type something..."
+                        x-webkit-speech />
+                    <button type="button" class="close ins-close ins-selectable" data-dismiss="modal"
+                        aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="ins-section-wrapper">
+                    <div class="ins-section-container"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+        <ul class="nav navbar-nav main-nav">
+            <li class="menu-item menu-item-home">
+                <a href="/">
+                  <span class="menu-title">Home</span>
+                </a>
+            </li>
+            <li class="menu-item menu-item-categories">
+                <a href="/categories/">
+                  <span class="menu-title">Categories</span>
+                </a>
+            </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+<aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title"> Categories</h3>
+    <div class="widget-body">
+        <ul class="category-list">
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/c/" class="category-list-link">c</a><span class="category-list-count">3</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">5</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/other/" class="category-list-link">other</a><span class="category-list-count">7</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/study/" class="category-list-link">study</a><span class="category-list-count">9</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/web/" class="category-list-link">web</a><span class="category-list-count">28</span></li>
+        </ul>
+    </div>
+</div>
+      
+<div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+        <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-03-31-march/" class="title">[Life] 三月起，在竹北定區生活</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-03-31 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-03-31</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-02-24-february/" class="title">[Life] 2月雜談</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-02-24 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-02-24</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-21-golang-router/" class="title">Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-21 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-21</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-19-memory-allocator-implicit-free-list/" class="title">Implement Memory Allocator - Implicit Free List</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-19 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-19</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2019-12-30-2019-review/" class="title">2019 年度回顧</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2019-12-30 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-12-30</time>
+                    </p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+  </div>
+</aside>
+
+    
+    
+<main class="main" role="main"><div class="content">
+  <article id="single-" class="article article-type-single" itemscope
+    itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      <h1 itemprop="name">
+  <a
+    class="article-title"
+    href="/post/2019-01-17-react-and-redux/"
+    >
+    
+      
+        <span class="title-cat">Web</span>
+      
+    使用 React-Redux 注意事項和運作原理</a>
+</h1>
+
+      <div class="article-meta">
+        
+<span class="article-date">
+  <i class="icon icon-calendar-check"></i>&nbsp;
+<a href="https://yushuanhsieh.github.io/post/2019-01-17-react-and-redux/" class="article-date">
+  <time datetime="2019-01-17 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-01-17</time>
+</a>
+</span>
+<span class="article-category">
+  <i class="icon icon-folder"></i>
+  
+    <a class="article-category-link" href="/categories/web/"> Web </a>
+  
+</span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2019-01-17-react-and-redux/#comments"
+            class="article-comment-link">Comments</a></span>
+      </div>
+    </div>
+    <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
+      <h2 id="前言">前言</h2>
+<p>網路上有很多關於如何使用 <code>redux</code> and <code>react-redux</code> 的教學文章，所以在這邊就不寫如何去應用，而是會著重在一些可能會忽略的細節以及大概的 實作原理。其實這些細節都寫在官網上，不過一般在教學文章內較少著墨，所以特別摘錄出來，讓大家在使用 <code>react-redux</code> 時能注意到可能會發生的問題。</p>
+<h2 id="mapstatetoprops-issues"><code>mapStateToProps</code> Issues</h2>
+<p>首先來談談在建立 connectHOC 常用到的 <code>mapStateToProps</code>，由於這個
+function 關係到 component props，所以就容易產生沒有發生 render 或是 render 次數過多的問題。</p>
+<h3 id="1-render-沒有被觸發">1. render() 沒有被觸發</h3>
+<p>關於這部分，官網也有提出相關內容：</p>
+<blockquote>
+<p>By default, React Redux decides whether the contents of the object returned from mapStateToProps are different using === comparison <strong>(a &ldquo;shallow equality&rdquo; check)</strong> on each fields of the returned object.</p>
+</blockquote>
+<blockquote>
+<p>Note that returning a <strong>mutated object of the same reference</strong> is a common mistake that can result in your component not re-rendering when expected.</p>
+</blockquote>
+<p>最常發生的例子像是 array，如果使用 array.push(value)，那麼 array 還是同一個 reference，那麼就不會觸發 render().</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">
+<span style="color:#75715e">// in reducer
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">case</span> <span style="color:#a6e22e">appListAction</span>.<span style="color:#a6e22e">ADD_APP</span><span style="color:#f92672">:</span>
+    <span style="color:#a6e22e">state</span>.<span style="color:#a6e22e">list</span>.<span style="color:#a6e22e">push</span>(<span style="color:#a6e22e">action</span>.<span style="color:#a6e22e">payload</span>);
+    <span style="color:#75715e">// state.list 為相同 reference
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">return</span> {...<span style="color:#a6e22e">state</span>, <span style="color:#a6e22e">list</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">state</span>.<span style="color:#a6e22e">list</span>};
+
+<span style="color:#75715e">// 由於 state.list 為相同 reference，不會觸發 render
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">mapStateToProps</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">state</span> =&gt; ({
+  <span style="color:#a6e22e">list</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">state</span>.<span style="color:#a6e22e">list</span>
+})
+
+<span style="color:#75715e">// Fix
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">case</span> <span style="color:#a6e22e">appListAction</span>.<span style="color:#a6e22e">ADD_APP</span><span style="color:#f92672">:</span>
+  <span style="color:#75715e">// 重新建立一個 array
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">return</span> {...<span style="color:#a6e22e">state</span>, <span style="color:#a6e22e">list</span><span style="color:#f92672">:</span> [...<span style="color:#a6e22e">state</span>.<span style="color:#a6e22e">list</span>, <span style="color:#a6e22e">action</span>.<span style="color:#a6e22e">payload</span>]};
+</code></pre></div><h3 id="2-render太頻繁---only-return-new-object-references-if-needed">2. render()太頻繁 - Only Return New Object References If Needed</h3>
+<p>這個問題是在說，我們有可能會濫用 return new object ，導致觸發 render()。例如說：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">return</span> {
+  <span style="color:#75715e">// map func always create a new array.
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">list</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">state</span>.<span style="color:#a6e22e">list</span>.<span style="color:#a6e22e">map</span>(<span style="color:#a6e22e">item</span> =&gt; <span style="color:#a6e22e">item</span>),
+  <span style="color:#a6e22e">target</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">state</span>.<span style="color:#a6e22e">target</span>
+}
+</code></pre></div><p>這樣即使 state.list 的值不變，但是由於 map 的 return 值是新建立一個 array，導致 component 的 list 會一直被更新，進而導致頻繁觸發 render()。</p>
+<p>建議的解決辦法是使用 <code>memoized selector functions</code>，而官方推出的 lib 是 <code>reselect</code>，以下節錄 <code>reselect</code> 中一段重要原始碼：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">defaultMemoize</span>(<span style="color:#a6e22e">func</span>, <span style="color:#a6e22e">equalityCheck</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">defaultEqualityCheck</span>) {
+  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">lastArgs</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span>
+  <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">lastResult</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span>
+  
+  <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">function</span> () {
+    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">areArgumentsShallowlyEqual</span>(<span style="color:#a6e22e">equalityCheck</span>, <span style="color:#a6e22e">lastArgs</span>, <span style="color:#a6e22e">arguments</span>)) {
+      <span style="color:#a6e22e">lastResult</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">func</span>.<span style="color:#a6e22e">apply</span>(<span style="color:#66d9ef">null</span>, <span style="color:#a6e22e">arguments</span>)
+    }
+
+    <span style="color:#a6e22e">lastArgs</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">arguments</span>
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">lastResult</span>
+  }
+}
+</code></pre></div><p>簡單來說，就是會先檢查 function 的 input value 有沒有發生變化，如果沒有發生變化，則會直接返回上一次運算的結果值。</p>
+<p>如何使用 <code>reselect</code> 一樣略過不做介紹，網上已經有很多很完整的範例可以供參考～</p>
+<h3 id="3-render太頻繁---the-number-of-declared-arguments-affects-behavior">3. render()太頻繁 - The Number of Declared Arguments Affects Behavior</h3>
+<p><code>mapStateToProps(state, props)</code> 提供 state, props 兩個 args，但是如果我們在 mapStateToProps 中<strong>沒有使用</strong> props 的值來運算，卻引入 props 當參數，就會不斷觸發 mapStateToProps function 導致效能問題。</p>
+<p>所以為了改善效能，只引入需要 args 即可。</p>
+<blockquote>
+<p>Notice: <strong>With (state, ownProps)</strong>, it runs any time the store state is different and ALSO whenever the wrapper props have changed.</p>
+</blockquote>
+<blockquote>
+<p>This means that you should <strong>not add the ownProps argument unless you actually need to use it</strong>, or your mapStateToProps function will run more often than it needs to.</p>
+</blockquote>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">
+<span style="color:#75715e">// source code from wrapMapToProps.js
+</span><span style="color:#75715e"></span>
+<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">initProxySelector</span>(<span style="color:#a6e22e">dispatch</span>, { <span style="color:#a6e22e">displayName</span> }) {
+    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">proxy</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">mapToPropsProxy</span>(<span style="color:#a6e22e">stateOrDispatch</span>, <span style="color:#a6e22e">ownProps</span>) {
+      <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">proxy</span>.<span style="color:#a6e22e">dependsOnOwnProps</span>
+        <span style="color:#75715e">// 這邊會判斷是否有使用 props 當參數來決定後續處理方式
+</span><span style="color:#75715e"></span>        <span style="color:#f92672">?</span> <span style="color:#a6e22e">proxy</span>.<span style="color:#a6e22e">mapToProps</span>(<span style="color:#a6e22e">stateOrDispatch</span>, <span style="color:#a6e22e">ownProps</span>)
+        <span style="color:#f92672">:</span> <span style="color:#a6e22e">proxy</span>.<span style="color:#a6e22e">mapToProps</span>(<span style="color:#a6e22e">stateOrDispatch</span>)
+    }
+</code></pre></div><h3 id="4-mapstatetoprops-must-be-a-fast-pure-and-synchronous-function">4. <code>mapStateToProps</code> MUST be a fast, pure and synchronous function</h3>
+<p>這題比較偏效能議題，官方建議 <code>mapStateToProps</code> 應該是一個邏輯簡單 / pure / 且 synchronous 的 function。畢竟當 state 變動時，就會呼叫此 function，如果 <code>mapStateToProps</code> 的邏輯複雜，那就會大幅降低每次變動後的處理速度。</p>
+<p>再來複習 Pure Function 定義:</p>
+<blockquote>
+<ol>
+<li>Its <strong>return value</strong> is the same for the same arguments (no variation with local static variables, non-local variables, mutable reference arguments or input streams from I/O devices).</li>
+</ol>
+</blockquote>
+<blockquote>
+<ol start="2">
+<li>Its <strong>evaluation has no side effects</strong> (no mutation of local static variables, non-local variables, mutable reference arguments or I/O streams).</li>
+</ol>
+</blockquote>
+<p>以下例子就是會改變 variable member 而造成 side effects 的例子：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Test</span>() {
+  <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">value</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+  
+  <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">notPureFunc</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">a</span>, <span style="color:#a6e22e">b</span>) {
+    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">value</span> <span style="color:#f92672">+=</span> <span style="color:#a6e22e">a</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">b</span>;
+  }
+  
+  <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">pureFunc</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">a</span>, <span style="color:#a6e22e">b</span>) {
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">a</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">b</span>;
+  }
+}
+</code></pre></div><p>從上面例子可以知道，如果不是使用 pure function，可能的風險就是會造成 return 值不會是你所預期的（因為他會修改到內部變數），因此這樣寫法也盡量避免的。</p>
+<h2 id="mapdispatchtoprops-issues"><code>mapDispatchToProps</code> Issues</h2>
+<h3 id="1-using-the-object-shorthand-form-of-mapdispatchtoprops">1. Using the <strong>object shorthand</strong> form of mapDispatchToProps</h3>
+<p>網路上可以看到很多例子這樣寫：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">mapDispatchToProps</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">dispatch</span> =&gt; {
+  <span style="color:#66d9ef">return</span> {
+    <span style="color:#75715e">// dispatching actions returned by action creators
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">increment</span><span style="color:#f92672">:</span> () =&gt; <span style="color:#a6e22e">dispatch</span>(<span style="color:#a6e22e">increment</span>()),
+    <span style="color:#a6e22e">decrement</span><span style="color:#f92672">:</span> () =&gt; <span style="color:#a6e22e">dispatch</span>(<span style="color:#a6e22e">decrement</span>()),
+    <span style="color:#a6e22e">reset</span><span style="color:#f92672">:</span> () =&gt; <span style="color:#a6e22e">dispatch</span>(<span style="color:#a6e22e">reset</span>())
+  }
+}
+</code></pre></div><p>或是使用 <code>redux</code> 本身的 <code>bindActionCreators</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">
+<span style="color:#66d9ef">import</span> { <span style="color:#a6e22e">bindActionCreators</span> } <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;redux&#39;</span>
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">mapDispatchToProps</span>(<span style="color:#a6e22e">dispatch</span>) {
+  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">bindActionCreators</span>({ <span style="color:#a6e22e">increment</span>, <span style="color:#a6e22e">decrement</span>, <span style="color:#a6e22e">reset</span> }, <span style="color:#a6e22e">dispatch</span>)
+}
+</code></pre></div><p>因為這樣的寫法實在太常見了，頻繁寫 dispatch 看起來變得很多餘，所以 <code>react-redux</code> 整合 <code>mapDispatchToProps</code> function，我們只要使用 object type 的 mapDispatchToProps，內部機制就會自動幫你套用 <code>mapDispatchToProps</code>，讓使用者用起來更方便。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">
+<span style="color:#66d9ef">import</span> { <span style="color:#a6e22e">connect</span> } <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#34;react-redux&#34;</span>;
+
+<span style="color:#a6e22e">connect</span>(
+  <span style="color:#a6e22e">mapState</span>,
+  { <span style="color:#a6e22e">increment</span>, <span style="color:#a6e22e">decrement</span>, <span style="color:#a6e22e">reset</span> }
+)(<span style="color:#a6e22e">Counter</span>);
+
+</code></pre></div><p>不過即使 <code>react-redux</code> 幫你貼心設計好了，我們還是要知他是使用了 <code>bindActionCreators</code> 來綁定 dispatch 行為。</p>
+<h4 id="如果不使用-mapdispatchtoprops-這個變數呢">如果不使用 mapDispatchToProps 這個變數呢？</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">
+<span style="color:#75715e">// 官網例子
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">connect</span>(<span style="color:#a6e22e">mapStateToProps</span> <span style="color:#75715e">/** no second argument */</span>)(<span style="color:#a6e22e">MyComponent</span>)
+
+</code></pre></div><p>那Default 設定就會是 <code>props.dispatch</code>，然後再自己手動呼叫 <code>dispatch(action)</code>。</p>
+<p>當然，官方也有特別提醒，如果使用 mapDispatchToProps，那 dispatch function 就不會被傳入到 component 中。</p>
+<blockquote>
+<p>Notice: Therefore, if you define your own mapDispatchToProps, the connected component will <strong>no longer</strong> receive dispatch.</p>
+</blockquote>
+<p>因此，如果想要更彈性或是有其他需求，不傳入 mapDispatchToProps，也是一種方式。</p>
+<h2 id="react-redux-內部機制"><code>react-redux</code> 內部機制</h2>
+<p>很明顯地， <code>react-redux</code> 的 redux store 是使用 react <code>context</code> 的方式來實作。</p>
+<blockquote>
+<p>Internally, React Redux uses <strong>React&rsquo;s &ldquo;context&rdquo; feature</strong> to make the Redux store accessible to deeply nested connected components.</p>
+</blockquote>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-jsx" data-lang="jsx">
+<span style="color:#75715e">// 我們通常用這種方式來設定 redux store
+</span><span style="color:#75715e"></span>&lt;<span style="color:#f92672">Provider</span> <span style="color:#a6e22e">store</span><span style="color:#f92672">=</span>{<span style="color:#a6e22e">store</span>}&gt;
+  <span style="color:#f92672">&lt;</span>...<span style="color:#f92672">&gt;</span>
+&lt;/<span style="color:#f92672">Provider</span>&gt;
+
+<span style="color:#75715e">// source code from `react-redux`
+</span><span style="color:#75715e">// `this.state` contains a store property you passed
+</span><span style="color:#75715e"></span>&lt;<span style="color:#f92672">Context</span><span style="color:#a6e22e">.Provider</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span>{<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">state</span>}&gt;
+  {<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">props</span>.<span style="color:#a6e22e">children</span>}
+<span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">/Context.Provider&gt;</span>
+
+<span style="color:#75715e">// The store object is observable pattern to detect value change. 
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">store</span>.<span style="color:#a6e22e">subscribe</span>(() =&gt; {
+  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">newStoreState</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">store</span>.<span style="color:#a6e22e">getState</span>()
+  <span style="color:#75715e">//...some code
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">setState</span>(<span style="color:#a6e22e">providerState</span> =&gt; {
+    <span style="color:#75715e">// reference comparision
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">providerState</span>.<span style="color:#a6e22e">storeState</span> <span style="color:#f92672">===</span> <span style="color:#a6e22e">newStoreState</span>) {
+      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>
+    }
+    <span style="color:#66d9ef">return</span> { <span style="color:#a6e22e">storeState</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">newStoreState</span> }
+  })
+})
+
+<span style="color:#75715e">// --- source code from connectAdvanced.js. use to create connectHOC
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">// WeappedComponent subscribe the value of context(store)
+</span><span style="color:#75715e">// and the render will be triggered when selected state changed
+</span><span style="color:#75715e"></span>
+<span style="color:#a6e22e">renderWrappedComponent</span>(<span style="color:#a6e22e">value</span>) { <span style="color:#75715e">// The value means context value
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// more code..
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> { <span style="color:#a6e22e">storeState</span>, <span style="color:#a6e22e">store</span> } <span style="color:#f92672">=</span> <span style="color:#a6e22e">value</span>
+  <span style="color:#75715e">// more code..
+</span><span style="color:#75715e"></span>}
+
+&lt;<span style="color:#f92672">ContextToUse</span><span style="color:#a6e22e">.Consumer</span>&gt;
+  {<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">renderWrappedComponent</span>}
+<span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">/ContextToUse.Consumer&gt;</span>
+
+</code></pre></div><p>簡單來說，就是利用 React 自身機制的的 <code>&lt;Context.Provider&gt;</code> and <code>&lt;Context.Consumer&gt;</code> 來實作。當 (1) dispatch action， (2) 經過 reducer function  (3) 產生出一個新的 state 時，(4) 會透過上面 setState 來更新 context value，(5) 接著那些 subscribed context 的 component 就會接收到 state 更新訊息，然後再判斷是否要 re-render component。</p>
+<p>簡單流程說明大概是這樣。</p>
+<h2 id="結尾">結尾</h2>
+<p>學 React 大概第 8 天，覺得雖然他和 Angular 的 template style 不同，不過學起來還是挺上手的，希望接下來能更深入了解他的 render 原理。</p>
+<h2 id="reference">Reference</h2>
+<ol>
+<li><a href="https://react-redux.js.org/using-react-redux/connect-mapstate">Connect: Extracting Data with mapStateToProps</a></li>
+</ol>
+
+    </div>
+    <div class="article-footer">
+<blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    <li class="post-copyright-link hidden-xs">
+      <strong>Permalink: </strong>
+      <a href="https://yushuanhsieh.github.io/post/2019-01-17-react-and-redux/" title="使用 React-Redux 注意事項和運作原理" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2019-01-17-react-and-redux/</a>
+    </li>
+  </ul>
+</blockquote>
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="https://yushuanhsieh.github.io/author.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">Cherie Hsieh</span><small class="ml-1x">Software Engineer</small></a></h3>
+        <div>Gopher</div>
+      </div>
+    </figure>
+  </div>
+</div>
+    </div>
+  </article>
+
+</div><nav class="bar bar-footer clearfix" data-stick-bottom>
+    <div class="bar-inner">
+        <ul class="pager pull-left">
+            <li class="prev">
+                <a href="https://yushuanhsieh.github.io/post/2019-01-01-12-study/" title="2018/12月份自我學習回顧"><i
+                        class="icon icon-angle-left"
+                        aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
+            </li>
+            <li class="next">
+                <a href="https://yushuanhsieh.github.io/post/2019-01-23-redux-problems/"
+                    title="工作 - Redux State 被異常更新除錯紀錄"><span>Newer&nbsp;&nbsp;</span><i
+                        class="icon icon-angle-right" aria-hidden="true"></i></a>
+            </li>
+            
+        </ul>
+        <div class="bar-right">
+        </div>
+    </div>
+</nav>
+
+</main><footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+  <div class="copyright">
+    &copy;2017  -
+    2020
+    <div class="publishby">
+        Theme by <a href="https://github.com/xiaoheiAh" target="_blank"> xiaoheiAh </a>base on<a href="https://github.com/xiaoheiAh/hugo-theme-pure" target="_blank"> pure</a>.
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+<script>
+    window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/javascript.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/c.min.js" defer></script><script>
+    hljs.configure({
+        tabReplace: '    ', 
+        classPrefix: ''     
+        
+    })
+    hljs.initHighlightingOnLoad();
+</script>
+<script src="https://yushuanhsieh.github.io/js/application.min.bdeb64b910570b6c41badc6a05b7afb0c8ad9efd8525de3c7257d59e786326a3.js"></script>
+<script src="https://yushuanhsieh.github.io/js/plugin.min.51ff8c7317566f82259170fa36e09c4493adc9b9378b427a01ad3f017ebac7dd.js"></script>
+
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            ROOT_URL: 'https:\/\/yushuanhsieh.github.io',
+            CONTENT_URL: 'https:\/\/yushuanhsieh.github.io\/searchindex.json ',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script type="text/javascript" src="https://yushuanhsieh.github.io/js/insight.min.a343cd9a5a7698336b28ef3a7c16a3a1b1d2d5fb17dc8ed04022bbe08cc5459073a15bdafa3a8a58cdd56080784bdd69fa70b1ae8597565c799c57ed00f0e120.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+<script>
+    tocbot.init({
+        
+        tocSelector: '.js-toc',
+        
+        contentSelector: '.js-toc-content',
+        
+        headingSelector: 'h1, h2, h3',
+        
+        hasInnerContainers: true,
+    });
+</script>
+
+
+  </body>
+</html>

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        Implement Memory Allocator - Cherie&#39;s Tech Blog
+      </title>
+    <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  
+  <meta name="theme-color" content="#000000" />
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <meta name="description" content="前言 在很多程式語言都會看到 memory allocator，也可以看到陸續發表的 allocator 實作方式，例如 microsoft mimalloc。與其用看 source code 的方式來了解其原理，倒不如從基本學起，並且從實作過程中了解到為什麼他們要這樣設計 allocator。" />
+  <meta name="generator" content="Hugo 0.67.0 with theme pure" />
+  <title>Implement Memory Allocator - Cherie&#39;s Tech Blog</title>
+  
+  
+  <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
+  
+    
+    <link rel="stylesheet" href="https://yushuanhsieh.github.io/scss/cherie.min.25e69b63f709fdfaf070b38e72e556d2a25931840ee2fcdc62b4aa0b9803e9ba.css" async>
+  
+  <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
+  <meta property="og:title" content="Implement Memory Allocator" />
+<meta property="og:description" content="前言 在很多程式語言都會看到 memory allocator，也可以看到陸續發表的 allocator 實作方式，例如 microsoft mimalloc。與其用看 source code 的方式來了解其原理，倒不如從基本學起，並且從實作過程中了解到為什麼他們要這樣設計 allocator。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2019-09-24-stack-memory-allocator/" />
+<meta property="article:published_time" content="2019-09-24T08:00:00+08:00" />
+<meta property="article:modified_time" content="2019-09-24T08:00:00+08:00" />
+<meta itemprop="name" content="Implement Memory Allocator">
+<meta itemprop="description" content="前言 在很多程式語言都會看到 memory allocator，也可以看到陸續發表的 allocator 實作方式，例如 microsoft mimalloc。與其用看 source code 的方式來了解其原理，倒不如從基本學起，並且從實作過程中了解到為什麼他們要這樣設計 allocator。">
+<meta itemprop="datePublished" content="2019-09-24T08:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2019-09-24T08:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="577">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Implement Memory Allocator"/>
+<meta name="twitter:description" content="前言 在很多程式語言都會看到 memory allocator，也可以看到陸續發表的 allocator 實作方式，例如 microsoft mimalloc。與其用看 source code 的方式來了解其原理，倒不如從基本學起，並且從實作過程中了解到為什麼他們要這樣設計 allocator。"/>
+
+  <!--[if lte IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+    <![endif]-->
+
+  <!--[if lt IE 9]>
+      <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+  </head>
+
+  
+  
+
+  <body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage"><header class="header" itemscope itemtype="http://schema.org/WPHeader">
+    <div class="slimContent">
+      <div class="navbar-header">
+        <div class="profile-block text-center">
+          <a id="avatar" href="" target="_blank">
+            <img class="img-circle img-rotate" src="https://yushuanhsieh.github.io/author.jpg" width="200" height="200">
+          </a>
+          <h2 id="name" class="hidden-xs hidden-sm">Cherie Hsieh</h2>
+          <h3 id="title" class="hidden-xs hidden-sm hidden-md">Software Engineer</h3>
+          <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>Taiwan</small>
+        </div><div class="search" id="search-form-wrap">
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i
+                        class="icon icon-search"></i></button>
+            </span>
+        </div>
+        <div class="ins-search">
+            <div class="ins-search-mask"></div>
+            <div class="ins-search-container">
+                <div class="ins-input-wrapper">
+                    <input type="text" class="ins-search-input" placeholder="Type something..."
+                        x-webkit-speech />
+                    <button type="button" class="close ins-close ins-selectable" data-dismiss="modal"
+                        aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="ins-section-wrapper">
+                    <div class="ins-section-container"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+        <ul class="nav navbar-nav main-nav">
+            <li class="menu-item menu-item-home">
+                <a href="/">
+                  <span class="menu-title">Home</span>
+                </a>
+            </li>
+            <li class="menu-item menu-item-categories">
+                <a href="/categories/">
+                  <span class="menu-title">Categories</span>
+                </a>
+            </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+<aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title"> Categories</h3>
+    <div class="widget-body">
+        <ul class="category-list">
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/c/" class="category-list-link">c</a><span class="category-list-count">3</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">5</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/other/" class="category-list-link">other</a><span class="category-list-count">7</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/study/" class="category-list-link">study</a><span class="category-list-count">9</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/web/" class="category-list-link">web</a><span class="category-list-count">28</span></li>
+        </ul>
+    </div>
+</div>
+      
+<div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+        <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-03-31-march/" class="title">[Life] 三月起，在竹北定區生活</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-03-31 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-03-31</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-02-24-february/" class="title">[Life] 2月雜談</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-02-24 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-02-24</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-21-golang-router/" class="title">Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-21 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-21</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-19-memory-allocator-implicit-free-list/" class="title">Implement Memory Allocator - Implicit Free List</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-19 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-19</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2019-12-30-2019-review/" class="title">2019 年度回顧</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2019-12-30 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-12-30</time>
+                    </p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+  </div>
+</aside>
+
+    
+    
+<main class="main" role="main"><div class="content">
+  <article id="single-" class="article article-type-single" itemscope
+    itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      <h1 itemprop="name">
+  <a
+    class="article-title"
+    href="/post/2019-09-24-stack-memory-allocator/"
+    >
+    
+      
+        
+          <span class="title-cat">C</span>
+        
+      
+    Implement Memory Allocator</a>
+</h1>
+
+      <div class="article-meta">
+        
+<span class="article-date">
+  <i class="icon icon-calendar-check"></i>&nbsp;
+<a href="https://yushuanhsieh.github.io/post/2019-09-24-stack-memory-allocator/" class="article-date">
+  <time datetime="2019-09-24 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-09-24</time>
+</a>
+</span>
+<span class="article-category">
+  <i class="icon icon-folder"></i>
+  
+    <a class="article-category-link" href="/categories/c/"> C </a>
+</span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2019-09-24-stack-memory-allocator/#comments"
+            class="article-comment-link">Comments</a></span>
+      </div>
+    </div>
+    <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
+      <h2 id="前言">前言</h2>
+<p>在很多程式語言都會看到 memory allocator，也可以看到陸續發表的 allocator 實作方式，例如 microsoft <a href="https://github.com/microsoft/mimalloc">mimalloc</a>。與其用看 source code 的方式來了解其原理，倒不如從基本學起，並且從實作過程中了解到為什麼他們要這樣設計 allocator。</p>
+<h2 id="原因">原因</h2>
+<p>在程式開始執行時，我們可以預期會有兩塊 default memory space (system stack, heap) 分配，其中 system stack 負責存放 function return address 或是 local variable 等，而 processor 的 stack pointer 會指向 system stack 的初始位置(可能往下長或往上長)。另外的 heap 則是供 dynamic memory allocation 使用。</p>
+<blockquote>
+<p>Dynamic Memory Allocation: The mechanism by which storage/memory/cells can be allocated to variables during the run time</p>
+</blockquote>
+<p>(圖待補)</p>
+<h3 id="1-為什麼一定要有-dynamic-memory-allocation">1. 為什麼一定要有 dynamic memory allocation</h3>
+<p>為了節省記憶體使用。很多時候，要等到執行當下才能夠確定是否需要此記憶體空間。最簡單的例子就是 array <code>int char[255];</code> ，如果一開始就 allocate 很大一塊 array space，結果實際使用卻不需要這麼多，就顯得有些浪費。</p>
+<p>既然 dynamic memory allocation 如此重要，那我們就需要一個工具管理這塊 heap 空間，讓這有限的空間可以被有效運用，而這也就是 Memory Allocator 的職責所在。</p>
+<p>有效運用這詞感覺很抽象，簡單來說就是如果隨意將 object 配置 在 heap 任意處，一開始可能用得很開心，等到後來會造成 fragmentation 問題，太多散布的小空間導致 size 較大的 object 無法被分配。</p>
+<p>另外，要善用記憶體，除了分配在適當的位置之外，還需要妥善地被釋放掉。例如我們在 C 中手動 <code>free</code> 掉佔用的記憶體，或著是其他高階語言有提供 garbage collection 機制，都是此類的體現。</p>
+<h3 id="example-for-user-space-memory-allocator">Example for User-Space Memory Allocator</h3>
+<p>當我們使用特定程式語言開發應用程式時，該語言其實就有對應的 user space memory allocator。舉例來說，C 程式常常使用 malloc，其 default memory allocator 實作就是 <code>ptmalloc</code>；而 Go 程式則是 <code>TCMalloc</code> 改良版。</p>
+<h2 id="implement-memory-allocator">Implement Memory Allocator</h2>
+<h3 id="stack-based-allocator">Stack-Based Allocator</h3>
+<p>以上概述了一些觀念，接下來就實做簡單的 memory allocator 來加深印象。首先最簡單又最常用的莫過於 Stack-Based Allocator。例如 system stack 就是這類型的 allocator。</p>
+<p>在一些情況下，我們可以自己實作 stack allocator 來因應自己的應用場景。例如在 <code>Game Engine Architecture</code> 這本書中有提到，簡單 single thread 關卡制的遊戲，很適合使用這類 memory allocator。當一個關卡開始時，allocate 該關卡資源，玩家前往下一個關卡，只需要把 stack pointer 退回到初始點，然後 allocate 下一個關卡的資源就好。</p>
+<p>這樣聽起來很基本，不過想想，如果這種可預期的 memory allocation 行為，可以使用更單純的 allocator 來處理，對於效能上就能有顯著地提升。</p>
+<p>當然 stack allocator 還有更多變化用法，例如 <code>double-end stack allocator</code>。一樣是舉遊戲開發為例子:</p>
+<p><img src="https://i.imgur.com/s8ohZP1.png" alt=""></p>
+<p>當玩家在破 A 關卡的時候，可以先將壓縮過的關卡 B load 到 stack 的另一端，然後玩家破完 A 關後，就可以直接將關卡 A pop 掉，解壓縮關卡 B 並 allocate 到一端 stack，接著關卡 C 依序處理。</p>
+<h3 id="advantages">Advantages</h3>
+<ol>
+<li>避免 external fragmentation
+由於是連續性地 allocate 或 free 記憶體，因此不會出現 external fragmentation 的狀況。</li>
+</ol>
+<blockquote>
+<p>External fragmentation arises when free memory is separated into small blocks and is interspersed by allocated memory.</p>
+</blockquote>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/External_Fragmentation.svg/900px-External_Fragmentation.svg.png" alt="resource"></p>
+<p>至於 internal fragmentation 部分，就要看具體實作方式，如果在 push 階段 allocate 固定 size 但是實際 object 大小不一時，就會產生 internal fragmentation，但是如果這個 allocator 是用在特定情況下，且 memory usage 已妥善計算過，那就可以避免此狀況發生。</p>
+<ol start="2">
+<li>實作簡單</li>
+</ol>
+<h3 id="disadvantages">Disadvantages</h3>
+<ol>
+<li>
+<p>必須依照特定順序 Free objects。
+畢竟是 stack 結構，所以要依照 LIFO 順序來 free 資源。</p>
+</li>
+<li>
+<p>Resource Contention
+因為實作方式簡單(當然也可以做到很複雜啦&hellip;)，所以無可避免就會有 resource contention 問題，更不用說如果 multi-thread 一起使用，並且同時 free 資源的情況下，很容易就會順序出錯。所以前面才說這是用於簡單線性遊戲，這樣就可以少去這類問題。</p>
+</li>
+</ol>
+<h3 id="implementation">Implementation</h3>
+<p>最後就來實作 stack allocator。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">struct</span> allocate_state {
+  <span style="color:#66d9ef">struct</span> allocate_state <span style="color:#f92672">*</span>next;
+  <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>addr; <span style="color:#75715e">// record the start address for validation.
+</span><span style="color:#75715e"></span>  size_t n; <span style="color:#75715e">// record the size of allocated object.
+</span><span style="color:#75715e"></span>};
+
+<span style="color:#66d9ef">struct</span> stackAllocator {
+  <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>top_addr;
+  <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>bottom_addr;
+  size_t length;
+  <span style="color:#66d9ef">struct</span> allocate_state <span style="color:#f92672">*</span>head;
+  pthread_mutex_t mu;
+};
+
+<span style="color:#75715e">// A fake resource for test
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">struct</span> game_resource {
+  <span style="color:#66d9ef">int</span> level;
+  <span style="color:#66d9ef">char</span> name[<span style="color:#ae81ff">50</span>];
+};
+
+<span style="color:#66d9ef">extern</span> <span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">init_allocator</span>(<span style="color:#66d9ef">struct</span> stackAllocator <span style="color:#f92672">*</span>allocator, size_t length);
+<span style="color:#66d9ef">extern</span> <span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">allocate</span>(<span style="color:#66d9ef">struct</span> stackAllocator <span style="color:#f92672">*</span>allocator, size_t n);
+<span style="color:#66d9ef">extern</span> <span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">deallocate</span>(<span style="color:#66d9ef">struct</span> stackAllocator <span style="color:#f92672">*</span>allocator, <span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>addr);
+</code></pre></div><h4 id="init-allocator">Init allocator</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">init_allocator</span>(<span style="color:#66d9ef">struct</span> stackAllocator <span style="color:#f92672">*</span>allocator, size_t length)
+{
+  <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>addr;
+  allocator<span style="color:#f92672">-&gt;</span>length <span style="color:#f92672">=</span> length;
+  allocator<span style="color:#f92672">-&gt;</span>head <span style="color:#f92672">=</span> NULL;
+  pthread_mutex_init(<span style="color:#f92672">&amp;</span>allocator<span style="color:#f92672">-&gt;</span>mu, NULL);
+
+  <span style="color:#75715e">// Allocate a memory pool.
+</span><span style="color:#75715e"></span>  addr <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)mmap(NULL, allocator<span style="color:#f92672">-&gt;</span>length, PROT_READ<span style="color:#f92672">|</span>PROT_WRITE, MAP_SHARED<span style="color:#f92672">|</span>MAP_ANONYMOUS, <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>);
+  
+  <span style="color:#66d9ef">if</span> (addr <span style="color:#f92672">==</span> MAP_FAILED) {
+    perror(<span style="color:#e6db74">&#34;init allocator&#34;</span>);
+    <span style="color:#66d9ef">return</span> false;
+  }
+
+  allocator<span style="color:#f92672">-&gt;</span>top_addr <span style="color:#f92672">=</span> addr;
+  allocator<span style="color:#f92672">-&gt;</span>bottom_addr <span style="color:#f92672">=</span> allocator<span style="color:#f92672">-&gt;</span>top_addr <span style="color:#f92672">+</span> allocator<span style="color:#f92672">-&gt;</span>length;
+  
+  <span style="color:#66d9ef">return</span> true;
+}
+</code></pre></div><h4 id="allocate-method">allocate method</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">allocate</span>(<span style="color:#66d9ef">struct</span> stackAllocator <span style="color:#f92672">*</span>allocator, size_t n)
+{
+  pthread_mutex_lock(<span style="color:#f92672">&amp;</span>allocator<span style="color:#f92672">-&gt;</span>mu);
+  <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>temp <span style="color:#f92672">=</span> allocator<span style="color:#f92672">-&gt;</span>top_addr;
+  
+  <span style="color:#66d9ef">if</span> (temp <span style="color:#f92672">+</span> n <span style="color:#f92672">&gt;=</span> allocator<span style="color:#f92672">-&gt;</span>bottom_addr) {
+    DEBUG(<span style="color:#e6db74">&#34;No more space for allocation&#34;</span>);
+    temp <span style="color:#f92672">=</span> NULL;
+    <span style="color:#66d9ef">goto</span> unlock;
+  }
+  allocator<span style="color:#f92672">-&gt;</span>top_addr <span style="color:#f92672">+=</span> n;
+
+  size_t size <span style="color:#f92672">=</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">struct</span> allocate_state);
+  allocator<span style="color:#f92672">-&gt;</span>bottom_addr <span style="color:#f92672">-=</span> size;
+
+  <span style="color:#66d9ef">struct</span> allocate_state<span style="color:#f92672">*</span> state <span style="color:#f92672">=</span> (<span style="color:#66d9ef">struct</span> allocate_state <span style="color:#f92672">*</span>) allocator<span style="color:#f92672">-&gt;</span>bottom_addr;
+  state<span style="color:#f92672">-&gt;</span>next <span style="color:#f92672">=</span> NULL;
+  state<span style="color:#f92672">-&gt;</span>addr <span style="color:#f92672">=</span> temp;
+  state<span style="color:#f92672">-&gt;</span>n <span style="color:#f92672">=</span> n;
+
+  <span style="color:#66d9ef">if</span> (allocator<span style="color:#f92672">-&gt;</span>head <span style="color:#f92672">==</span> NULL)
+  {
+    allocator<span style="color:#f92672">-&gt;</span>head <span style="color:#f92672">=</span> state;
+  }
+  <span style="color:#66d9ef">else</span> {
+    state<span style="color:#f92672">-&gt;</span>next <span style="color:#f92672">=</span> allocator<span style="color:#f92672">-&gt;</span>head;
+    allocator<span style="color:#f92672">-&gt;</span>head <span style="color:#f92672">=</span> state;
+  }
+
+unlock:
+  pthread_mutex_unlock(<span style="color:#f92672">&amp;</span>allocator<span style="color:#f92672">-&gt;</span>mu);
+
+  <span style="color:#66d9ef">return</span> temp;
+}
+</code></pre></div><h4 id="deallocate-method">deallocate method</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">deallocate</span>(<span style="color:#66d9ef">struct</span> stackAllocator <span style="color:#f92672">*</span>allocator, <span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>addr)
+{
+  <span style="color:#66d9ef">bool</span> result <span style="color:#f92672">=</span> false;
+  pthread_mutex_lock(<span style="color:#f92672">&amp;</span>allocator<span style="color:#f92672">-&gt;</span>mu);
+
+  <span style="color:#66d9ef">if</span> (allocator<span style="color:#f92672">-&gt;</span>head <span style="color:#f92672">==</span> NULL) {
+    DEBUG(<span style="color:#e6db74">&#34;allocate state is null&#34;</span>);
+    <span style="color:#66d9ef">goto</span> unlock;
+  }
+  <span style="color:#66d9ef">if</span> (allocator<span style="color:#f92672">-&gt;</span>head<span style="color:#f92672">-&gt;</span>addr <span style="color:#f92672">!=</span> addr) {
+    DEBUG(<span style="color:#e6db74">&#34;addrsss mismatched: target %p state %p&#34;</span>, addr, allocator<span style="color:#f92672">-&gt;</span>head<span style="color:#f92672">-&gt;</span>addr);
+    <span style="color:#66d9ef">goto</span> unlock;
+  }
+
+  allocator<span style="color:#f92672">-&gt;</span>top_addr <span style="color:#f92672">-=</span> allocator<span style="color:#f92672">-&gt;</span>head<span style="color:#f92672">-&gt;</span>n;
+  size_t size <span style="color:#f92672">=</span> <span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">struct</span> allocate_state);
+  allocator<span style="color:#f92672">-&gt;</span>bottom_addr <span style="color:#f92672">+=</span> size;
+  
+  allocator<span style="color:#f92672">-&gt;</span>head <span style="color:#f92672">=</span> allocator<span style="color:#f92672">-&gt;</span>head<span style="color:#f92672">-&gt;</span>next;
+  result <span style="color:#f92672">=</span> true;
+
+unlock:
+  pthread_mutex_unlock(<span style="color:#f92672">&amp;</span>allocator<span style="color:#f92672">-&gt;</span>mu);
+
+  <span style="color:#66d9ef">return</span> result;
+}
+</code></pre></div><h2 id="references">References</h2>
+<ol>
+<li><a href="https://techtalk.intersec.com/2014/09/memory-part-6-optimizing-the-fifo-and-stack-allocators">Memory – Part 6: Optimizing the FIFO and Stack allocators</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Memory_management">Memory management</a></li>
+<li>Game Engine Architecture</li>
+<li><a href="https://www.youtube.com/watch?v=LIb3L4vKZ7U">std::allocator is to allocation what std::vector is to vexation</a></li>
+<li><a href="https://techtalk.intersec.com/2013/10/memory-part-4-intersecs-custom-allocators">Memory – Part 4: Intersec’s custom allocators</a></li>
+</ol>
+
+    </div>
+    <div class="article-footer">
+<blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    <li class="post-copyright-link hidden-xs">
+      <strong>Permalink: </strong>
+      <a href="https://yushuanhsieh.github.io/post/2019-09-24-stack-memory-allocator/" title="Implement Memory Allocator" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2019-09-24-stack-memory-allocator/</a>
+    </li>
+  </ul>
+</blockquote>
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="https://yushuanhsieh.github.io/author.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">Cherie Hsieh</span><small class="ml-1x">Software Engineer</small></a></h3>
+        <div>Gopher</div>
+      </div>
+    </figure>
+  </div>
+</div>
+    </div>
+  </article>
+
+</div><nav class="bar bar-footer clearfix" data-stick-bottom>
+    <div class="bar-inner">
+        <ul class="pager pull-left">
+            <li class="prev">
+                <a href="https://yushuanhsieh.github.io/post/2019-09-07-201908-study/" title="2019/08月份自我學習回顧"><i
+                        class="icon icon-angle-left"
+                        aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
+            </li>
+            <li class="next">
+                <a href="https://yushuanhsieh.github.io/post/2019-10-05-study/"
+                    title="2019/09 月份自我學習回顧"><span>Newer&nbsp;&nbsp;</span><i
+                        class="icon icon-angle-right" aria-hidden="true"></i></a>
+            </li>
+            
+        </ul>
+        <div class="bar-right">
+        </div>
+    </div>
+</nav>
+
+</main><footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+  <div class="copyright">
+    &copy;2017  -
+    2020
+    <div class="publishby">
+        Theme by <a href="https://github.com/xiaoheiAh" target="_blank"> xiaoheiAh </a>base on<a href="https://github.com/xiaoheiAh/hugo-theme-pure" target="_blank"> pure</a>.
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+<script>
+    window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/javascript.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/c.min.js" defer></script><script>
+    hljs.configure({
+        tabReplace: '    ', 
+        classPrefix: ''     
+        
+    })
+    hljs.initHighlightingOnLoad();
+</script>
+<script src="https://yushuanhsieh.github.io/js/application.min.bdeb64b910570b6c41badc6a05b7afb0c8ad9efd8525de3c7257d59e786326a3.js"></script>
+<script src="https://yushuanhsieh.github.io/js/plugin.min.51ff8c7317566f82259170fa36e09c4493adc9b9378b427a01ad3f017ebac7dd.js"></script>
+
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            ROOT_URL: 'https:\/\/yushuanhsieh.github.io',
+            CONTENT_URL: 'https:\/\/yushuanhsieh.github.io\/searchindex.json ',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script type="text/javascript" src="https://yushuanhsieh.github.io/js/insight.min.a343cd9a5a7698336b28ef3a7c16a3a1b1d2d5fb17dc8ed04022bbe08cc5459073a15bdafa3a8a58cdd56080784bdd69fa70b1ae8597565c799c57ed00f0e120.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+<script>
+    tocbot.init({
+        
+        tocSelector: '.js-toc',
+        
+        contentSelector: '.js-toc-content',
+        
+        headingSelector: 'h1, h2, h3',
+        
+        hasInnerContainers: true,
+    });
+</script>
+
+
+  </body>
+</html>

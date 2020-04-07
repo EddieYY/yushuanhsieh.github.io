@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        11月份自我學習回顧 - Cherie&#39;s Tech Blog
+      </title>
+    <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  
+  <meta name="theme-color" content="#000000" />
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <meta name="description" content="前言 這個月學習內容主要集中在 Embedded System 和 Network，說來慚愧，雖然大學有修網際網路，但是過了這麼久，很多知識都還給老師了。因為目前在網通廠工作，常常會接觸到 Application Layer Protocol 和使用 UNIX Socket，所以趁這機會再一次把網路課程複習一下，混搭上個月沒有學完的 Embedded System。" />
+  <meta name="generator" content="Hugo 0.67.0 with theme pure" />
+  <title>11月份自我學習回顧 - Cherie&#39;s Tech Blog</title>
+  
+  
+  <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
+  
+    
+    <link rel="stylesheet" href="https://yushuanhsieh.github.io/scss/cherie.min.25e69b63f709fdfaf070b38e72e556d2a25931840ee2fcdc62b4aa0b9803e9ba.css" async>
+  
+  <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
+  <meta property="og:title" content="11月份自我學習回顧" />
+<meta property="og:description" content="前言 這個月學習內容主要集中在 Embedded System 和 Network，說來慚愧，雖然大學有修網際網路，但是過了這麼久，很多知識都還給老師了。因為目前在網通廠工作，常常會接觸到 Application Layer Protocol 和使用 UNIX Socket，所以趁這機會再一次把網路課程複習一下，混搭上個月沒有學完的 Embedded System。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2018-12-01-11-study/" />
+<meta property="article:published_time" content="2018-12-01T08:00:00+08:00" />
+<meta property="article:modified_time" content="2018-12-01T08:00:00+08:00" />
+<meta itemprop="name" content="11月份自我學習回顧">
+<meta itemprop="description" content="前言 這個月學習內容主要集中在 Embedded System 和 Network，說來慚愧，雖然大學有修網際網路，但是過了這麼久，很多知識都還給老師了。因為目前在網通廠工作，常常會接觸到 Application Layer Protocol 和使用 UNIX Socket，所以趁這機會再一次把網路課程複習一下，混搭上個月沒有學完的 Embedded System。">
+<meta itemprop="datePublished" content="2018-12-01T08:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2018-12-01T08:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="294">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="11月份自我學習回顧"/>
+<meta name="twitter:description" content="前言 這個月學習內容主要集中在 Embedded System 和 Network，說來慚愧，雖然大學有修網際網路，但是過了這麼久，很多知識都還給老師了。因為目前在網通廠工作，常常會接觸到 Application Layer Protocol 和使用 UNIX Socket，所以趁這機會再一次把網路課程複習一下，混搭上個月沒有學完的 Embedded System。"/>
+
+  <!--[if lte IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+    <![endif]-->
+
+  <!--[if lt IE 9]>
+      <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+  </head>
+
+  
+  
+
+  <body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage"><header class="header" itemscope itemtype="http://schema.org/WPHeader">
+    <div class="slimContent">
+      <div class="navbar-header">
+        <div class="profile-block text-center">
+          <a id="avatar" href="" target="_blank">
+            <img class="img-circle img-rotate" src="https://yushuanhsieh.github.io/author.jpg" width="200" height="200">
+          </a>
+          <h2 id="name" class="hidden-xs hidden-sm">Cherie Hsieh</h2>
+          <h3 id="title" class="hidden-xs hidden-sm hidden-md">Software Engineer</h3>
+          <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>Taiwan</small>
+        </div><div class="search" id="search-form-wrap">
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i
+                        class="icon icon-search"></i></button>
+            </span>
+        </div>
+        <div class="ins-search">
+            <div class="ins-search-mask"></div>
+            <div class="ins-search-container">
+                <div class="ins-input-wrapper">
+                    <input type="text" class="ins-search-input" placeholder="Type something..."
+                        x-webkit-speech />
+                    <button type="button" class="close ins-close ins-selectable" data-dismiss="modal"
+                        aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="ins-section-wrapper">
+                    <div class="ins-section-container"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+        <ul class="nav navbar-nav main-nav">
+            <li class="menu-item menu-item-home">
+                <a href="/">
+                  <span class="menu-title">Home</span>
+                </a>
+            </li>
+            <li class="menu-item menu-item-categories">
+                <a href="/categories/">
+                  <span class="menu-title">Categories</span>
+                </a>
+            </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+<aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title"> Categories</h3>
+    <div class="widget-body">
+        <ul class="category-list">
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/c/" class="category-list-link">c</a><span class="category-list-count">3</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">5</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/other/" class="category-list-link">other</a><span class="category-list-count">7</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/study/" class="category-list-link">study</a><span class="category-list-count">9</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/web/" class="category-list-link">web</a><span class="category-list-count">28</span></li>
+        </ul>
+    </div>
+</div>
+      
+<div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+        <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-03-31-march/" class="title">[Life] 三月起，在竹北定區生活</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-03-31 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-03-31</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-02-24-february/" class="title">[Life] 2月雜談</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-02-24 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-02-24</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-21-golang-router/" class="title">Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-21 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-21</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-19-memory-allocator-implicit-free-list/" class="title">Implement Memory Allocator - Implicit Free List</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-19 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-19</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2019-12-30-2019-review/" class="title">2019 年度回顧</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2019-12-30 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-12-30</time>
+                    </p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+  </div>
+</aside>
+
+    
+    
+<main class="main" role="main"><div class="content">
+  <article id="single-" class="article article-type-single" itemscope
+    itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      <h1 itemprop="name">
+  <a
+    class="article-title"
+    href="/post/2018-12-01-11-study/"
+    >
+    
+      
+        <span class="title-cat">Study</span>
+      
+    11月份自我學習回顧</a>
+</h1>
+
+      <div class="article-meta">
+        
+<span class="article-date">
+  <i class="icon icon-calendar-check"></i>&nbsp;
+<a href="https://yushuanhsieh.github.io/post/2018-12-01-11-study/" class="article-date">
+  <time datetime="2018-12-01 08:00:00 &#43;0800 CST" itemprop="datePublished">2018-12-01</time>
+</a>
+</span>
+<span class="article-category">
+  <i class="icon icon-folder"></i>
+  
+    <a class="article-category-link" href="/categories/study/"> Study </a>
+  
+</span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2018-12-01-11-study/#comments"
+            class="article-comment-link">Comments</a></span>
+      </div>
+    </div>
+    <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
+      <h2 id="前言">前言</h2>
+<p>這個月學習內容主要集中在 <code>Embedded System</code> 和 <code>Network</code>，說來慚愧，雖然大學有修網際網路，但是過了這麼久，很多知識都還給老師了。因為目前在網通廠工作，常常會接觸到 Application Layer Protocol 和使用 UNIX Socket，所以趁這機會再一次把網路課程複習一下，混搭上個月沒有學完的 <code>Embedded System</code>。</p>
+<p>遂一算也快要年底了，這個月發生一些事情，這些過程警示自己的能力還要繼續加強，不能因為在工作上已經逐漸上手了，而導致學習速度慢了下來。現在學習上，新事物和基礎理論強化各佔半，希望能在吸收新知識同時，也能把過去學習到但是遺忘掉的理論補起來，讓自己在使用這些新技術也能充分了解其背後含義。</p>
+<h2 id="學習回顧">學習回顧</h2>
+<p><code>Embedded System</code></p>
+<ul>
+<li>Build a linux kernel 和 simple linux service
+這個月在 Embedded System 進展到 build linux kernel， linux 版本上選擇了 <code>Alpine v3.8</code>，size 極小和重視 security 的 linux system。規劃在熟悉了 alpine 整體架構後。會細看它如何去修改這些 kernel 去實現安全化的機制。Service 部分，目前是採用 Alpine 打包成 package 的方式，然後將 package 一起 build 到 kernel 中。不過這些內容比較偏實作面，理論基礎上對於 kernel space 和 user space 的細節和運用場景還需要再加強。</li>
+</ul>
+<p><code>Network</code></p>
+<ul>
+<li>Network 課程內容是聽清大開放課程 <code>計算機網路概論</code>。覺得每位教授的上課方式不同，這位教授講解的蠻清楚，把網路上會遇到的問題點和解決方式都有說明。這個月集中在上 <code>Transport Layer</code>，印象比較深的像是 <code>TCP congestion control 和 flow control implemenation</code>，這些細節實作對我來說是比較陌生的。</li>
+</ul>
+<h2 id="學習日誌">學習日誌</h2>
+<p>因為趕工作進度或是身體不適所以提早睡的關係，11月總共有 6 天沒有念到書。</p>
+<ul>
+<li>11/30: 聚餐。</li>
+<li>11/29: Handshaking, network congestion control.</li>
+<li>11/28: TCP sender and receiver state management.</li>
+<li>11/27: build and install alpine linux in 樹莓派. TCP: estimate time and Dev Time</li>
+<li>11/26: TCP: byte stream, segment format, sequence number, special bits.</li>
+<li>11/25: Transport layer: reliable data transport</li>
+<li>11/24: Network overview (connection-riented, connectionless), TDM, FDM</li>
+<li>11/23: RabbitMQ, AMQP protocol and compare the RabbitMQ with mosqitto</li>
+<li>11/22: Process control block</li>
+<li>11/21: Deadlock</li>
+<li>11/20: The difference of Linux user space and kernel space. mapping device driver</li>
+<li>11/19: AWS VPC configuration, Software interrupt. (trap system call)</li>
+<li>11/18: 身體不適。</li>
+<li>11/17: ARM architecture</li>
+<li>11/16: BSP thumb instruction (code density)</li>
+<li>11/15: a node-RED post</li>
+<li>11/14: Node-RED issues</li>
+<li>11/13: 身體不適。</li>
+<li>11/12: Node-red cross-compile problem and system call</li>
+<li>11/11: Network basic concept (MTU 1500 bytes), TCP/IP layers. Docker network bridge</li>
+<li>11/10: OS: deadlock - cycle resource request, resource allocate graph, how to prevent deadlock and how to avoid deadlock</li>
+<li>11/09: 趕工作進度。</li>
+<li>11/08: Codility practice and SSL</li>
+<li>11/07: Codility array / demo test. Leetcode prime number,</li>
+<li>11/06: The process of general bootloader and trigger OS (bootloader -&gt; copy OS and root files to RAM run OS)</li>
+<li>11/05: The bootloader of Linux Pi (bootcode -&gt; loader.bin(RAM))</li>
+<li>11/04: 趕工作進度。</li>
+<li>11/03: Intro of Embedded System. cross-compiler (Review)</li>
+<li>11/02: The procedure of config USART Rx, Tx. ADC and DAC</li>
+<li>11/01: 趕工作進度。</li>
+</ul>
+
+    </div>
+    <div class="article-footer">
+<blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    <li class="post-copyright-link hidden-xs">
+      <strong>Permalink: </strong>
+      <a href="https://yushuanhsieh.github.io/post/2018-12-01-11-study/" title="11月份自我學習回顧" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2018-12-01-11-study/</a>
+    </li>
+  </ul>
+</blockquote>
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="https://yushuanhsieh.github.io/author.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">Cherie Hsieh</span><small class="ml-1x">Software Engineer</small></a></h3>
+        <div>Gopher</div>
+      </div>
+    </figure>
+  </div>
+</div>
+    </div>
+  </article>
+
+</div><nav class="bar bar-footer clearfix" data-stick-bottom>
+    <div class="bar-inner">
+        <ul class="pager pull-left">
+            <li class="prev">
+                <a href="https://yushuanhsieh.github.io/post/2018-11-15-node-red/" title="Node-Red - Node 坑坑紀錄"><i
+                        class="icon icon-angle-left"
+                        aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
+            </li>
+            <li class="next">
+                <a href="https://yushuanhsieh.github.io/post/2019-01-01-12-study/"
+                    title="2018/12月份自我學習回顧"><span>Newer&nbsp;&nbsp;</span><i
+                        class="icon icon-angle-right" aria-hidden="true"></i></a>
+            </li>
+            
+        </ul>
+        <div class="bar-right">
+        </div>
+    </div>
+</nav>
+
+</main><footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+  <div class="copyright">
+    &copy;2017  -
+    2020
+    <div class="publishby">
+        Theme by <a href="https://github.com/xiaoheiAh" target="_blank"> xiaoheiAh </a>base on<a href="https://github.com/xiaoheiAh/hugo-theme-pure" target="_blank"> pure</a>.
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+<script>
+    window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/javascript.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/c.min.js" defer></script><script>
+    hljs.configure({
+        tabReplace: '    ', 
+        classPrefix: ''     
+        
+    })
+    hljs.initHighlightingOnLoad();
+</script>
+<script src="https://yushuanhsieh.github.io/js/application.min.bdeb64b910570b6c41badc6a05b7afb0c8ad9efd8525de3c7257d59e786326a3.js"></script>
+<script src="https://yushuanhsieh.github.io/js/plugin.min.51ff8c7317566f82259170fa36e09c4493adc9b9378b427a01ad3f017ebac7dd.js"></script>
+
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            ROOT_URL: 'https:\/\/yushuanhsieh.github.io',
+            CONTENT_URL: 'https:\/\/yushuanhsieh.github.io\/searchindex.json ',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script type="text/javascript" src="https://yushuanhsieh.github.io/js/insight.min.a343cd9a5a7698336b28ef3a7c16a3a1b1d2d5fb17dc8ed04022bbe08cc5459073a15bdafa3a8a58cdd56080784bdd69fa70b1ae8597565c799c57ed00f0e120.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+<script>
+    tocbot.init({
+        
+        tocSelector: '.js-toc',
+        
+        contentSelector: '.js-toc-content',
+        
+        headingSelector: 'h1, h2, h3',
+        
+        hasInnerContainers: true,
+    });
+</script>
+
+
+  </body>
+</html>

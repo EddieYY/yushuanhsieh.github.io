@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較 - Cherie&#39;s Tech Blog
+      </title>
+    <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  
+  <meta name="theme-color" content="#000000" />
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <meta name="description" content="前言 之前做 API server，制定 route path 時有遇到一些問題，於是就順手看了幾個 HTTP router / web framework 的 router 部分實作方式，並且記錄下來，提供給大家做個參考。" />
+  <meta name="generator" content="Hugo 0.67.0 with theme pure" />
+  <title>Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較 - Cherie&#39;s Tech Blog</title>
+  
+  
+  <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
+  
+    
+    <link rel="stylesheet" href="https://yushuanhsieh.github.io/scss/cherie.min.25e69b63f709fdfaf070b38e72e556d2a25931840ee2fcdc62b4aa0b9803e9ba.css" async>
+  
+  <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
+  <meta property="og:title" content="Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較" />
+<meta property="og:description" content="前言 之前做 API server，制定 route path 時有遇到一些問題，於是就順手看了幾個 HTTP router / web framework 的 router 部分實作方式，並且記錄下來，提供給大家做個參考。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2020-01-21-golang-router/" />
+<meta property="article:published_time" content="2020-01-21T08:00:00+08:00" />
+<meta property="article:modified_time" content="2020-01-21T08:00:00+08:00" />
+<meta itemprop="name" content="Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較">
+<meta itemprop="description" content="前言 之前做 API server，制定 route path 時有遇到一些問題，於是就順手看了幾個 HTTP router / web framework 的 router 部分實作方式，並且記錄下來，提供給大家做個參考。">
+<meta itemprop="datePublished" content="2020-01-21T08:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-01-21T08:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="1139">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較"/>
+<meta name="twitter:description" content="前言 之前做 API server，制定 route path 時有遇到一些問題，於是就順手看了幾個 HTTP router / web framework 的 router 部分實作方式，並且記錄下來，提供給大家做個參考。"/>
+
+  <!--[if lte IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+    <![endif]-->
+
+  <!--[if lt IE 9]>
+      <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+  </head>
+
+  
+  
+
+  <body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage"><header class="header" itemscope itemtype="http://schema.org/WPHeader">
+    <div class="slimContent">
+      <div class="navbar-header">
+        <div class="profile-block text-center">
+          <a id="avatar" href="" target="_blank">
+            <img class="img-circle img-rotate" src="https://yushuanhsieh.github.io/author.jpg" width="200" height="200">
+          </a>
+          <h2 id="name" class="hidden-xs hidden-sm">Cherie Hsieh</h2>
+          <h3 id="title" class="hidden-xs hidden-sm hidden-md">Software Engineer</h3>
+          <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>Taiwan</small>
+        </div><div class="search" id="search-form-wrap">
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i
+                        class="icon icon-search"></i></button>
+            </span>
+        </div>
+        <div class="ins-search">
+            <div class="ins-search-mask"></div>
+            <div class="ins-search-container">
+                <div class="ins-input-wrapper">
+                    <input type="text" class="ins-search-input" placeholder="Type something..."
+                        x-webkit-speech />
+                    <button type="button" class="close ins-close ins-selectable" data-dismiss="modal"
+                        aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="ins-section-wrapper">
+                    <div class="ins-section-container"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+        <ul class="nav navbar-nav main-nav">
+            <li class="menu-item menu-item-home">
+                <a href="/">
+                  <span class="menu-title">Home</span>
+                </a>
+            </li>
+            <li class="menu-item menu-item-categories">
+                <a href="/categories/">
+                  <span class="menu-title">Categories</span>
+                </a>
+            </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+<aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title"> Categories</h3>
+    <div class="widget-body">
+        <ul class="category-list">
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/c/" class="category-list-link">c</a><span class="category-list-count">3</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">5</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/other/" class="category-list-link">other</a><span class="category-list-count">7</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/study/" class="category-list-link">study</a><span class="category-list-count">9</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/web/" class="category-list-link">web</a><span class="category-list-count">28</span></li>
+        </ul>
+    </div>
+</div>
+      
+<div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+        <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-03-31-march/" class="title">[Life] 三月起，在竹北定區生活</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-03-31 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-03-31</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-02-24-february/" class="title">[Life] 2月雜談</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-02-24 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-02-24</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-21-golang-router/" class="title">Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-21 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-21</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-19-memory-allocator-implicit-free-list/" class="title">Implement Memory Allocator - Implicit Free List</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-19 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-19</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2019-12-30-2019-review/" class="title">2019 年度回顧</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2019-12-30 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-12-30</time>
+                    </p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+  </div>
+</aside>
+
+    
+    
+<main class="main" role="main"><div class="content">
+  <article id="single-" class="article article-type-single" itemscope
+    itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      <h1 itemprop="name">
+  <a
+    class="article-title"
+    href="/post/2020-01-21-golang-router/"
+    >
+    
+      
+        
+          <span class="title-cat">Go</span>
+        
+      
+    Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較</a>
+</h1>
+
+      <div class="article-meta">
+        
+<span class="article-date">
+  <i class="icon icon-calendar-check"></i>&nbsp;
+<a href="https://yushuanhsieh.github.io/post/2020-01-21-golang-router/" class="article-date">
+  <time datetime="2020-01-21 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-21</time>
+</a>
+</span>
+<span class="article-category">
+  <i class="icon icon-folder"></i>
+  
+    <a class="article-category-link" href="/categories/go/"> Go </a>
+</span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2020-01-21-golang-router/#comments"
+            class="article-comment-link">Comments</a></span>
+      </div>
+    </div>
+    <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
+      <h2 id="前言">前言</h2>
+<p>之前做 API server，制定 route path 時有遇到一些問題，於是就順手看了幾個 HTTP router / web framework 的 router 部分實作方式，並且記錄下來，提供給大家做個參考。</p>
+<h2 id="問題">問題</h2>
+<p>需要加入</p>
+<ol>
+<li>/stations/instances</li>
+<li>/stations/{id}</li>
+</ol>
+<p>這兩個 path 對應到不同的 handlers。</p>
+<h2 id="chi">Chi</h2>
+<p>package <code>github.com/go-chi/chi</code></p>
+<p>知名 HTTP router library <code>chi</code>，其輕量、快速、handler 使用原生 <code>net/http</code> struct，都是不錯的優勢。和多數主流的 HTTP router 相似，chi 的 router 是採用 <a href="https://en.wikipedia.org/wiki/Radix_tree">radix tree</a> 結構，比較特別的是 chi 將 node type 分成四種：</p>
+<ol>
+<li>ntStatic (<code>/home</code>)</li>
+<li>ntRegexp (<code>/{id:[0-9]+}</code>)</li>
+<li>ntParam (<code>/{user}</code>)</li>
+<li>ntCatchAll (<code>/api/v1/</code>)</li>
+</ol>
+<p>與其他 router 相較起來，多了 <code>Regexp</code> 這個 type，而在插入新的 node 時候，會根據 type 來將 node 插入到適當的位置。</p>
+<p>假設我們要插入兩個 path：</p>
+<ol>
+<li><code>/stations/instances</code></li>
+<li><code>/stations/{id}</code></li>
+</ol>
+<p>其樹狀圖如下：</p>
+<p>![study]({{ site.url }}/assets/images/router-chi.png)</p>
+<p>為什麼要將 nodes 分類插入呢？因為就 path match 的嚴謹程度而言是 Static &gt; Regexp &gt; Param &gt; CatchAll，因此如果先分類好， router 在進行尋找的時候，就會先從 Static 分類 (index = 0) 開始找起，以符合使用者預期的行為。</p>
+<p>不過這樣做也會有個小問題，就是沒有用到的 bucket 會空著。(因為 node children 是 <strong>array</strong> 型態呈現)</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">node</span> <span style="color:#66d9ef">struct</span> {
+<span style="color:#75715e">// node type: static, regexp, param, catchAll
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">typ</span> <span style="color:#a6e22e">nodeTyp</span>
+
+<span style="color:#75715e">// more members
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">// child nodes should be stored in-order for iteration,
+</span><span style="color:#75715e">// in groups of the node type.
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">children</span> [<span style="color:#a6e22e">ntCatchAll</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>]<span style="color:#a6e22e">nodes</span>
+}
+</code></pre></div><p>另外一個問題是， Chi 在 search 的時候是使用 recursion 方式，這點對於效率與記憶體使用上都會有所影響。其他多數的 router 在 search tree 的時候是使用 iteration，只有在一些必要的部分才使用 recursion。</p>
+<h2 id="echo">Echo</h2>
+<p>package <code>github.com/labstack/echo/v4</code></p>
+<p>echo 是蠻老牌的 web framework，在 2015 年第一次釋出正式版本，目前已來到 V4 版本。同樣地，echo 的 router 結構也是採用 radix tree ，不過在表現上和 chi 略有些差異。</p>
+<p>echo 的 node type 只有三種：</p>
+<ol>
+<li>skind (static)</li>
+<li>pkind (params)</li>
+<li>akind (any)</li>
+</ol>
+<p>缺少 Regexp type，因此 chi 相對來說，在 route path 設定上更豐富一些 。再來看一下插入 path 時的樹狀圖：</p>
+<ol>
+<li><code>/stations/instances</code></li>
+<li><code>/stations/{id}</code></li>
+</ol>
+<p>![study]({{ site.url }}/assets/images/router-echo.png)</p>
+<p>echo 的 node children 是 <strong>slice</strong> 型態，而 slice 內的 node 順序是根據插入先後來決定的，當要尋找 node 的時候，echo 也是會按照 skind &gt; pkind &gt; akind 的順序去找，不過由於 children 插入時並沒有預先分類，因此必須要 loop children 篩選出 type priority 高的 node，這裡是與 chi 明顯的差異處。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// from echo/router.go
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> (
+    <span style="color:#a6e22e">node</span> <span style="color:#66d9ef">struct</span> {
+		<span style="color:#a6e22e">kind</span>          <span style="color:#a6e22e">kind</span>
+		<span style="color:#a6e22e">label</span>         <span style="color:#66d9ef">byte</span>
+		<span style="color:#a6e22e">prefix</span>        <span style="color:#66d9ef">string</span>
+		<span style="color:#a6e22e">parent</span>        <span style="color:#f92672">*</span><span style="color:#a6e22e">node</span>
+		<span style="color:#a6e22e">children</span>      <span style="color:#a6e22e">children</span>
+		<span style="color:#a6e22e">ppath</span>         <span style="color:#66d9ef">string</span>
+		<span style="color:#a6e22e">pnames</span>        []<span style="color:#66d9ef">string</span>
+		<span style="color:#a6e22e">methodHandler</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">methodHandler</span>
+	}
+	<span style="color:#a6e22e">kind</span>          <span style="color:#66d9ef">uint8</span>
+	<span style="color:#a6e22e">children</span>      []<span style="color:#f92672">*</span><span style="color:#a6e22e">node</span>
+)
+</code></pre></div><p>但即使如此，整體上 echo 的 search algorithm 還是寫的很不錯，在 Benchmark 上有優異的表現。</p>
+<h2 id="gin">gin</h2>
+<p>package <code>github.com/gin-gonic/gin</code></p>
+<p>同樣為老牌 web framework，gin 最為人所知的就是 router 的速度快，當然要快的話肯定也是基於 radix tree 所組成。</p>
+<p>gin 的 node type 大同小異也是三種：</p>
+<ol>
+<li>static</li>
+<li>params</li>
+<li>catchAll</li>
+</ol>
+<p>但與上面兩個 router 設計不同的是，gin 在插入 node 會有一些限制，例如上面的例子：</p>
+<ol>
+<li><code>/stations/instances</code></li>
+<li><code>/stations/:id</code></li>
+</ol>
+<p>![study]({{ site.url }}/assets/images/router-gin.png)</p>
+<p>gin 不允許這樣的 path 設計，其原因 node 中有一個 <code>wildChild</code> member 是用來進行搜尋判斷，而當插入含有 params path 時，這個 wildChild 會被設定成 true，進而導致同一層的 static path child 會變成 unreachable 狀態。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">node</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">path</span>      <span style="color:#66d9ef">string</span>
+	<span style="color:#a6e22e">indices</span>   <span style="color:#66d9ef">string</span>
+	<span style="color:#a6e22e">children</span>  []<span style="color:#f92672">*</span><span style="color:#a6e22e">node</span>
+	<span style="color:#a6e22e">handlers</span>  <span style="color:#a6e22e">HandlersChain</span>
+	<span style="color:#a6e22e">priority</span>  <span style="color:#66d9ef">uint32</span>
+	<span style="color:#a6e22e">nType</span>     <span style="color:#a6e22e">nodeType</span>
+	<span style="color:#a6e22e">maxParams</span> <span style="color:#66d9ef">uint8</span>
+	<span style="color:#a6e22e">wildChild</span> <span style="color:#66d9ef">bool</span> <span style="color:#75715e">// wildcard path
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">fullPath</span>  <span style="color:#66d9ef">string</span>
+}
+</code></pre></div><p>此外，今天假設我們有些 path 需求，例如：</p>
+<ol>
+<li><code>student/:id</code></li>
+<li><code>student/others/:id</code></li>
+</ol>
+<p>如果要兼容 gin 本身的限制，就要將 path 設定成：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">router</span>.<span style="color:#a6e22e">GET</span>(<span style="color:#e6db74">&#34;/student/:id&#34;</span>, <span style="color:#a6e22e">StudentHandler</span>)
+<span style="color:#a6e22e">router</span>.<span style="color:#a6e22e">GET</span>(<span style="color:#e6db74">&#34;/student/:id/:others&#34;</span>, <span style="color:#a6e22e">OtherHandler</span>)
+</code></pre></div><p>這樣就能夠根據不同的 path 來進入到對應的 handler 了。</p>
+<h2 id="gorillamux">gorilla/mux</h2>
+<p>package <code>github.com/gorilla/mux</code></p>
+<p>以上幾個 router 都是採用 radix tree，所以最後來介紹一個很常見，但是採用單純 matcher list 設計的 <code>gorilla/mux</code>。</p>
+<p>當我們在加入新的 path 時，gorilla mux 會將其新增到 routes slice 上，順序採用加入先後排列。</p>
+<p>![study]({{ site.url }}/assets/images/router-mux.png)</p>
+<p>(Note: route 中其實有 matchers list，可以結合不同種類的 matcher，例如 headerMatcher, schemeMatcher 等)</p>
+<p>在搜尋適合的 route 時候，會從第一個開始匹配，也就是說即使我們要找的 path 是 <code>/stations/instances</code> ，但是由於第一個 route 的 matcher 已經符合，所以就不會繼續比對到下一個更精確的 route。</p>
+<p>因此也可以知道，gorilla mux 在搜尋上的速度一定是較慢，但可以搭配想要的 matcher，彈性也是蠻高的。</p>
+<h2 id="補充context-pool">補充：Context Pool</h2>
+<p>除了 path 搜尋速度之外，各大 router libraries 也會針對 context 做額外的效能提升。最明顯的就是使用 <code>sync.Pool</code> 來避免當每個 request 進來的時候，需要新建立一個 context 給 handler 使用。當短時間有大量 request 進出時，如果動態分配太多 context，會造成 Garbage Collection 的壓力，進而觸發清理而影響效能。使用 <code>sync.Pool</code> 的好處是可以重複使用閒置的 context，以減少此類問題發生。</p>
+<p>以 Echo source code 為例，可以看到 context 從 pool 中取出和放回。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">e</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Echo</span>) <span style="color:#a6e22e">ServeHTTP</span>(<span style="color:#a6e22e">w</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
+	<span style="color:#75715e">// Acquire context
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">c</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">pool</span>.<span style="color:#a6e22e">Get</span>().(<span style="color:#f92672">*</span><span style="color:#a6e22e">context</span>)
+	<span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">Reset</span>(<span style="color:#a6e22e">r</span>, <span style="color:#a6e22e">w</span>)
+
+	<span style="color:#a6e22e">h</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">NotFoundHandler</span>
+
+	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">premiddleware</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">nil</span> {
+		<span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">findRouter</span>(<span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Host</span>).<span style="color:#a6e22e">Find</span>(<span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Method</span>, <span style="color:#a6e22e">getPath</span>(<span style="color:#a6e22e">r</span>), <span style="color:#a6e22e">c</span>)
+		<span style="color:#a6e22e">h</span> = <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">Handler</span>()
+		<span style="color:#a6e22e">h</span> = <span style="color:#a6e22e">applyMiddleware</span>(<span style="color:#a6e22e">h</span>, <span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">middleware</span><span style="color:#f92672">...</span>)
+	} <span style="color:#66d9ef">else</span> {
+		<span style="color:#a6e22e">h</span> = <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">c</span> <span style="color:#a6e22e">Context</span>) <span style="color:#66d9ef">error</span> {
+			<span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">findRouter</span>(<span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Host</span>).<span style="color:#a6e22e">Find</span>(<span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Method</span>, <span style="color:#a6e22e">getPath</span>(<span style="color:#a6e22e">r</span>), <span style="color:#a6e22e">c</span>)
+			<span style="color:#a6e22e">h</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">Handler</span>()
+			<span style="color:#a6e22e">h</span> = <span style="color:#a6e22e">applyMiddleware</span>(<span style="color:#a6e22e">h</span>, <span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">middleware</span><span style="color:#f92672">...</span>)
+			<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">h</span>(<span style="color:#a6e22e">c</span>)
+		}
+		<span style="color:#a6e22e">h</span> = <span style="color:#a6e22e">applyMiddleware</span>(<span style="color:#a6e22e">h</span>, <span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">premiddleware</span><span style="color:#f92672">...</span>)
+	}
+
+	<span style="color:#75715e">// Execute chain
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">h</span>(<span style="color:#a6e22e">c</span>); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+		<span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">HTTPErrorHandler</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">c</span>)
+	}
+
+	<span style="color:#75715e">// Release context
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">pool</span>.<span style="color:#a6e22e">Put</span>(<span style="color:#a6e22e">c</span>)
+}
+</code></pre></div><p>另外， Echo 更有趣的地方是，它在新建 context 的時候，會建立一個可以容納最大 params 數的 string slice(<code>pvalues</code>)，這樣就可以將 params 值放入 context 而不觸發 slice expansion。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">e</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Echo</span>) <span style="color:#a6e22e">NewContext</span>(<span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>, <span style="color:#a6e22e">w</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>) <span style="color:#a6e22e">Context</span> {
+	<span style="color:#66d9ef">return</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">context</span>{
+		<span style="color:#a6e22e">request</span>:  <span style="color:#a6e22e">r</span>,
+		<span style="color:#a6e22e">response</span>: <span style="color:#a6e22e">NewResponse</span>(<span style="color:#a6e22e">w</span>, <span style="color:#a6e22e">e</span>),
+		<span style="color:#a6e22e">store</span>:    make(<span style="color:#a6e22e">Map</span>),
+		<span style="color:#a6e22e">echo</span>:     <span style="color:#a6e22e">e</span>,
+		<span style="color:#a6e22e">pvalues</span>:  make([]<span style="color:#66d9ef">string</span>, <span style="color:#f92672">*</span><span style="color:#a6e22e">e</span>.<span style="color:#a6e22e">maxParam</span>),
+		<span style="color:#a6e22e">handler</span>:  <span style="color:#a6e22e">NotFoundHandler</span>,
+	}
+}
+</code></pre></div><p>Chi 則是有使用 sync.Pool，不過 context 的 params 會是一個 0 size 的 string slice，而在需要放入 params 值再使用 <code>append</code> 來插入到 params slice。雖然可能會觸發 slice expansion，不過如果 params 數很少，是不太會有明顯地效能影響。</p>
+<p>有一點要特別注意的是，<code>sync.Pool</code> 不是每個場景都很適用的，例如：它會在 GC trigger 時候，把 pool 內的 object 清除，因此不適合放需要長時間保留的 object。還有就是即使使用 <code>sync.Pool</code> 也有可能降低效能，可以參考 <a href="https://medium.com/a-journey-with-go/go-understand-the-design-of-sync-pool-2dde3024e277">Go: Understand the Design of Sync.Pool</a>，文章中有例子講解和實作原理。</p>
+<h2 id="benchmark">Benchmark</h2>
+<p>最後不可免俗地跑個 Benchmark，基於 <a href="https://github.com/julienschmidt/go-http-routing-benchmark">julienschmidt/go-http-routing-benchmark</a> 所測試的結果。老實說 Chi 的表現有點出乎我意料，除了 recursion 因素之外，推測還與 context reuse 方式有關，可參考 <a href="https://github.com/go-chi/chi/blob/master/tree.go#L374">chi/tree.go</a>。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c">BenchmarkChi_Param               	 <span style="color:#ae81ff">2000000</span>	       <span style="color:#ae81ff">916</span> ns<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">432</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">3</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkEcho_Param              	<span style="color:#ae81ff">20000000</span>	        <span style="color:#ae81ff">67.1</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGin_Param               	<span style="color:#ae81ff">20000000</span>	        <span style="color:#ae81ff">73.0</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGorillaMux_Param        	  <span style="color:#ae81ff">500000</span>	      <span style="color:#ae81ff">2239</span> ns<span style="color:#f92672">/</span>op	    <span style="color:#ae81ff">1280</span> B<span style="color:#f92672">/</span>op	      <span style="color:#ae81ff">10</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkChi_Param5              	 <span style="color:#ae81ff">1000000</span>	      <span style="color:#ae81ff">1215</span> ns<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">432</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">3</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkEcho_Param5             	<span style="color:#ae81ff">10000000</span>	       <span style="color:#ae81ff">155</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGin_Param5              	<span style="color:#ae81ff">10000000</span>	       <span style="color:#ae81ff">143</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGorillaMux_Param5       	  <span style="color:#ae81ff">500000</span>	      <span style="color:#ae81ff">3130</span> ns<span style="color:#f92672">/</span>op	    <span style="color:#ae81ff">1344</span> B<span style="color:#f92672">/</span>op	      <span style="color:#ae81ff">10</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkChi_Param20             	 <span style="color:#ae81ff">1000000</span>	      <span style="color:#ae81ff">2009</span> ns<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">432</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">3</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkEcho_Param20            	 <span style="color:#ae81ff">3000000</span>	       <span style="color:#ae81ff">487</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGin_Param20             	 <span style="color:#ae81ff">5000000</span>	       <span style="color:#ae81ff">382</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGorillaMux_Param20      	  <span style="color:#ae81ff">200000</span>	      <span style="color:#ae81ff">7037</span> ns<span style="color:#f92672">/</span>op	    <span style="color:#ae81ff">3451</span> B<span style="color:#f92672">/</span>op	      <span style="color:#ae81ff">12</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkChi_ParamWrite          	 <span style="color:#ae81ff">2000000</span>	       <span style="color:#ae81ff">969</span> ns<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">432</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">3</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkEcho_ParamWrite         	<span style="color:#ae81ff">10000000</span>	       <span style="color:#ae81ff">144</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">8</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">1</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGin_ParamWrite          	<span style="color:#ae81ff">10000000</span>	       <span style="color:#ae81ff">121</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGorillaMux_ParamWrite   	 <span style="color:#ae81ff">1000000</span>	      <span style="color:#ae81ff">2269</span> ns<span style="color:#f92672">/</span>op	    <span style="color:#ae81ff">1280</span> B<span style="color:#f92672">/</span>op	      <span style="color:#ae81ff">10</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkChi_GithubStatic        	 <span style="color:#ae81ff">2000000</span>	       <span style="color:#ae81ff">848</span> ns<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">432</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">3</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkEcho_GithubStatic       	<span style="color:#ae81ff">20000000</span>	       <span style="color:#ae81ff">100</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGin_GithubStatic        	<span style="color:#ae81ff">20000000</span>	        <span style="color:#ae81ff">88.8</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGorillaMux_GithubStatic 	  <span style="color:#ae81ff">100000</span>	     <span style="color:#ae81ff">11857</span> ns<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">976</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">9</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkChi_GithubParam         	 <span style="color:#ae81ff">1000000</span>	      <span style="color:#ae81ff">1241</span> ns<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">432</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">3</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkEcho_GithubParam        	<span style="color:#ae81ff">10000000</span>	       <span style="color:#ae81ff">182</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGin_GithubParam         	<span style="color:#ae81ff">10000000</span>	       <span style="color:#ae81ff">186</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGorillaMux_GithubParam  	  <span style="color:#ae81ff">200000</span>	      <span style="color:#ae81ff">7122</span> ns<span style="color:#f92672">/</span>op	    <span style="color:#ae81ff">1296</span> B<span style="color:#f92672">/</span>op	      <span style="color:#ae81ff">10</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkChi_GithubAll           	    <span style="color:#ae81ff">5000</span>	    <span style="color:#ae81ff">260724</span> ns<span style="color:#f92672">/</span>op	   <span style="color:#ae81ff">87697</span> B<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">609</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkEcho_GithubAll          	   <span style="color:#ae81ff">50000</span>	     <span style="color:#ae81ff">36859</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGin_GithubAll           	   <span style="color:#ae81ff">50000</span>	     <span style="color:#ae81ff">39361</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGorillaMux_GithubAll    	     <span style="color:#ae81ff">300</span>	   <span style="color:#ae81ff">3869867</span> ns<span style="color:#f92672">/</span>op	  <span style="color:#ae81ff">251672</span> B<span style="color:#f92672">/</span>op	    <span style="color:#ae81ff">1994</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkChi_GPlusStatic         	 <span style="color:#ae81ff">2000000</span>	       <span style="color:#ae81ff">875</span> ns<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">432</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">3</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkEcho_GPlusStatic        	<span style="color:#ae81ff">20000000</span>	        <span style="color:#ae81ff">64.3</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGin_GPlusStatic         	<span style="color:#ae81ff">20000000</span>	        <span style="color:#ae81ff">63.2</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGorillaMux_GPlusStatic  	 <span style="color:#ae81ff">1000000</span>	      <span style="color:#ae81ff">1865</span> ns<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">976</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">9</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkChi_GPlusParam          	 <span style="color:#ae81ff">1000000</span>	      <span style="color:#ae81ff">1013</span> ns<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">432</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">3</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkEcho_GPlusParam         	<span style="color:#ae81ff">20000000</span>	        <span style="color:#ae81ff">97.1</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGin_GPlusParam          	<span style="color:#ae81ff">10000000</span>	       <span style="color:#ae81ff">125</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGorillaMux_GPlusParam   	  <span style="color:#ae81ff">500000</span>	      <span style="color:#ae81ff">2998</span> ns<span style="color:#f92672">/</span>op	    <span style="color:#ae81ff">1280</span> B<span style="color:#f92672">/</span>op	      <span style="color:#ae81ff">10</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkChi_GPlus2Params        	 <span style="color:#ae81ff">1000000</span>	      <span style="color:#ae81ff">1146</span> ns<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">432</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">3</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkEcho_GPlus2Params       	<span style="color:#ae81ff">10000000</span>	       <span style="color:#ae81ff">148</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGin_GPlus2Params        	<span style="color:#ae81ff">10000000</span>	       <span style="color:#ae81ff">177</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGorillaMux_GPlus2Params 	  <span style="color:#ae81ff">300000</span>	      <span style="color:#ae81ff">5355</span> ns<span style="color:#f92672">/</span>op	    <span style="color:#ae81ff">1296</span> B<span style="color:#f92672">/</span>op	      <span style="color:#ae81ff">10</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkChi_GPlusAll            	  <span style="color:#ae81ff">100000</span>	     <span style="color:#ae81ff">14494</span> ns<span style="color:#f92672">/</span>op	    <span style="color:#ae81ff">5616</span> B<span style="color:#f92672">/</span>op	      <span style="color:#ae81ff">39</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkEcho_GPlusAll           	 <span style="color:#ae81ff">1000000</span>	      <span style="color:#ae81ff">1602</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGin_GPlusAll            	 <span style="color:#ae81ff">1000000</span>	      <span style="color:#ae81ff">1702</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGorillaMux_GPlusAll     	   <span style="color:#ae81ff">30000</span>	     <span style="color:#ae81ff">47365</span> ns<span style="color:#f92672">/</span>op	   <span style="color:#ae81ff">16112</span> B<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">128</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkChi_ParseStatic         	 <span style="color:#ae81ff">2000000</span>	       <span style="color:#ae81ff">850</span> ns<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">432</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">3</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkEcho_ParseStatic        	<span style="color:#ae81ff">20000000</span>	        <span style="color:#ae81ff">63.3</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGin_ParseStatic         	<span style="color:#ae81ff">20000000</span>	        <span style="color:#ae81ff">66.7</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGorillaMux_ParseStatic  	  <span style="color:#ae81ff">500000</span>	      <span style="color:#ae81ff">2589</span> ns<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">976</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">9</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkChi_ParseParam          	 <span style="color:#ae81ff">2000000</span>	       <span style="color:#ae81ff">972</span> ns<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">432</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">3</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkEcho_ParseParam         	<span style="color:#ae81ff">20000000</span>	        <span style="color:#ae81ff">79.3</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGin_ParseParam          	<span style="color:#ae81ff">20000000</span>	        <span style="color:#ae81ff">81.2</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGorillaMux_ParseParam   	  <span style="color:#ae81ff">500000</span>	      <span style="color:#ae81ff">2590</span> ns<span style="color:#f92672">/</span>op	    <span style="color:#ae81ff">1280</span> B<span style="color:#f92672">/</span>op	      <span style="color:#ae81ff">10</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkChi_Parse2Params        	 <span style="color:#ae81ff">1000000</span>	      <span style="color:#ae81ff">1068</span> ns<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">432</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">3</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkEcho_Parse2Params       	<span style="color:#ae81ff">20000000</span>	       <span style="color:#ae81ff">106</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGin_Parse2Params        	<span style="color:#ae81ff">20000000</span>	       <span style="color:#ae81ff">111</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGorillaMux_Parse2Params 	  <span style="color:#ae81ff">500000</span>	      <span style="color:#ae81ff">2695</span> ns<span style="color:#f92672">/</span>op	    <span style="color:#ae81ff">1296</span> B<span style="color:#f92672">/</span>op	      <span style="color:#ae81ff">10</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkChi_ParseAll            	   <span style="color:#ae81ff">50000</span>	     <span style="color:#ae81ff">27547</span> ns<span style="color:#f92672">/</span>op	   <span style="color:#ae81ff">11232</span> B<span style="color:#f92672">/</span>op	      <span style="color:#ae81ff">78</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkEcho_ParseAll           	  <span style="color:#ae81ff">500000</span>	      <span style="color:#ae81ff">2681</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGin_ParseAll            	  <span style="color:#ae81ff">500000</span>	      <span style="color:#ae81ff">2977</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGorillaMux_ParseAll     	   <span style="color:#ae81ff">20000</span>	     <span style="color:#ae81ff">97551</span> ns<span style="color:#f92672">/</span>op	   <span style="color:#ae81ff">30289</span> B<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">250</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkChi_StaticAll           	   <span style="color:#ae81ff">10000</span>	    <span style="color:#ae81ff">158210</span> ns<span style="color:#f92672">/</span>op	   <span style="color:#ae81ff">67825</span> B<span style="color:#f92672">/</span>op	     <span style="color:#ae81ff">471</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkEcho_StaticAll          	  <span style="color:#ae81ff">100000</span>	     <span style="color:#ae81ff">23191</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGin_StaticAll           	  <span style="color:#ae81ff">100000</span>	     <span style="color:#ae81ff">22989</span> ns<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> B<span style="color:#f92672">/</span>op	       <span style="color:#ae81ff">0</span> allocs<span style="color:#f92672">/</span>op
+BenchmarkGorillaMux_StaticAll    	    <span style="color:#ae81ff">1000</span>	   <span style="color:#ae81ff">1155625</span> ns<span style="color:#f92672">/</span>op	  <span style="color:#ae81ff">153240</span> B<span style="color:#f92672">/</span>op	    <span style="color:#ae81ff">1413</span> allocs<span style="color:#f92672">/</span>op
+</code></pre></div>
+    </div>
+    <div class="article-footer">
+<blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    <li class="post-copyright-link hidden-xs">
+      <strong>Permalink: </strong>
+      <a href="https://yushuanhsieh.github.io/post/2020-01-21-golang-router/" title="Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2020-01-21-golang-router/</a>
+    </li>
+  </ul>
+</blockquote>
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="https://yushuanhsieh.github.io/author.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">Cherie Hsieh</span><small class="ml-1x">Software Engineer</small></a></h3>
+        <div>Gopher</div>
+      </div>
+    </figure>
+  </div>
+</div>
+    </div>
+  </article>
+
+</div><nav class="bar bar-footer clearfix" data-stick-bottom>
+    <div class="bar-inner">
+        <ul class="pager pull-left">
+            <li class="prev">
+                <a href="https://yushuanhsieh.github.io/post/2020-01-19-memory-allocator-implicit-free-list/" title="Implement Memory Allocator - Implicit Free List"><i
+                        class="icon icon-angle-left"
+                        aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
+            </li>
+            <li class="next">
+                <a href="https://yushuanhsieh.github.io/post/2020-02-24-february/"
+                    title="[Life] 2月雜談"><span>Newer&nbsp;&nbsp;</span><i
+                        class="icon icon-angle-right" aria-hidden="true"></i></a>
+            </li>
+            
+        </ul>
+        <div class="bar-right">
+        </div>
+    </div>
+</nav>
+
+</main><footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+  <div class="copyright">
+    &copy;2017  -
+    2020
+    <div class="publishby">
+        Theme by <a href="https://github.com/xiaoheiAh" target="_blank"> xiaoheiAh </a>base on<a href="https://github.com/xiaoheiAh/hugo-theme-pure" target="_blank"> pure</a>.
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+<script>
+    window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/javascript.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/c.min.js" defer></script><script>
+    hljs.configure({
+        tabReplace: '    ', 
+        classPrefix: ''     
+        
+    })
+    hljs.initHighlightingOnLoad();
+</script>
+<script src="https://yushuanhsieh.github.io/js/application.min.bdeb64b910570b6c41badc6a05b7afb0c8ad9efd8525de3c7257d59e786326a3.js"></script>
+<script src="https://yushuanhsieh.github.io/js/plugin.min.51ff8c7317566f82259170fa36e09c4493adc9b9378b427a01ad3f017ebac7dd.js"></script>
+
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            ROOT_URL: 'https:\/\/yushuanhsieh.github.io',
+            CONTENT_URL: 'https:\/\/yushuanhsieh.github.io\/searchindex.json ',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script type="text/javascript" src="https://yushuanhsieh.github.io/js/insight.min.a343cd9a5a7698336b28ef3a7c16a3a1b1d2d5fb17dc8ed04022bbe08cc5459073a15bdafa3a8a58cdd56080784bdd69fa70b1ae8597565c799c57ed00f0e120.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+<script>
+    tocbot.init({
+        
+        tocSelector: '.js-toc',
+        
+        contentSelector: '.js-toc-content',
+        
+        headingSelector: 'h1, h2, h3',
+        
+        hasInnerContainers: true,
+    });
+</script>
+
+
+  </body>
+</html>

@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        AngularJS - angular-formly study notes - Cherie&#39;s Tech Blog
+      </title>
+    <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  
+  <meta name="theme-color" content="#000000" />
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <meta name="description" content="Angular formly 運作原理 將 form 中的每個 field 獨立出來寫成共用 template，並供整個 app 使用。使用者先在 angular-formly 中進行 configuration，包含設定 type 和 wrapper ，接著只要在 component 的 controller 中建立指定 type 的 field objects 之後，angular-formly 就會結合之前設定好的 field template 和 objects， render 出完整的表單。 !" />
+  <meta name="generator" content="Hugo 0.67.0 with theme pure" />
+  <title>AngularJS - angular-formly study notes - Cherie&#39;s Tech Blog</title>
+  
+  
+  <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
+  
+    
+    <link rel="stylesheet" href="https://yushuanhsieh.github.io/scss/cherie.min.25e69b63f709fdfaf070b38e72e556d2a25931840ee2fcdc62b4aa0b9803e9ba.css" async>
+  
+  <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
+  <meta property="og:title" content="AngularJS - angular-formly study notes" />
+<meta property="og:description" content="Angular formly 運作原理 將 form 中的每個 field 獨立出來寫成共用 template，並供整個 app 使用。使用者先在 angular-formly 中進行 configuration，包含設定 type 和 wrapper ，接著只要在 component 的 controller 中建立指定 type 的 field objects 之後，angular-formly 就會結合之前設定好的 field template 和 objects， render 出完整的表單。 !" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2018-01-06-angular-formly-basic-usage/" />
+<meta property="article:published_time" content="2018-01-05T12:00:00+08:00" />
+<meta property="article:modified_time" content="2018-01-05T12:00:00+08:00" />
+<meta itemprop="name" content="AngularJS - angular-formly study notes">
+<meta itemprop="description" content="Angular formly 運作原理 將 form 中的每個 field 獨立出來寫成共用 template，並供整個 app 使用。使用者先在 angular-formly 中進行 configuration，包含設定 type 和 wrapper ，接著只要在 component 的 controller 中建立指定 type 的 field objects 之後，angular-formly 就會結合之前設定好的 field template 和 objects， render 出完整的表單。 !">
+<meta itemprop="datePublished" content="2018-01-05T12:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2018-01-05T12:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="619">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="AngularJS - angular-formly study notes"/>
+<meta name="twitter:description" content="Angular formly 運作原理 將 form 中的每個 field 獨立出來寫成共用 template，並供整個 app 使用。使用者先在 angular-formly 中進行 configuration，包含設定 type 和 wrapper ，接著只要在 component 的 controller 中建立指定 type 的 field objects 之後，angular-formly 就會結合之前設定好的 field template 和 objects， render 出完整的表單。 !"/>
+
+  <!--[if lte IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+    <![endif]-->
+
+  <!--[if lt IE 9]>
+      <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+  </head>
+
+  
+  
+
+  <body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage"><header class="header" itemscope itemtype="http://schema.org/WPHeader">
+    <div class="slimContent">
+      <div class="navbar-header">
+        <div class="profile-block text-center">
+          <a id="avatar" href="" target="_blank">
+            <img class="img-circle img-rotate" src="https://yushuanhsieh.github.io/author.jpg" width="200" height="200">
+          </a>
+          <h2 id="name" class="hidden-xs hidden-sm">Cherie Hsieh</h2>
+          <h3 id="title" class="hidden-xs hidden-sm hidden-md">Software Engineer</h3>
+          <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>Taiwan</small>
+        </div><div class="search" id="search-form-wrap">
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i
+                        class="icon icon-search"></i></button>
+            </span>
+        </div>
+        <div class="ins-search">
+            <div class="ins-search-mask"></div>
+            <div class="ins-search-container">
+                <div class="ins-input-wrapper">
+                    <input type="text" class="ins-search-input" placeholder="Type something..."
+                        x-webkit-speech />
+                    <button type="button" class="close ins-close ins-selectable" data-dismiss="modal"
+                        aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="ins-section-wrapper">
+                    <div class="ins-section-container"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+        <ul class="nav navbar-nav main-nav">
+            <li class="menu-item menu-item-home">
+                <a href="/">
+                  <span class="menu-title">Home</span>
+                </a>
+            </li>
+            <li class="menu-item menu-item-categories">
+                <a href="/categories/">
+                  <span class="menu-title">Categories</span>
+                </a>
+            </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+<aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title"> Categories</h3>
+    <div class="widget-body">
+        <ul class="category-list">
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/c/" class="category-list-link">c</a><span class="category-list-count">3</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">5</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/other/" class="category-list-link">other</a><span class="category-list-count">7</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/study/" class="category-list-link">study</a><span class="category-list-count">9</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/web/" class="category-list-link">web</a><span class="category-list-count">28</span></li>
+        </ul>
+    </div>
+</div>
+      
+<div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+        <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-03-31-march/" class="title">[Life] 三月起，在竹北定區生活</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-03-31 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-03-31</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-02-24-february/" class="title">[Life] 2月雜談</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-02-24 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-02-24</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-21-golang-router/" class="title">Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-21 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-21</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-19-memory-allocator-implicit-free-list/" class="title">Implement Memory Allocator - Implicit Free List</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-19 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-19</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2019-12-30-2019-review/" class="title">2019 年度回顧</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2019-12-30 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-12-30</time>
+                    </p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+  </div>
+</aside>
+
+    
+    
+<main class="main" role="main"><div class="content">
+  <article id="single-" class="article article-type-single" itemscope
+    itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      <h1 itemprop="name">
+  <a
+    class="article-title"
+    href="/post/2018-01-06-angular-formly-basic-usage/"
+    >
+    
+      
+        <span class="title-cat">Web</span>
+      
+    AngularJS - angular-formly study notes</a>
+</h1>
+
+      <div class="article-meta">
+        
+<span class="article-date">
+  <i class="icon icon-calendar-check"></i>&nbsp;
+<a href="https://yushuanhsieh.github.io/post/2018-01-06-angular-formly-basic-usage/" class="article-date">
+  <time datetime="2018-01-05 12:00:00 &#43;0800 CST" itemprop="datePublished">2018-01-05</time>
+</a>
+</span>
+<span class="article-category">
+  <i class="icon icon-folder"></i>
+  
+    <a class="article-category-link" href="/categories/web/"> Web </a>
+  
+</span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2018-01-06-angular-formly-basic-usage/#comments"
+            class="article-comment-link">Comments</a></span>
+      </div>
+    </div>
+    <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
+      <h2 id="angular-formly-運作原理">Angular formly 運作原理</h2>
+<p>將 form 中的每個 field 獨立出來寫成共用 template，並供整個 app 使用。使用者先在 angular-formly 中進行 configuration，包含設定 type 和 wrapper ，接著只要在 component 的 controller 中建立指定 type 的 field objects 之後，angular-formly 就會結合之前設定好的 field template 和 objects， render 出完整的表單。
+![study.png]({{ site.url }}/assets/images/angular-formly-usage-1.png)</p>
+<h4 id="angular-formly-field-render-source-code">Angular-formly field render source code</h4>
+<p>Angular-formly 套用 field template 的順序流程：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#a6e22e">getFieldTemplate</span>(<span style="color:#a6e22e">scope</span>.<span style="color:#a6e22e">options</span>)
+      .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">runManipulators</span>(<span style="color:#a6e22e">fieldManipulators</span>.<span style="color:#a6e22e">preWrapper</span>))
+      .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">transcludeInWrappers</span>(<span style="color:#a6e22e">scope</span>.<span style="color:#a6e22e">options</span>, <span style="color:#a6e22e">scope</span>.<span style="color:#a6e22e">formOptions</span>))
+      .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">runManipulators</span>(<span style="color:#a6e22e">fieldManipulators</span>.<span style="color:#a6e22e">postWrapper</span>))
+      .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">setElementTemplate</span>)
+      .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">watchFormControl</span>)
+      .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">callLinkFunctions</span>)
+      .<span style="color:#66d9ef">catch</span>(<span style="color:#a6e22e">error</span> =&gt; {
+        <span style="color:#a6e22e">formlyWarn</span>(
+          <span style="color:#e6db74">&#39;there-was-a-problem-setting-the-template-for-this-field&#39;</span>,
+          <span style="color:#e6db74">&#39;There was a problem setting the template for this field &#39;</span>,
+          <span style="color:#a6e22e">scope</span>.<span style="color:#a6e22e">options</span>,
+          <span style="color:#a6e22e">error</span>
+        )
+      })
+</code></pre></div><h2 id="set-up-field-templates">Set Up Field Templates</h2>
+<h3 id="--prebuilt-template">- Prebuilt Template</h3>
+<p>在使用 angular-formly 之前必須先定義好各 field 的 template。目前有幾個已經建好的簡易 formly template，包含：</p>
+<ol>
+<li>Boostrap</li>
+<li>LumX</li>
+<li>lonic</li>
+</ol>
+<p>不過目前這些 template module 都已經沒在維護，所以還是自己寫一個 template 比較妥當。</p>
+<h4 id="pre-built-template-使用方式">Pre-built template 使用方式</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">import</span> <span style="color:#e6db74">&#39;angular-formly-templates-bootstrap&#39;</span>;
+<span style="color:#75715e">// inject to the module
+</span><span style="color:#75715e"></span>.<span style="color:#a6e22e">module</span>(<span style="color:#e6db74">&#39;myApp&#39;</span>, [<span style="color:#e6db74">&#39;formly&#39;</span>, <span style="color:#e6db74">&#39;formlyBootstrap&#39;</span>]);
+</code></pre></div><p><strong>[Notice]</strong> 使用之前，請先看 template 的 source code，確認好有哪些 type 有被定義，不然會報錯。（例如: formlyBootstrap 並沒有定義switch type，因此無法使用。）</p>
+<hr>
+<h3 id="--use-custom-template">- Use Custom Template</h3>
+<h5 id="api-documents-formlyconfighttpdocsangular-formlycomv800docsformlyconfig"><a href="http://docs.angular-formly.com/v8.0.0/docs/formlyconfig">API Documents: formlyConfig</a></h5>
+<p>使用 <code>formlyConfig</code> 或 <code>formlyConfigProvider</code> 來定義自己的 field template。</p>
+<h5 id="example1-use-formlyconfig">Example1: use <code>formlyConfig</code></h5>
+<p>在 module.run 中設定的好處是，可以 inject 其他想要的 service。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#a6e22e">module</span>.<span style="color:#a6e22e">run</span>((<span style="color:#a6e22e">formlyConfig</span>, <span style="color:#a6e22e">MyService</span>) =&gt; {
+  <span style="color:#a6e22e">formlyConfig</span>.<span style="color:#a6e22e">setType</span>({
+    <span style="color:#75715e">// Set a type object.
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// MyService could be used in controller.
+</span><span style="color:#75715e"></span>  });
+});
+</code></pre></div><h5 id="example2-use-formlyconfigprovider">Example2: use <code>formlyConfigProvider</code></h5>
+<p>在 cinfig 階段設定，則無法引入 service ，因為該階段 service 還未被建立。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#a6e22e">module</span>.<span style="color:#a6e22e">config</span>(<span style="color:#a6e22e">formlyConfigProvider</span> =&gt; {
+  <span style="color:#a6e22e">formlyConfigProvider</span>.<span style="color:#a6e22e">setType</span>({
+    <span style="color:#75715e">// Set a type object.
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// You cannot inject your services in a config stage.
+</span><span style="color:#75715e"></span>  });
+});
+</code></pre></div><h3 id="api-reference">API Reference</h3>
+<h3 id="1-settype">1. setType</h3>
+<h5 id="example-1">Example 1:</h5>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#a6e22e">formlyConfig</span>.<span style="color:#a6e22e">setType</span>({
+  <span style="color:#75715e">// 定義 field type
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">name</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;input&#39;</span>,
+  <span style="color:#a6e22e">template</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;&lt;input ng-model=&#34;model[options.key]&#34; /&gt;&#39;</span>
+  <span style="color:#75715e">// 必須使用 model[options.key]，因為是要指定 options.key 的值為 model 對象
+</span><span style="color:#75715e"></span>});
+</code></pre></div><h5 id="example-2">Example 2:</h5>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#a6e22e">formlyConfig</span>.<span style="color:#a6e22e">setType</span>({
+  <span style="color:#a6e22e">name</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;ipAddress&#39;</span>,
+  <span style="color:#66d9ef">extends</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;input&#39;</span>,
+  <span style="color:#75715e">// 用來包裝 field template 的 wrapper template.
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">wrapper</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;someWrapper&#39;</span>,
+  <span style="color:#75715e">// 加入自訂 property。
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">defaultOptions</span><span style="color:#f92672">:</span> {},
+  <span style="color:#a6e22e">link</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">scope</span>, <span style="color:#a6e22e">el</span>, <span style="color:#a6e22e">attrs</span>) {},
+  <span style="color:#75715e">// 該controller 的觸發時間為 formly-field(internal API) 之後，field controller 之前。
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">controller</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">$scope</span>, <span style="color:#a6e22e">yourInjectableThing</span>) {},
+  <span style="color:#75715e">// 欄位驗證
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">apiCheck</span><span style="color:#f92672">:</span> {}
+});
+</code></pre></div><p><strong>[Notice]</strong> Just be aware that angular-formly does make use of <em>common parameters</em> like required or onClick to automatically add attributes to ng-model elements.</p>
+<h4 id="some-properties-of-config">Some properties of config:</h4>
+<ul>
+<li><strong>name</strong>
+field refernece.(Required!)</li>
+<li><strong>templateUrl or template</strong>
+(use $templateCache) 套用於該 field 的 template(通常是HTML格式).</li>
+<li><strong>wrapper</strong>
+額外加入 template 在 field template 外層。</li>
+<li><strong>apiCheck</strong>
+Default setting uses <code>apiCheck</code> library.</li>
+</ul>
+<h5 id="example-for-apicheck">*Example for apiCheck:</h5>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#a6e22e">apiCheck</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">check</span> =&gt; ({
+          <span style="color:#a6e22e">templateOptions</span><span style="color:#f92672">:</span> {
+            <span style="color:#a6e22e">label</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">check</span>.<span style="color:#a6e22e">string</span>.<span style="color:#a6e22e">optional</span>,
+            <span style="color:#a6e22e">required</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">check</span>.<span style="color:#a6e22e">bool</span>.<span style="color:#a6e22e">optional</span>,
+            <span style="color:#a6e22e">labelSrOnly</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">check</span>.<span style="color:#a6e22e">bool</span>.<span style="color:#a6e22e">optional</span>,
+          }
+        })
+</code></pre></div><ul>
+<li>
+<p><strong>extend</strong>
+(需注意如果在 extend type 設置和母 type 一樣的 wrapper 會造成衝突，請重新設置一個新的type。)</p>
+</li>
+<li>
+<p><strong>defaultOptions</strong>
+在該欄位中加入自定義的 options 供使用者調整。</p>
+</li>
+</ul>
+<h5 id="example-for-defaultoptions">*Example for defaultOptions:</h5>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#a6e22e">defaultOptions</span><span style="color:#f92672">:</span> {
+  <span style="color:#a6e22e">ngModelAttrs</span><span style="color:#f92672">:</span> {
+    <span style="color:#75715e">// 在 type的 attribute 中加入 rows 和 mdMaxLength 屬性。
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">rows</span><span style="color:#f92672">:</span> {<span style="color:#a6e22e">attribute</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;rows&#39;</span>},
+    <span style="color:#a6e22e">mdMaxLength</span><span style="color:#f92672">:</span> {<span style="color:#a6e22e">attribute</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;md-maxlength&#39;</span>}
+  }
+}
+</code></pre></div><h3 id="2-setwrapper">2. setWrapper</h3>
+<p>定義 wrapper 的寫法和定義 field 寫法雷同，不過template 中需加入指定 html tag。</p>
+<ul>
+<li>需使用 <code>&lt;formly-transclude&gt;&lt;/formly-transclude&gt;</code> 來指定 field template 的位置。</li>
+<li>至少要有 <code>templateUrl</code> 或 <code>template</code>。</li>
+</ul>
+<h5 id="wapper-template-example">*wapper template example：</h5>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#f92672">div</span>&gt;
+  &lt;<span style="color:#f92672">label</span>&gt;
+    {{to.label}}
+    {{to.required ? &#39;*&#39; : &#39;&#39;}}
+  &lt;/<span style="color:#f92672">label</span>&gt;
+  <span style="color:#75715e">&lt;!-- 需使用&lt;formly-transclude&gt; 來指定 field template 放置的位置 --&gt;</span>
+  &lt;<span style="color:#f92672">formly-transclude</span>&gt;&lt;/<span style="color:#f92672">formly-transclude</span>&gt;
+&lt;/<span style="color:#f92672">div</span>&gt;
+</code></pre></div><hr>
+<p>###[ 其他重點 ] Template&rsquo;s $scope</p>
+<p>在寫 controller 或 expressionProperties function 的時候，可以使用$scope 來操作 template 中的變數。這邊要注意的是， angular-formly 的 $scope 有調整過，新增一些 formly 特有屬性，所以要使用指定的 property 去取得 model 參數。</p>
+<h4 id="常用的property">常用的property</h4>
+<table>
+<thead>
+<tr>
+<th>Variable Name</th>
+<th align="center">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>options</td>
+<td align="center">此 object 包含設定 field 的參數，例如: formControl, initModel等。</td>
+</tr>
+<tr>
+<td>to</td>
+<td align="center">= <code>options.templateOptions</code></td>
+</tr>
+<tr>
+<td>fc</td>
+<td align="center">= <code>options.formControl</code></td>
+</tr>
+</tbody>
+</table>
+<h5 id="templates-scope-example-1">*template&rsquo;s $scope example 1</h5>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#f92672">label</span>&gt;{{ to.label }}&lt;/<span style="color:#f92672">label</span>&gt;
+</code></pre></div><h5 id="templates-scope-example-2">*template&rsquo;s $scope example 2</h5>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">  <span style="color:#a6e22e">key</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;priority&#39;</span>,
+  <span style="color:#a6e22e">type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;radio&#39;</span>,
+  <span style="color:#a6e22e">defaultValue</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">item</span>.<span style="color:#a6e22e">priority</span> <span style="color:#f92672">||</span> <span style="color:#ae81ff">1</span>,
+  <span style="color:#a6e22e">templateOptions</span><span style="color:#f92672">:</span> {
+    <span style="color:#a6e22e">label</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;Priority&#39;</span>,
+    <span style="color:#a6e22e">options</span><span style="color:#f92672">:</span> []
+  },
+  <span style="color:#a6e22e">controller</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">$scope</span>) {
+    <span style="color:#a6e22e">$scope</span>.<span style="color:#a6e22e">to</span>.<span style="color:#a6e22e">options</span> <span style="color:#f92672">=</span> [
+      { <span style="color:#a6e22e">value</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">1</span>, <span style="color:#a6e22e">label</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;Urgent&#39;</span> },
+      { <span style="color:#a6e22e">value</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">2</span>, <span style="color:#a6e22e">label</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;Normal&#39;</span> }
+    ];
+  }
+</code></pre></div><hr>
+<h2 id="field-configuration">Field configuration</h2>
+<h3 id="property">Property</h3>
+<ul>
+<li>key
+key 會與 controller 的 model 綁定(controller.model.keyName)。預設 key 值是 field object array 的 index。</li>
+<li>type
+這個是指欄位的型別，例如 input / checkbox / switch / select 等。<strong>注意：type 需在 formlyConfig 被定義，也可直接使用現有的template</strong>。</li>
+<li>templateOption</li>
+<li>defaultValue
+initialize model. 如果該 model 在 compile-time 中為 undefined，則會 assign 此初始值。<em>if you want to default values in the form, simply initialize your model with that state and you&rsquo;re good. However, there are some use cases where it is much easier to use the form config to initialize the model, which is why this property was added.</em></li>
+<li>hideExpression (string || function)</li>
+<li>expressionProperties (object)</li>
+<li>model
+這個用在當 field 的 model 和 formly 的model 為不同的時候。可配合<code>expressionProperties</code>（a <strong>deep watch</strong> is added to the formly-field directive&rsquo;s scope to run the <strong>expressionProperties</strong> when the specified model changes）。</li>
+</ul>
+
+    </div>
+    <div class="article-footer">
+<blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    <li class="post-copyright-link hidden-xs">
+      <strong>Permalink: </strong>
+      <a href="https://yushuanhsieh.github.io/post/2018-01-06-angular-formly-basic-usage/" title="AngularJS - angular-formly study notes" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2018-01-06-angular-formly-basic-usage/</a>
+    </li>
+  </ul>
+</blockquote>
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="https://yushuanhsieh.github.io/author.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">Cherie Hsieh</span><small class="ml-1x">Software Engineer</small></a></h3>
+        <div>Gopher</div>
+      </div>
+    </figure>
+  </div>
+</div>
+    </div>
+  </article>
+
+</div><nav class="bar bar-footer clearfix" data-stick-bottom>
+    <div class="bar-inner">
+        <ul class="pager pull-left">
+            <li class="prev">
+                <a href="https://yushuanhsieh.github.io/post/2017-12-08-two-way-binding/" title="AngularJS - Two way data binding"><i
+                        class="icon icon-angle-left"
+                        aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
+            </li>
+            <li class="next">
+                <a href="https://yushuanhsieh.github.io/post/2018-01-29-cypress-basic-usage/"
+                    title="Cypress &amp; Cucumber Introduction"><span>Newer&nbsp;&nbsp;</span><i
+                        class="icon icon-angle-right" aria-hidden="true"></i></a>
+            </li>
+            
+        </ul>
+        <div class="bar-right">
+        </div>
+    </div>
+</nav>
+
+</main><footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+  <div class="copyright">
+    &copy;2017  -
+    2020
+    <div class="publishby">
+        Theme by <a href="https://github.com/xiaoheiAh" target="_blank"> xiaoheiAh </a>base on<a href="https://github.com/xiaoheiAh/hugo-theme-pure" target="_blank"> pure</a>.
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+<script>
+    window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/javascript.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/c.min.js" defer></script><script>
+    hljs.configure({
+        tabReplace: '    ', 
+        classPrefix: ''     
+        
+    })
+    hljs.initHighlightingOnLoad();
+</script>
+<script src="https://yushuanhsieh.github.io/js/application.min.bdeb64b910570b6c41badc6a05b7afb0c8ad9efd8525de3c7257d59e786326a3.js"></script>
+<script src="https://yushuanhsieh.github.io/js/plugin.min.51ff8c7317566f82259170fa36e09c4493adc9b9378b427a01ad3f017ebac7dd.js"></script>
+
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            ROOT_URL: 'https:\/\/yushuanhsieh.github.io',
+            CONTENT_URL: 'https:\/\/yushuanhsieh.github.io\/searchindex.json ',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script type="text/javascript" src="https://yushuanhsieh.github.io/js/insight.min.a343cd9a5a7698336b28ef3a7c16a3a1b1d2d5fb17dc8ed04022bbe08cc5459073a15bdafa3a8a58cdd56080784bdd69fa70b1ae8597565c799c57ed00f0e120.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+<script>
+    tocbot.init({
+        
+        tocSelector: '.js-toc',
+        
+        contentSelector: '.js-toc-content',
+        
+        headingSelector: 'h1, h2, h3',
+        
+        hasInnerContainers: true,
+    });
+</script>
+
+
+  </body>
+</html>

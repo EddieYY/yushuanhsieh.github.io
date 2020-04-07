@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        React Hooks with memoizedState - Cherie&#39;s Tech Blog
+      </title>
+    <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  
+  <meta name="theme-color" content="#000000" />
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <meta name="description" content="前言 React Hooks 自從正式 release 後，就出現很多相關教學文章，所以這篇不是講如何實作，而是說他如何在 stateless functional component 中保存當前 state。 此外，最近也開始嘗試把 class component 轉換成使用 hooks 的 components，但過程中還是需要蠻多調整，包含之前有使用一些 lifecycle functions ，藉此機會順便檢視是否真的必要使用這些 functions，是否可以透過其他架構方式來簡化。" />
+  <meta name="generator" content="Hugo 0.67.0 with theme pure" />
+  <title>React Hooks with memoizedState - Cherie&#39;s Tech Blog</title>
+  
+  
+  <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
+  
+    
+    <link rel="stylesheet" href="https://yushuanhsieh.github.io/scss/cherie.min.25e69b63f709fdfaf070b38e72e556d2a25931840ee2fcdc62b4aa0b9803e9ba.css" async>
+  
+  <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
+  <meta property="og:title" content="React Hooks with memoizedState" />
+<meta property="og:description" content="前言 React Hooks 自從正式 release 後，就出現很多相關教學文章，所以這篇不是講如何實作，而是說他如何在 stateless functional component 中保存當前 state。 此外，最近也開始嘗試把 class component 轉換成使用 hooks 的 components，但過程中還是需要蠻多調整，包含之前有使用一些 lifecycle functions ，藉此機會順便檢視是否真的必要使用這些 functions，是否可以透過其他架構方式來簡化。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2019-02-27-react-hooks/" />
+<meta property="article:published_time" content="2019-02-27T08:00:00+08:00" />
+<meta property="article:modified_time" content="2019-02-27T08:00:00+08:00" />
+<meta itemprop="name" content="React Hooks with memoizedState">
+<meta itemprop="description" content="前言 React Hooks 自從正式 release 後，就出現很多相關教學文章，所以這篇不是講如何實作，而是說他如何在 stateless functional component 中保存當前 state。 此外，最近也開始嘗試把 class component 轉換成使用 hooks 的 components，但過程中還是需要蠻多調整，包含之前有使用一些 lifecycle functions ，藉此機會順便檢視是否真的必要使用這些 functions，是否可以透過其他架構方式來簡化。">
+<meta itemprop="datePublished" content="2019-02-27T08:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2019-02-27T08:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="505">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="React Hooks with memoizedState"/>
+<meta name="twitter:description" content="前言 React Hooks 自從正式 release 後，就出現很多相關教學文章，所以這篇不是講如何實作，而是說他如何在 stateless functional component 中保存當前 state。 此外，最近也開始嘗試把 class component 轉換成使用 hooks 的 components，但過程中還是需要蠻多調整，包含之前有使用一些 lifecycle functions ，藉此機會順便檢視是否真的必要使用這些 functions，是否可以透過其他架構方式來簡化。"/>
+
+  <!--[if lte IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+    <![endif]-->
+
+  <!--[if lt IE 9]>
+      <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+  </head>
+
+  
+  
+
+  <body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage"><header class="header" itemscope itemtype="http://schema.org/WPHeader">
+    <div class="slimContent">
+      <div class="navbar-header">
+        <div class="profile-block text-center">
+          <a id="avatar" href="" target="_blank">
+            <img class="img-circle img-rotate" src="https://yushuanhsieh.github.io/author.jpg" width="200" height="200">
+          </a>
+          <h2 id="name" class="hidden-xs hidden-sm">Cherie Hsieh</h2>
+          <h3 id="title" class="hidden-xs hidden-sm hidden-md">Software Engineer</h3>
+          <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>Taiwan</small>
+        </div><div class="search" id="search-form-wrap">
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i
+                        class="icon icon-search"></i></button>
+            </span>
+        </div>
+        <div class="ins-search">
+            <div class="ins-search-mask"></div>
+            <div class="ins-search-container">
+                <div class="ins-input-wrapper">
+                    <input type="text" class="ins-search-input" placeholder="Type something..."
+                        x-webkit-speech />
+                    <button type="button" class="close ins-close ins-selectable" data-dismiss="modal"
+                        aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="ins-section-wrapper">
+                    <div class="ins-section-container"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+        <ul class="nav navbar-nav main-nav">
+            <li class="menu-item menu-item-home">
+                <a href="/">
+                  <span class="menu-title">Home</span>
+                </a>
+            </li>
+            <li class="menu-item menu-item-categories">
+                <a href="/categories/">
+                  <span class="menu-title">Categories</span>
+                </a>
+            </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+<aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title"> Categories</h3>
+    <div class="widget-body">
+        <ul class="category-list">
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/c/" class="category-list-link">c</a><span class="category-list-count">3</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">5</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/other/" class="category-list-link">other</a><span class="category-list-count">7</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/study/" class="category-list-link">study</a><span class="category-list-count">9</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/web/" class="category-list-link">web</a><span class="category-list-count">28</span></li>
+        </ul>
+    </div>
+</div>
+      
+<div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+        <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-03-31-march/" class="title">[Life] 三月起，在竹北定區生活</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-03-31 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-03-31</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-02-24-february/" class="title">[Life] 2月雜談</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-02-24 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-02-24</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-21-golang-router/" class="title">Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-21 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-21</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-19-memory-allocator-implicit-free-list/" class="title">Implement Memory Allocator - Implicit Free List</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-19 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-19</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2019-12-30-2019-review/" class="title">2019 年度回顧</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2019-12-30 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-12-30</time>
+                    </p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+  </div>
+</aside>
+
+    
+    
+<main class="main" role="main"><div class="content">
+  <article id="single-" class="article article-type-single" itemscope
+    itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      <h1 itemprop="name">
+  <a
+    class="article-title"
+    href="/post/2019-02-27-react-hooks/"
+    >
+    
+      
+        <span class="title-cat">Web</span>
+      
+    React Hooks with memoizedState</a>
+</h1>
+
+      <div class="article-meta">
+        
+<span class="article-date">
+  <i class="icon icon-calendar-check"></i>&nbsp;
+<a href="https://yushuanhsieh.github.io/post/2019-02-27-react-hooks/" class="article-date">
+  <time datetime="2019-02-27 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-02-27</time>
+</a>
+</span>
+<span class="article-category">
+  <i class="icon icon-folder"></i>
+  
+    <a class="article-category-link" href="/categories/web/"> Web </a>
+  
+</span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2019-02-27-react-hooks/#comments"
+            class="article-comment-link">Comments</a></span>
+      </div>
+    </div>
+    <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
+      <h2 id="前言">前言</h2>
+<p>React Hooks 自從正式 release 後，就出現很多相關教學文章，所以這篇不是講如何實作，而是說他如何在 stateless functional component 中保存當前 state。 此外，最近也開始嘗試把 class component 轉換成使用 hooks 的 components，但過程中還是需要蠻多調整，包含之前有使用一些 lifecycle functions ，藉此機會順便檢視是否真的必要使用這些 functions，是否可以透過其他架構方式來簡化。</p>
+<h2 id="usestate">useState</h2>
+<p>以下是我們使用 useState function 的基本範例：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">Example</span>(<span style="color:#a6e22e">props</span>) {
+<span style="color:#66d9ef">const</span> [<span style="color:#a6e22e">state</span>, <span style="color:#a6e22e">setState</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">useState</span>(<span style="color:#a6e22e">initialState</span>)
+  <span style="color:#66d9ef">return</span> (
+  <span style="color:#75715e">/// ReactElement
+</span><span style="color:#75715e"></span>  )
+}
+
+</code></pre></div><p>依照 functional component 邏輯，我們應該每次都會新建一個 state，導致 state 值無法保存。不過透過 React Hooks，我們卻可以在每次 render 時得到上次更新後的 state 值，這是為什麼呢？</p>
+<p>trace code 後，可以發現這個 function 其實是呼叫 internal dispatcher 的 useState</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">
+<span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">useState</span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">S</span><span style="color:#f92672">&gt;</span>(<span style="color:#a6e22e">initialState</span><span style="color:#f92672">:</span> (() =&gt; <span style="color:#a6e22e">S</span>) <span style="color:#f92672">|</span> <span style="color:#a6e22e">S</span>) {
+  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">dispatcher</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">resolveDispatcher</span>();
+  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">dispatcher</span>.<span style="color:#a6e22e">useState</span>(<span style="color:#a6e22e">initialState</span>);
+}
+</code></pre></div><p>而 <code>dispatcher</code> 是什麼呢？其實可以把它想成每個 component 內部的 mount or update 調度器，這個 dispatcher 會在 component render 階段 <code>renderWithHooks</code> 被 assign。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">
+<span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">renderWithHooks</span>(
+<span style="color:#75715e">/// 略過
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">ReactCurrentDispatcher</span>.<span style="color:#a6e22e">current</span> <span style="color:#f92672">=</span>
+  <span style="color:#a6e22e">nextCurrentHook</span> <span style="color:#f92672">===</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">?</span> <span style="color:#a6e22e">HooksDispatcherOnMount</span> <span style="color:#f92672">:</span> <span style="color:#a6e22e">HooksDispatcherOnUpdate</span>;
+}
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">HooksDispatcherOnMount</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">Dispatcher</span> <span style="color:#f92672">=</span> {
+  <span style="color:#75715e">//略過
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">useState</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">mountState</span>,
+};
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">HooksDispatcherOnUpdate</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">Dispatcher</span> <span style="color:#f92672">=</span> {
+  <span style="color:#75715e">//略過
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">useState</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">updateState</span>,
+};
+
+</code></pre></div><p>從上述 code 可以知道，<strong>HooksDispatcher 又分成 mount 和 update</strong>，當 hook 還未建立，會套用 mount ，反之則會使用 update methods。藉由這種方式，可以根據目前 render 的階段，讓 useState 實際上是執行不同的實作 function。</p>
+<h2 id="memoizedstate">memoizedState</h2>
+<p>接續以上 source code，我們先來看 mountState，在 mountState function 中會建立一個新的 Hook object:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">mountWorkInProgressHook</span>()<span style="color:#f92672">:</span> <span style="color:#a6e22e">Hook</span> {
+
+  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">hook</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">Hook</span> <span style="color:#f92672">=</span> {
+    <span style="color:#a6e22e">memoizedState</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">null</span>,
+    <span style="color:#a6e22e">baseState</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">null</span>,
+    <span style="color:#a6e22e">queue</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">null</span>,
+    <span style="color:#a6e22e">baseUpdate</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">null</span>,
+    <span style="color:#a6e22e">next</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">null</span>,
+  };
+
+  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">workInProgressHook</span> <span style="color:#f92672">===</span> <span style="color:#66d9ef">null</span>) {
+    <span style="color:#75715e">// This is the first hook in the list
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">firstWorkInProgressHook</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">workInProgressHook</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">hook</span>;
+  } <span style="color:#66d9ef">else</span> {
+    <span style="color:#75715e">// Append to the end of the list
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">workInProgressHook</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">workInProgressHook</span>.<span style="color:#a6e22e">next</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">hook</span>;
+  }
+  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">workInProgressHook</span>;
+}
+
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">mountState</span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">S</span><span style="color:#f92672">&gt;</span>(
+  <span style="color:#a6e22e">initialState</span><span style="color:#f92672">:</span> (() =&gt; <span style="color:#a6e22e">S</span>) <span style="color:#f92672">|</span> <span style="color:#a6e22e">S</span>,
+)<span style="color:#f92672">:</span> [<span style="color:#a6e22e">S</span>, <span style="color:#a6e22e">Dispatch</span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">BasicStateAction</span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">S</span><span style="color:#f92672">&gt;&gt;</span>]{
+  <span style="color:#75715e">// 略
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">hook</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">mountWorkInProgressHook</span>();
+  <span style="color:#a6e22e">hook</span>.<span style="color:#a6e22e">memoizedState</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">hook</span>.<span style="color:#a6e22e">baseState</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">initialState</span>;
+  
+  <span style="color:#66d9ef">return</span> [<span style="color:#a6e22e">hook</span>.<span style="color:#a6e22e">memoizedState</span>, <span style="color:#a6e22e">dispatch</span>];
+}
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">queue</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">hook</span>.<span style="color:#a6e22e">queue</span> <span style="color:#f92672">=</span> {
+    <span style="color:#a6e22e">last</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">null</span>,
+    <span style="color:#a6e22e">dispatch</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">null</span>,
+    <span style="color:#a6e22e">eagerReducer</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">reducer</span>,
+    <span style="color:#a6e22e">eagerState</span><span style="color:#f92672">:</span> (<span style="color:#a6e22e">initialState</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">any</span>),
+  });
+</code></pre></div><p>可以看到 initialState 會被 assign 給 <code>hook.memoizedState</code>。而從 <code>workInProgressHook.next = hook</code> 可以知道， hook 是一個 linked list 結構，紀錄了該 hook 的 state 值並有 pointer 指向下一個 hook。</p>
+<p>而這個 hook linked list 又會被記錄在 fiber 的 memoizedState。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">renderedWork</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">Fiber</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">currentlyRenderingFiber</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">any</span>);
+<span style="color:#a6e22e">renderedWork</span>.<span style="color:#a6e22e">memoizedState</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">firstWorkInProgressHook</span>;
+
+</code></pre></div><blockquote>
+<p>Hooks are stored as a linked list on the fiber&rsquo;s memoizedState field.</p>
+</blockquote>
+<p>這樣看下來就清楚了，原來在 stateless functional component 中使用 useState ，之所以能夠紀錄下當前 state 值，是因為這些 state 被組成一串 hook linked list 並保存在 fiber 欄位。</p>
+<p>![React-Hooks]({{ site.url }}/assets/images/React-hooks.png)</p>
+<p>當第一次 render 執行 <code>useState</code> 時，會執行 <code>mountState</code> 並把 user 設定的 initial State 放到 hook 中的 memoizedState。</p>
+<p>而後續再次執行 render 或是 update state 時，就會<strong>直接從 fiber memoizedState (hook ) 中取出保存的 memoizedState</strong> (怎麼有點繞口令)。</p>
+<h2 id="rules-of-hooks">Rules of Hooks</h2>
+<p>知道了上面的流程後，再來看一下官方聲明的 Hooks 使用規則：</p>
+<h3 id="1-only-call-hooks-at-the-top-level-dont-call-hooks-inside-loops-conditions-or-nested-functions">1. Only Call Hooks at the Top Level. Don’t call Hooks inside loops, conditions, or nested functions.</h3>
+<p>由於 Hooks 是使用 Linked List 的方式來保存，所以順序對於 Hooks 來說相當重要，如果像是使用 conditions 導致 useState 順序出現變動，那在透過 Linked List 依序取出 memoizedState 就會出現問題。</p>
+<h3 id="2-only-call-hooks-from-react-functions">2. Only Call Hooks from React Functions</h3>
+<p>從 source code 可以知道 hooks 其實是呼叫 dispatcher 的 functions，如果是非 React Component，那麼在 get dispatcher 就會出現 error 啦！</p>
+<h2 id="class-component-的-state-保存">Class Component 的 State 保存</h2>
+<p>既然說到使用 hooks 就可以保存 state，那不免要來談一下我們常用的 class component 是如何保存 state 的。</p>
+<p>在 <code>ReactFiberClassComponent.js</code> 中有提到新建 ClassInstance 的method:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript">
+<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">constructClassInstance</span>(
+  <span style="color:#a6e22e">workInProgress</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">Fiber</span>,
+  <span style="color:#a6e22e">ctor</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">any</span>,
+  <span style="color:#a6e22e">props</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">any</span>,
+  <span style="color:#a6e22e">renderExpirationTime</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">ExpirationTime</span>,
+){
+  <span style="color:#75715e">// 略
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">instance</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">ctor</span>(<span style="color:#a6e22e">props</span>, <span style="color:#a6e22e">context</span>); <span style="color:#75715e">//ctor 就是 component class
+</span><span style="color:#75715e"></span>  <span style="color:#75715e">// 將我們所寫的 this.state assign 給 fiber memoizedState
+</span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">state</span> <span style="color:#f92672">=</span> (<span style="color:#a6e22e">workInProgress</span>.<span style="color:#a6e22e">memoizedState</span> <span style="color:#f92672">=</span>
+    <span style="color:#a6e22e">instance</span>.<span style="color:#a6e22e">state</span> <span style="color:#f92672">!==</span> <span style="color:#66d9ef">null</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">instance</span>.<span style="color:#a6e22e">state</span> <span style="color:#f92672">!==</span> <span style="color:#66d9ef">undefined</span>
+      <span style="color:#f92672">?</span> <span style="color:#a6e22e">instance</span>.<span style="color:#a6e22e">state</span>
+      <span style="color:#f92672">:</span> <span style="color:#66d9ef">null</span>);
+  <span style="color:#a6e22e">adoptClassInstance</span>(<span style="color:#a6e22e">workInProgress</span>, <span style="color:#a6e22e">instance</span>);
+  <span style="color:#75715e">// 略
+</span><span style="color:#75715e"></span>}
+
+</code></pre></div><p>透過上面程式碼可以知道， class component state 最後還是會被 assign 給 fiber memoizedState，這樣說起來， hooks 只是使用另一種方式來達到一樣的效果。</p>
+<h2 id="references">References</h2>
+<ol>
+<li><a href="https://github.com/facebook/react">React source code</a></li>
+</ol>
+
+    </div>
+    <div class="article-footer">
+<blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    <li class="post-copyright-link hidden-xs">
+      <strong>Permalink: </strong>
+      <a href="https://yushuanhsieh.github.io/post/2019-02-27-react-hooks/" title="React Hooks with memoizedState" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2019-02-27-react-hooks/</a>
+    </li>
+  </ul>
+</blockquote>
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="https://yushuanhsieh.github.io/author.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">Cherie Hsieh</span><small class="ml-1x">Software Engineer</small></a></h3>
+        <div>Gopher</div>
+      </div>
+    </figure>
+  </div>
+</div>
+    </div>
+  </article>
+
+</div><nav class="bar bar-footer clearfix" data-stick-bottom>
+    <div class="bar-inner">
+        <ul class="pager pull-left">
+            <li class="prev">
+                <a href="https://yushuanhsieh.github.io/post/2019-02-03-study-2019-01/" title="2019/01月份自我學習回顧"><i
+                        class="icon icon-angle-left"
+                        aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
+            </li>
+            <li class="next">
+                <a href="https://yushuanhsieh.github.io/post/2019-03-03-study-2019-02/"
+                    title="2019/02月份自我學習回顧"><span>Newer&nbsp;&nbsp;</span><i
+                        class="icon icon-angle-right" aria-hidden="true"></i></a>
+            </li>
+            
+        </ul>
+        <div class="bar-right">
+        </div>
+    </div>
+</nav>
+
+</main><footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+  <div class="copyright">
+    &copy;2017  -
+    2020
+    <div class="publishby">
+        Theme by <a href="https://github.com/xiaoheiAh" target="_blank"> xiaoheiAh </a>base on<a href="https://github.com/xiaoheiAh/hugo-theme-pure" target="_blank"> pure</a>.
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+<script>
+    window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/javascript.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/c.min.js" defer></script><script>
+    hljs.configure({
+        tabReplace: '    ', 
+        classPrefix: ''     
+        
+    })
+    hljs.initHighlightingOnLoad();
+</script>
+<script src="https://yushuanhsieh.github.io/js/application.min.bdeb64b910570b6c41badc6a05b7afb0c8ad9efd8525de3c7257d59e786326a3.js"></script>
+<script src="https://yushuanhsieh.github.io/js/plugin.min.51ff8c7317566f82259170fa36e09c4493adc9b9378b427a01ad3f017ebac7dd.js"></script>
+
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            ROOT_URL: 'https:\/\/yushuanhsieh.github.io',
+            CONTENT_URL: 'https:\/\/yushuanhsieh.github.io\/searchindex.json ',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script type="text/javascript" src="https://yushuanhsieh.github.io/js/insight.min.a343cd9a5a7698336b28ef3a7c16a3a1b1d2d5fb17dc8ed04022bbe08cc5459073a15bdafa3a8a58cdd56080784bdd69fa70b1ae8597565c799c57ed00f0e120.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+<script>
+    tocbot.init({
+        
+        tocSelector: '.js-toc',
+        
+        contentSelector: '.js-toc-content',
+        
+        headingSelector: 'h1, h2, h3',
+        
+        hasInnerContainers: true,
+    });
+</script>
+
+
+  </body>
+</html>

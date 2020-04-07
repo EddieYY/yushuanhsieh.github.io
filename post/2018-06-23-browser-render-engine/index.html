@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        The Main Flow of Rendering Engines - Cherie&#39;s Tech Blog
+      </title>
+    <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  
+  <meta name="theme-color" content="#000000" />
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <meta name="description" content="前言： 最近在寫 CSS Animation 部分，於是比較深入的看瀏覽器渲染流程，希望在進行 Animation 時可以更加地流暢。
+The Main Flow of Rendering Engines 在寫 HTML 的時候，我們很理所當然地寫出這樣的頁面：" />
+  <meta name="generator" content="Hugo 0.67.0 with theme pure" />
+  <title>The Main Flow of Rendering Engines - Cherie&#39;s Tech Blog</title>
+  
+  
+  <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
+  
+    
+    <link rel="stylesheet" href="https://yushuanhsieh.github.io/scss/cherie.min.25e69b63f709fdfaf070b38e72e556d2a25931840ee2fcdc62b4aa0b9803e9ba.css" async>
+  
+  <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
+  <meta property="og:title" content="The Main Flow of Rendering Engines" />
+<meta property="og:description" content="前言： 最近在寫 CSS Animation 部分，於是比較深入的看瀏覽器渲染流程，希望在進行 Animation 時可以更加地流暢。
+The Main Flow of Rendering Engines 在寫 HTML 的時候，我們很理所當然地寫出這樣的頁面：" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2018-06-23-browser-render-engine/" />
+<meta property="article:published_time" content="2018-06-23T12:00:00+08:00" />
+<meta property="article:modified_time" content="2018-06-23T12:00:00+08:00" />
+<meta itemprop="name" content="The Main Flow of Rendering Engines">
+<meta itemprop="description" content="前言： 最近在寫 CSS Animation 部分，於是比較深入的看瀏覽器渲染流程，希望在進行 Animation 時可以更加地流暢。
+The Main Flow of Rendering Engines 在寫 HTML 的時候，我們很理所當然地寫出這樣的頁面：">
+<meta itemprop="datePublished" content="2018-06-23T12:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2018-06-23T12:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="287">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="The Main Flow of Rendering Engines"/>
+<meta name="twitter:description" content="前言： 最近在寫 CSS Animation 部分，於是比較深入的看瀏覽器渲染流程，希望在進行 Animation 時可以更加地流暢。
+The Main Flow of Rendering Engines 在寫 HTML 的時候，我們很理所當然地寫出這樣的頁面："/>
+
+  <!--[if lte IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+    <![endif]-->
+
+  <!--[if lt IE 9]>
+      <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+  </head>
+
+  
+  
+
+  <body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage"><header class="header" itemscope itemtype="http://schema.org/WPHeader">
+    <div class="slimContent">
+      <div class="navbar-header">
+        <div class="profile-block text-center">
+          <a id="avatar" href="" target="_blank">
+            <img class="img-circle img-rotate" src="https://yushuanhsieh.github.io/author.jpg" width="200" height="200">
+          </a>
+          <h2 id="name" class="hidden-xs hidden-sm">Cherie Hsieh</h2>
+          <h3 id="title" class="hidden-xs hidden-sm hidden-md">Software Engineer</h3>
+          <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>Taiwan</small>
+        </div><div class="search" id="search-form-wrap">
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i
+                        class="icon icon-search"></i></button>
+            </span>
+        </div>
+        <div class="ins-search">
+            <div class="ins-search-mask"></div>
+            <div class="ins-search-container">
+                <div class="ins-input-wrapper">
+                    <input type="text" class="ins-search-input" placeholder="Type something..."
+                        x-webkit-speech />
+                    <button type="button" class="close ins-close ins-selectable" data-dismiss="modal"
+                        aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="ins-section-wrapper">
+                    <div class="ins-section-container"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+        <ul class="nav navbar-nav main-nav">
+            <li class="menu-item menu-item-home">
+                <a href="/">
+                  <span class="menu-title">Home</span>
+                </a>
+            </li>
+            <li class="menu-item menu-item-categories">
+                <a href="/categories/">
+                  <span class="menu-title">Categories</span>
+                </a>
+            </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+<aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title"> Categories</h3>
+    <div class="widget-body">
+        <ul class="category-list">
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/c/" class="category-list-link">c</a><span class="category-list-count">3</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">5</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/other/" class="category-list-link">other</a><span class="category-list-count">7</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/study/" class="category-list-link">study</a><span class="category-list-count">9</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/web/" class="category-list-link">web</a><span class="category-list-count">28</span></li>
+        </ul>
+    </div>
+</div>
+      
+<div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+        <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-03-31-march/" class="title">[Life] 三月起，在竹北定區生活</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-03-31 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-03-31</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-02-24-february/" class="title">[Life] 2月雜談</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-02-24 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-02-24</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-21-golang-router/" class="title">Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-21 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-21</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-19-memory-allocator-implicit-free-list/" class="title">Implement Memory Allocator - Implicit Free List</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-19 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-19</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2019-12-30-2019-review/" class="title">2019 年度回顧</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2019-12-30 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-12-30</time>
+                    </p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+  </div>
+</aside>
+
+    
+    
+<main class="main" role="main"><div class="content">
+  <article id="single-" class="article article-type-single" itemscope
+    itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      <h1 itemprop="name">
+  <a
+    class="article-title"
+    href="/post/2018-06-23-browser-render-engine/"
+    >
+    
+      
+        <span class="title-cat">Web</span>
+      
+    The Main Flow of Rendering Engines</a>
+</h1>
+
+      <div class="article-meta">
+        
+<span class="article-date">
+  <i class="icon icon-calendar-check"></i>&nbsp;
+<a href="https://yushuanhsieh.github.io/post/2018-06-23-browser-render-engine/" class="article-date">
+  <time datetime="2018-06-23 12:00:00 &#43;0800 CST" itemprop="datePublished">2018-06-23</time>
+</a>
+</span>
+<span class="article-category">
+  <i class="icon icon-folder"></i>
+  
+    <a class="article-category-link" href="/categories/web/"> Web </a>
+  
+</span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2018-06-23-browser-render-engine/#comments"
+            class="article-comment-link">Comments</a></span>
+      </div>
+    </div>
+    <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
+      <h2 id="前言">前言：</h2>
+<p>最近在寫 CSS Animation 部分，於是比較深入的看瀏覽器渲染流程，希望在進行 Animation 時可以更加地流暢。</p>
+<h2 id="the-main-flow-of-rendering-engines">The Main Flow of Rendering Engines</h2>
+<p>在寫 HTML 的時候，我們很理所當然地寫出這樣的頁面：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#75715e">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#f92672">html</span>&gt;
+&lt;<span style="color:#f92672">head</span>&gt;
+  &lt;<span style="color:#f92672">meta</span> <span style="color:#a6e22e">charset</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;UTF-8&#34;</span>&gt;
+  &lt;<span style="color:#f92672">link</span> <span style="color:#a6e22e">rel</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;stylesheet&#34;</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;styles.css&#34;</span>&gt;
+  &lt;<span style="color:#f92672">title</span>&gt;My Website&lt;/<span style="color:#f92672">title</span>&gt;
+&lt;/<span style="color:#f92672">head</span>&gt;
+&lt;<span style="color:#f92672">body</span>&gt;
+  My Website
+  &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;./main.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+&lt;/<span style="color:#f92672">body</span>&gt;
+&lt;/<span style="color:#f92672">html</span>&gt;
+</code></pre></div><p>這時候就會有個疑問，那瀏覽器是如何讀懂這些檔案？又如何將頁面呈現在我們眼前呢？首先，瀏覽器要渲染出網頁頁面，需要幾個主要步驟：</p>
+<p>![study-Render-process.png]({{ site.url }}/assets/images/study-Render-process.png)</p>
+<h3 id="1-files">1. Files</h3>
+<p>從 server 獲得 HTML / CSS / JavaScript 等檔案。</p>
+<h3 id="2-parsing">2. Parsing</h3>
+<p>HTML parser 會將 HTML 檔案解析成樹狀結構的 <code>DOM</code>。相同地， CSS parser 也會將 CSS 解析成樹狀結構的 <code>CSSOM</code>。兩者都會被轉化為樹狀資料結構，以利後續的合併匹配。</p>
+<h3 id="3-render-tree">3. Render Tree</h3>
+<p>接下來，DOM 和 CSSOM 會合併成為一個 <code>Render Tree</code>，以供後續繪製時使用。在產生 Render Tree 時，會根據 DOM 的元素，來匹配適合的 CSS 樣式，並且產生新的 Render Tree。不過，假設 CSS 為 <code>display: none</code>，則不會被放置到 Render Tree 中。如下方圖所示的 <code>p span</code>。
+(image source from <a href="https://developers.google.com/web/fundamentals/performance/critical-rendering-path/constructing-the-object-model">Google Developer</a>)
+<img src="https://developers.google.com/web/fundamentals/performance/critical-rendering-path/images/cssom-tree.png?hl=zh-tw" alt=""></p>
+<h3 id="4-layout">4. Layout</h3>
+<p>有了 Render Tree，此時還需要將這些 node 配置在適合的位置，才能正確地顯示出我們想要的頁面，而這段版面配置的過程就是 <code>Layout</code> 階段。為了避免不斷更新版面配置，Layout 流程設計為 <code>Dirty Check</code>，當配置發生變化時，只會去調整標記為 <code>dirty: true</code> 的 node。</p>
+<h3 id="5-paint">5. Paint</h3>
+<p>配置好樣式和 Layout ，就可以開始繪製物件。不過要注意的是，這階段所產生的drawing commnad 只是會被紀錄起來，而不會真正地被顯示在螢幕上。（例如 Chrome 使用 <a href="https://skia.org/">SkPicture</a> 來記錄）</p>
+<h3 id="6-composite">6. Composite</h3>
+<p>這階段會將上敘有提到的 drawing command 進行處理，並且透過 GPU Process 將結果輸出到介面上。而最主要的目的是為了<strong>提升瀏覽效能</strong>，它是一個<strong>獨立的 thread</strong>，並會 cache 最後的頁面結構，然後在特定情況下直接使用 cache 結構，進而讓畫面能更快速地呈現在使用者面前。(例如我們 scroll 捲動畫面)</p>
+<h2 id="threads">Threads</h2>
+<p>從上面的流程可以知道，瀏覽器從 server 取得檔案到將頁面渲染完成，需要好幾個步驟，而一般使用者又會預期網頁在四秒內就要能呈現完成，到底該如何處理這些流程，會是重要的問題。</p>
+<h3 id="main-thread">Main Thread</h3>
+<p>首先，從 HTML Download 到組成 Render Tree 以及 Paint 這整個主要流程，都是由 <code>Main Single Thread</code> 來處理。而這也意味著只要有其中一個流程需要外部資源或是執行比較長的時間，就會讓整個畫面停滯住(Render-Blocking)。舉例來說，HTML 中有一個從 server 端引入的 CSS 檔案，由於 CSSOM 在 Render Tree 中是必要的，所以 Main Thread 會被暫停住，等待 CSS 檔案下載完畢後進入 CSS Parsing ，而這處理期間，使用者可能會看到頁面呈現一片空白（或是不完整畫面），必須等到整個 Render Tree 出來並且被繪製，才會看到完整頁面。</p>
+<p>根據上面所述，這對使用者來說可能不會是好的體驗，因此現在瀏覽器會盡可能地提早將頁面繪製出來，即使<strong>這個頁面並不是完整頁面</strong>。理論上來說，繪製的流程必須等到 Render Tree 建構完成之後才會發生，不過瀏覽器實際在執行時會讓第一次繪製在 Render Tree 建構完整之前發生。</p>
+<p>![rendering-engine-2.png]({{ site.url }}/assets/images/rendering-engine-2.png)</p>
+<p>即使如此，網站還是要等到整個渲染出來才有其意義在，所以雖然瀏覽器會提前將部分畫面顯示出來，但只是為了提高用戶體驗，不影響本節所要討論的重點：<strong>當 HTML / CSS Parsing 以及 JavaScript 執行或是在處理版面配置繪製時，都需要佔用 Main Thread，進而延長頁面顯示所需的時間。</strong></p>
+<p>當然我們可以透過一些手段來加快 Main Thread 的流程，例如使用 <code>&lt;script async&gt;</code> 的非同步載入檔案來避免 Main Thread 被暫停住，或是盡可能地只先載入必要內容。不過這邊只先大概說明，後續文章會進行比較完整的補充。</p>
+<h3 id="compositor-thread">Compositor Thread</h3>
+<p><a href="https://dev.chromium.org/developers/design-documents/compositor-thread-architecture">Compositor Thread Architecture</a>
+上面有提到 Composite 這個部分，在現代瀏覽器中，它被分成獨立的 Thread，主要目的是藉此提高捲動畫面或是動畫呈現的速度。前面有提到在 Main Thread 的 paint 階段中會產生即將繪製在螢幕上的物件群，這些物件會被複製一份到 Compositor Thread 中，然後透過 GPU process 輸出在畫面上。</p>
+<p>當使用者捲動畫面時，原本流程是要在 Main Thread 重新進行 Layout / Paint 的行為，不過透過 Compositor Thread 的協助，可以在最短時間內使用 Cache Tree 去輸出網頁畫面，同時 Compositor Thread 也會通知 Main Thread 進行re-layout / re-paint，並且將更新後的資料逐步地呈現在畫面上，而不會因為 Main Thread 需要執行複雜的運算導致畫面停擺。</p>
+<p>![study-scroll-event.png]({{ site.url }}/assets/images/study-scroll-event.png)</p>
+<h2 id="結論">結論</h2>
+<p>這篇最主要的目的是概要地介紹瀏覽器渲染網頁頁面的流程，透過流程敘述，可以獲得更多關於改善畫面呈現速度的啟發。例如我們可以知道當在進行 CSS parsing 或是 JavaScript 執行的時候，會佔用 Main Thread，所以在改善部分，可以嘗試將 CSS 分成不同階段進行讀取和 parsing ，以及把工作量較大的 JavaScript code 分成不同階段來逐步執行，以加快整體畫面的呈現時間。</p>
+<h2 id="reference">Reference</h2>
+<ol>
+<li><a href="http://taligarsiel.com/Projects/howbrowserswork1.htm#Webkit_CSS_parser">How browsers work</a></li>
+<li><a href="https://developers.google.com/web/fundamentals/performance/critical-rendering-path/render-tree-construction">Critical Rendering Path</a></li>
+<li><a href="http://www.masonchang.com/blog/2016/10/10/a-quick-overview-of-chromes-rendering-path">A Quick Overview of Chrome&rsquo;s Rendering Path</a></li>
+</ol>
+
+    </div>
+    <div class="article-footer">
+<blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    <li class="post-copyright-link hidden-xs">
+      <strong>Permalink: </strong>
+      <a href="https://yushuanhsieh.github.io/post/2018-06-23-browser-render-engine/" title="The Main Flow of Rendering Engines" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2018-06-23-browser-render-engine/</a>
+    </li>
+  </ul>
+</blockquote>
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="https://yushuanhsieh.github.io/author.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">Cherie Hsieh</span><small class="ml-1x">Software Engineer</small></a></h3>
+        <div>Gopher</div>
+      </div>
+    </figure>
+  </div>
+</div>
+    </div>
+  </article>
+
+</div><nav class="bar bar-footer clearfix" data-stick-bottom>
+    <div class="bar-inner">
+        <ul class="pager pull-left">
+            <li class="prev">
+                <a href="https://yushuanhsieh.github.io/post/2018-06-14-angular-reactive-form/" title="Angular - Reactive Form"><i
+                        class="icon icon-angle-left"
+                        aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
+            </li>
+            <li class="next">
+                <a href="https://yushuanhsieh.github.io/post/2018-06-24-css-typed-om/"
+                    title="CSS Typed Object Model"><span>Newer&nbsp;&nbsp;</span><i
+                        class="icon icon-angle-right" aria-hidden="true"></i></a>
+            </li>
+            
+        </ul>
+        <div class="bar-right">
+        </div>
+    </div>
+</nav>
+
+</main><footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+  <div class="copyright">
+    &copy;2017  -
+    2020
+    <div class="publishby">
+        Theme by <a href="https://github.com/xiaoheiAh" target="_blank"> xiaoheiAh </a>base on<a href="https://github.com/xiaoheiAh/hugo-theme-pure" target="_blank"> pure</a>.
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+<script>
+    window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/javascript.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/c.min.js" defer></script><script>
+    hljs.configure({
+        tabReplace: '    ', 
+        classPrefix: ''     
+        
+    })
+    hljs.initHighlightingOnLoad();
+</script>
+<script src="https://yushuanhsieh.github.io/js/application.min.bdeb64b910570b6c41badc6a05b7afb0c8ad9efd8525de3c7257d59e786326a3.js"></script>
+<script src="https://yushuanhsieh.github.io/js/plugin.min.51ff8c7317566f82259170fa36e09c4493adc9b9378b427a01ad3f017ebac7dd.js"></script>
+
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            ROOT_URL: 'https:\/\/yushuanhsieh.github.io',
+            CONTENT_URL: 'https:\/\/yushuanhsieh.github.io\/searchindex.json ',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script type="text/javascript" src="https://yushuanhsieh.github.io/js/insight.min.a343cd9a5a7698336b28ef3a7c16a3a1b1d2d5fb17dc8ed04022bbe08cc5459073a15bdafa3a8a58cdd56080784bdd69fa70b1ae8597565c799c57ed00f0e120.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+<script>
+    tocbot.init({
+        
+        tocSelector: '.js-toc',
+        
+        contentSelector: '.js-toc-content',
+        
+        headingSelector: 'h1, h2, h3',
+        
+        hasInnerContainers: true,
+    });
+</script>
+
+
+  </body>
+</html>

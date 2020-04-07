@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        Understanding Router in Angular 6 - Cherie&#39;s Tech Blog
+      </title>
+    <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  
+  <meta name="theme-color" content="#000000" />
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <meta name="description" content="前言： 這陣子在看 Reactive Extension (Rx) 和 Angular ，而 Angular 中常使用的 Router 內就有些 Observable Type 的 instance，因此就打算從這邊深入了解一下 Angular Router 的流程和 Observable 應用方式。" />
+  <meta name="generator" content="Hugo 0.67.0 with theme pure" />
+  <title>Understanding Router in Angular 6 - Cherie&#39;s Tech Blog</title>
+  
+  
+  <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
+  
+    
+    <link rel="stylesheet" href="https://yushuanhsieh.github.io/scss/cherie.min.25e69b63f709fdfaf070b38e72e556d2a25931840ee2fcdc62b4aa0b9803e9ba.css" async>
+  
+  <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
+  <meta property="og:title" content="Understanding Router in Angular 6" />
+<meta property="og:description" content="前言： 這陣子在看 Reactive Extension (Rx) 和 Angular ，而 Angular 中常使用的 Router 內就有些 Observable Type 的 instance，因此就打算從這邊深入了解一下 Angular Router 的流程和 Observable 應用方式。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2018-05-24-angular-6-router/" />
+<meta property="article:published_time" content="2018-05-24T12:00:00+08:00" />
+<meta property="article:modified_time" content="2018-05-24T12:00:00+08:00" />
+<meta itemprop="name" content="Understanding Router in Angular 6">
+<meta itemprop="description" content="前言： 這陣子在看 Reactive Extension (Rx) 和 Angular ，而 Angular 中常使用的 Router 內就有些 Observable Type 的 instance，因此就打算從這邊深入了解一下 Angular Router 的流程和 Observable 應用方式。">
+<meta itemprop="datePublished" content="2018-05-24T12:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2018-05-24T12:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="351">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Understanding Router in Angular 6"/>
+<meta name="twitter:description" content="前言： 這陣子在看 Reactive Extension (Rx) 和 Angular ，而 Angular 中常使用的 Router 內就有些 Observable Type 的 instance，因此就打算從這邊深入了解一下 Angular Router 的流程和 Observable 應用方式。"/>
+
+  <!--[if lte IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+    <![endif]-->
+
+  <!--[if lt IE 9]>
+      <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+  </head>
+
+  
+  
+
+  <body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage"><header class="header" itemscope itemtype="http://schema.org/WPHeader">
+    <div class="slimContent">
+      <div class="navbar-header">
+        <div class="profile-block text-center">
+          <a id="avatar" href="" target="_blank">
+            <img class="img-circle img-rotate" src="https://yushuanhsieh.github.io/author.jpg" width="200" height="200">
+          </a>
+          <h2 id="name" class="hidden-xs hidden-sm">Cherie Hsieh</h2>
+          <h3 id="title" class="hidden-xs hidden-sm hidden-md">Software Engineer</h3>
+          <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>Taiwan</small>
+        </div><div class="search" id="search-form-wrap">
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i
+                        class="icon icon-search"></i></button>
+            </span>
+        </div>
+        <div class="ins-search">
+            <div class="ins-search-mask"></div>
+            <div class="ins-search-container">
+                <div class="ins-input-wrapper">
+                    <input type="text" class="ins-search-input" placeholder="Type something..."
+                        x-webkit-speech />
+                    <button type="button" class="close ins-close ins-selectable" data-dismiss="modal"
+                        aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="ins-section-wrapper">
+                    <div class="ins-section-container"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+        <ul class="nav navbar-nav main-nav">
+            <li class="menu-item menu-item-home">
+                <a href="/">
+                  <span class="menu-title">Home</span>
+                </a>
+            </li>
+            <li class="menu-item menu-item-categories">
+                <a href="/categories/">
+                  <span class="menu-title">Categories</span>
+                </a>
+            </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+<aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title"> Categories</h3>
+    <div class="widget-body">
+        <ul class="category-list">
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/c/" class="category-list-link">c</a><span class="category-list-count">3</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">5</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/other/" class="category-list-link">other</a><span class="category-list-count">7</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/study/" class="category-list-link">study</a><span class="category-list-count">9</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/web/" class="category-list-link">web</a><span class="category-list-count">28</span></li>
+        </ul>
+    </div>
+</div>
+      
+<div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+        <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-03-31-march/" class="title">[Life] 三月起，在竹北定區生活</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-03-31 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-03-31</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-02-24-february/" class="title">[Life] 2月雜談</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-02-24 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-02-24</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-21-golang-router/" class="title">Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-21 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-21</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-19-memory-allocator-implicit-free-list/" class="title">Implement Memory Allocator - Implicit Free List</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-19 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-19</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2019-12-30-2019-review/" class="title">2019 年度回顧</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2019-12-30 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-12-30</time>
+                    </p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+  </div>
+</aside>
+
+    
+    
+<main class="main" role="main"><div class="content">
+  <article id="single-" class="article article-type-single" itemscope
+    itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      <h1 itemprop="name">
+  <a
+    class="article-title"
+    href="/post/2018-05-24-angular-6-router/"
+    >
+    
+      
+        <span class="title-cat">Web</span>
+      
+    Understanding Router in Angular 6</a>
+</h1>
+
+      <div class="article-meta">
+        
+<span class="article-date">
+  <i class="icon icon-calendar-check"></i>&nbsp;
+<a href="https://yushuanhsieh.github.io/post/2018-05-24-angular-6-router/" class="article-date">
+  <time datetime="2018-05-24 12:00:00 &#43;0800 CST" itemprop="datePublished">2018-05-24</time>
+</a>
+</span>
+<span class="article-category">
+  <i class="icon icon-folder"></i>
+  
+    <a class="article-category-link" href="/categories/web/"> Web </a>
+  
+</span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2018-05-24-angular-6-router/#comments"
+            class="article-comment-link">Comments</a></span>
+      </div>
+    </div>
+    <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
+      <h2 id="前言">前言：</h2>
+<p>這陣子在看 Reactive Extension (Rx) 和 Angular ，而 Angular 中常使用的 Router 內就有些 Observable Type 的 instance，因此就打算從這邊深入了解一下 Angular Router 的流程和 Observable 應用方式。</p>
+<h2 id="router-navigation">Router Navigation</h2>
+<h3 id="overview">Overview</h3>
+<p>![router.png]({{ site.url }}/assets/images/router.png)</p>
+<p>首先，先來說一下大致流程，當使用者點擊設有 <code>routerLink</code> attribute 超連結時（或是在 component 裡面 trigger router navigation），設置的連結會先經過分析步驟，然後透過 Router 找出對應的 Component，再將此 Component 呈現在設置好 <code>&lt;router-outlet&gt;&lt;/router-outlet&gt;</code>  的地方。</p>
+<h3 id="建立-router-service">建立 Router Service</h3>
+<p>網上有很多案例會教導如何設置 Component 的 Router，如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">import</span> { <span style="color:#a6e22e">RouterModule</span>, <span style="color:#a6e22e">Routes</span> } <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;@angular/router&#39;</span>;
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">routes</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">Routes</span> <span style="color:#f92672">=</span> [{<span style="color:#a6e22e">path</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;content/:id&#39;</span>, <span style="color:#a6e22e">component</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">ArticleComponent</span>}];
+<span style="color:#960050;background-color:#1e0010">@</span><span style="color:#a6e22e">NgModule</span>({
+  <span style="color:#a6e22e">imports</span><span style="color:#f92672">:</span> [<span style="color:#a6e22e">RouterModule</span>.<span style="color:#a6e22e">forRoot</span>(<span style="color:#a6e22e">routes</span>)],
+  <span style="color:#a6e22e">declarations</span><span style="color:#f92672">:</span> [<span style="color:#a6e22e">ArticleComponent</span>],
+})
+</code></pre></div><p>而 <code>RouterModule.forRoot(routes)</code> 實際上會建立一個 <code>Router</code> 的 Singleton Service，裡面有 instance <code>Router.RouterState</code> 來管理目前的 Route 狀態，以及一些 methods 來讓使用者透過 Router 來進行 navigation。
+<a href="https://angular.io/api/router/Router">Router class API</a></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Router</span> {
+  <span style="color:#75715e">// 省略其他 methods or instance
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">get</span> <span style="color:#a6e22e">routerState</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">RouterState</span>
+  <span style="color:#a6e22e">navigateByUrl</span>(<span style="color:#a6e22e">url</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">string</span> <span style="color:#f92672">|</span> <span style="color:#a6e22e">UrlTree</span>, <span style="color:#a6e22e">extras</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">NavigationExtras</span> <span style="color:#f92672">=</span> { <span style="color:#a6e22e">skipLocationChange</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">false</span> })<span style="color:#f92672">:</span> Promise<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">boolean</span><span style="color:#f92672">&gt;</span>
+  <span style="color:#a6e22e">navigate</span>(<span style="color:#a6e22e">commands</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">any</span>[], <span style="color:#a6e22e">extras</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">NavigationExtras</span> <span style="color:#f92672">=</span> { <span style="color:#a6e22e">skipLocationChange</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">false</span> })<span style="color:#f92672">:</span> Promise<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">boolean</span><span style="color:#f92672">&gt;</span>
+}
+</code></pre></div><h3 id="routerstate-樹狀結構與-activatedroute-結點">RouterState 樹狀結構與 ActivatedRoute 結點</h3>
+<h4 id="routerstate">RouterState</h4>
+<p><code>RouterState</code> 是一個由 ActivedRoute 所組成的樹狀結構，以及 <code>RouterStateSnapshot</code> 存放當前的 Route 狀態。所以如果想要查看當前狀態，可以直接透過此 Service 進行查詢。</p>
+<pre><code class="language-javascript｀" data-lang="javascript｀">constructor(private router: Router){}
+this.router.routerState.snapshot.url; /** 如果當前路徑在/Article/1，就會印出 /Article/1 */
+</code></pre><p><a href="https://angular.io/api/router/RouterStateSnapshot">RouterStateSnapshot Interface</a>
+而當使用者在進行 navigation 時，就是透過 <code>RouterState</code> 內的樹狀結構來找到對應的 Component。</p>
+<h4 id="activatedroute">ActivatedRoute</h4>
+<p>上面提到 <code>RouterState</code> 是個樹狀結構，而 <code>ActivatedRoute</code> 就是其中每個 node。 <code>ActivatedRoute</code> 除了有 <code>routeConfig</code> 配置要顯示 Component 和 matcher (負責驗證當前路徑是否匹配)，更重要的是還帶有 <code>params</code> 和 <code>data</code>，讓頁面在切換到指定 Component 時，也能將資料帶往 Component。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">interface</span> <span style="color:#a6e22e">ActivatedRoute</span> {
+  <span style="color:#a6e22e">params</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">Observable</span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">Params</span><span style="color:#f92672">&gt;</span>,
+  <span style="color:#a6e22e">data</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">Observable</span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">Data</span><span style="color:#f92672">&gt;</span>,
+  <span style="color:#a6e22e">get</span> <span style="color:#a6e22e">paramMap</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">Observable</span><span style="color:#f92672">&lt;</span><span style="color:#a6e22e">ParamMap</span><span style="color:#f92672">&gt;</span>
+}
+</code></pre></div><p>假設配置路徑為</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">routes</span> <span style="color:#f92672">=</span> [{<span style="color:#a6e22e">path</span> <span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;article/:id&#39;</span>, <span style="color:#a6e22e">component</span> <span style="color:#f92672">:</span> <span style="color:#a6e22e">ArticleComponent</span>, <span style="color:#a6e22e">data</span> <span style="color:#f92672">:</span> {<span style="color:#a6e22e">content</span> <span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;my article&#39;</span>}}]
+</code></pre></div><p>當點擊以下路徑</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">routerLink</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;/article/1&#34;</span>&gt;&lt;/<span style="color:#f92672">a</span>&gt; 
+</code></pre></div><p>就可以透過以下方式來取得對應資料</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#a6e22e">constructor</span>(<span style="color:#66d9ef">private</span> <span style="color:#a6e22e">route</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">ActivatedRoute</span>){}
+<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">route</span>.<span style="color:#a6e22e">params</span>.<span style="color:#a6e22e">subscribe</span>(<span style="color:#a6e22e">params</span> =&gt; <span style="color:#a6e22e">params</span>) <span style="color:#75715e">// {id: 1}
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">route</span>.<span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">subscribe</span>(<span style="color:#a6e22e">data</span> =&gt; <span style="color:#a6e22e">data</span>) <span style="color:#75715e">// {content : &#39;my article&#39;}
+</span></code></pre></div><h4 id="activatedroute-injection">ActivatedRoute Injection</h4>
+<p>要注意的是，一個 ActivatedRoute 對應一個 Component，所以當從 Component Inject ActivatedRoute 時，他會引入關聯到此 Component 的 ActivatedRoute。如果你是想從 Service Inject ActivatedRoute，那要記得<strong>在 Component 註冊此 Service</strong>，假設是在 Module 層註冊 Service，那 Service 就會為 Singleton Service（意指 Application 內的 Component 都共用此 Service，當然如果你使用 Angular 6 的 provideredIn ，就是指 module 底下的 Component），並會 Inject 到 RouterState.root 這個 ActivatedRoute，這樣就不會是我們想要的結果。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#960050;background-color:#1e0010">@</span><span style="color:#a6e22e">Component</span>({
+  <span style="color:#a6e22e">selector</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;article&#39;</span>,
+  <span style="color:#a6e22e">templateUrl</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;article.html&#39;</span>,
+  <span style="color:#a6e22e">providers</span><span style="color:#f92672">:</span> [<span style="color:#a6e22e">ArticleService</span>] <span style="color:#75715e">// 在此宣告 Service，讓 Service 是依賴在此 Component.
+</span><span style="color:#75715e"></span>})
+</code></pre></div><h3 id="subscribe-activatedroute-service">Subscribe ActivatedRoute Service</h3>
+<p>最後，假設我們需要追蹤 ActivatedRoute.params 的變動，根據最新的 params 值做處理，很理所當然地，我們會使用 subscribe，例如：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#a6e22e">constructor</span>(<span style="color:#66d9ef">private</span> <span style="color:#a6e22e">route</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">ActivatedRoute</span>){}
+
+<span style="color:#a6e22e">ngOnInit</span>{
+  <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">route</span>.<span style="color:#a6e22e">params</span>.<span style="color:#a6e22e">subscribe</span>(<span style="color:#a6e22e">params</span> =&gt; {
+    <span style="color:#75715e">// deal with params
+</span><span style="color:#75715e"></span>  })
+}
+</code></pre></div><p>如此一來，當 route.params 值發生改變時，我們就可以透過 subscribe 來追蹤。思考 observable 的做法，如果能進行 subscribe，那必定有個執行 next(params) 的地方。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">advanceActivatedRoute</span>(<span style="color:#a6e22e">route</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">ActivatedRoute</span>)<span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> {
+  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">route</span>.<span style="color:#a6e22e">snapshot</span>) {
+    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">shallowEqual</span>(<span style="color:#a6e22e">currentSnapshot</span>.<span style="color:#a6e22e">params</span>, <span style="color:#a6e22e">nextSnapshot</span>.<span style="color:#a6e22e">params</span>)) {
+      (<span style="color:#f92672">&lt;</span><span style="color:#a6e22e">any</span><span style="color:#f92672">&gt;</span><span style="color:#a6e22e">route</span>.<span style="color:#a6e22e">params</span>).<span style="color:#a6e22e">next</span>(<span style="color:#a6e22e">nextSnapshot</span>.<span style="color:#a6e22e">params</span>);
+    }
+  }
+}
+</code></pre></div><p>當在進行 navigate 時，會執行 <code>runNavigate()</code> ，然後依序處理 navigate 的流程，並執行 <code>activateRoutes()</code> 來觸發上面那段 next(params) 通知 observers。</p>
+<p>如此一來，observer 就可以處理最新 params 了！</p>
+<h2 id="reference">Reference</h2>
+<p><a href="http://vsavkin.tumblr.com/post/145672529346/angular-router">http://vsavkin.tumblr.com/post/145672529346/angular-router</a>
+<a href="https://leanpub.com/router">https://leanpub.com/router</a>
+<a href="https://vsavkin.com/angular-router-understanding-router-state-7b5b95a12eab">https://vsavkin.com/angular-router-understanding-router-state-7b5b95a12eab</a></p>
+
+    </div>
+    <div class="article-footer">
+<blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    <li class="post-copyright-link hidden-xs">
+      <strong>Permalink: </strong>
+      <a href="https://yushuanhsieh.github.io/post/2018-05-24-angular-6-router/" title="Understanding Router in Angular 6" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2018-05-24-angular-6-router/</a>
+    </li>
+  </ul>
+</blockquote>
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="https://yushuanhsieh.github.io/author.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">Cherie Hsieh</span><small class="ml-1x">Software Engineer</small></a></h3>
+        <div>Gopher</div>
+      </div>
+    </figure>
+  </div>
+</div>
+    </div>
+  </article>
+
+</div><nav class="bar bar-footer clearfix" data-stick-bottom>
+    <div class="bar-inner">
+        <ul class="pager pull-left">
+            <li class="prev">
+                <a href="https://yushuanhsieh.github.io/post/2018-05-16-javascript-optimization-property/" title="How Does JavaScript Engine (V8) Optimize JavaScript code - Fast Property Access"><i
+                        class="icon icon-angle-left"
+                        aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
+            </li>
+            <li class="next">
+                <a href="https://yushuanhsieh.github.io/post/2018-05-29-angular-6-ngtemplate/"
+                    title="Angular - ng-template &amp; ng-container"><span>Newer&nbsp;&nbsp;</span><i
+                        class="icon icon-angle-right" aria-hidden="true"></i></a>
+            </li>
+            
+        </ul>
+        <div class="bar-right">
+        </div>
+    </div>
+</nav>
+
+</main><footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+  <div class="copyright">
+    &copy;2017  -
+    2020
+    <div class="publishby">
+        Theme by <a href="https://github.com/xiaoheiAh" target="_blank"> xiaoheiAh </a>base on<a href="https://github.com/xiaoheiAh/hugo-theme-pure" target="_blank"> pure</a>.
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+<script>
+    window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/javascript.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/c.min.js" defer></script><script>
+    hljs.configure({
+        tabReplace: '    ', 
+        classPrefix: ''     
+        
+    })
+    hljs.initHighlightingOnLoad();
+</script>
+<script src="https://yushuanhsieh.github.io/js/application.min.bdeb64b910570b6c41badc6a05b7afb0c8ad9efd8525de3c7257d59e786326a3.js"></script>
+<script src="https://yushuanhsieh.github.io/js/plugin.min.51ff8c7317566f82259170fa36e09c4493adc9b9378b427a01ad3f017ebac7dd.js"></script>
+
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            ROOT_URL: 'https:\/\/yushuanhsieh.github.io',
+            CONTENT_URL: 'https:\/\/yushuanhsieh.github.io\/searchindex.json ',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script type="text/javascript" src="https://yushuanhsieh.github.io/js/insight.min.a343cd9a5a7698336b28ef3a7c16a3a1b1d2d5fb17dc8ed04022bbe08cc5459073a15bdafa3a8a58cdd56080784bdd69fa70b1ae8597565c799c57ed00f0e120.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+<script>
+    tocbot.init({
+        
+        tocSelector: '.js-toc',
+        
+        contentSelector: '.js-toc-content',
+        
+        headingSelector: 'h1, h2, h3',
+        
+        hasInnerContainers: true,
+    });
+</script>
+
+
+  </body>
+</html>
