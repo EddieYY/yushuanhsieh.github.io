@@ -38,7 +38,7 @@
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://yushuanhsieh.github.io/" />
-<meta property="og:updated_time" content="2020-03-31T08:00:00+08:00" />
+<meta property="og:updated_time" content="2020-04-07T08:00:00+08:00" />
 <meta itemprop="name" content="文組工程師">
 <meta itemprop="description" content=""><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="文組工程師"/>
@@ -128,7 +128,7 @@
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/c/" class="category-list-link">c</a><span class="category-list-count">3</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
-            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">5</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">6</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
@@ -143,6 +143,16 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget-body">
         <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-04-07-hugo-merge/" class="title">Multilingual Mode in Hugo</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-04-07 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-07</time>
+                    </p>
+                </div>
+            </li>
             <li>
                 <div class="item-inner">
                     <p class="item-title">
@@ -183,16 +193,6 @@
                     </p>
                 </div>
             </li>
-            <li>
-                <div class="item-inner">
-                    <p class="item-title">
-                        <a href="https://yushuanhsieh.github.io/post/2019-12-30-2019-review/" class="title">2019 年度回顧</a>
-                    </p>
-                    <p class="item-date">
-                        <time datetime="2019-12-30 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-12-30</time>
-                    </p>
-                </div>
-            </li>
         </ul>
     </div>
 </div>
@@ -208,6 +208,44 @@
     
     
     
+    <article
+      class="article article-type-page"
+      itemscope
+      itemtype="http://schema.org/BlogPosting"
+    >
+      <div class="article-header">
+        <h1 itemprop="name">
+  <a
+    class="article-title"
+    href="/post/2020-04-07-hugo-merge/"
+    >
+    
+      
+        
+          <span class="title-cat">Go</span>
+        
+      
+    Multilingual Mode in Hugo</a>
+</h1>
+
+      </div>
+      <div class="article-entry text-muted" itemprop="description">紀錄用 Hugo site generator 建立多語言網站時所遇到的問題，與過程中相關的學習內容，包含 Hugo render 過程、source code trace 等。</div>
+      <p class="article-meta">
+<span class="article-date">
+  <i class="icon icon-calendar-check"></i>&nbsp;
+<a href="https://yushuanhsieh.github.io/post/2020-04-07-hugo-merge/" class="">
+  <time datetime="2020-04-07 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-07</time>
+</a>
+</span>
+<span class="article-category">
+  <i class="icon icon-folder"></i>
+  
+    <a class="article-category-link" href="/categories/go/"> Go </a>
+</span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i> &nbsp;<a href="/post/2020-04-07-hugo-merge/#comments" class="article-comment-link">Comments</a></span>
+      </p>
+    </article>
     <article
       class="article article-type-page"
       itemscope
@@ -561,44 +599,6 @@ Front-End to Back-End 首先，最大的轉變大概是從專職 front-end 變�
 </span>
 
         <span class="post-comment"><i class="icon icon-comment"></i> &nbsp;<a href="/post/2019-10-05-study/#comments" class="article-comment-link">Comments</a></span>
-      </p>
-    </article>
-    <article
-      class="article article-type-page"
-      itemscope
-      itemtype="http://schema.org/BlogPosting"
-    >
-      <div class="article-header">
-        <h1 itemprop="name">
-  <a
-    class="article-title"
-    href="/post/2019-09-24-stack-memory-allocator/"
-    >
-    
-      
-        
-          <span class="title-cat">C</span>
-        
-      
-    Implement Memory Allocator</a>
-</h1>
-
-      </div>
-      <div class="article-entry text-muted" itemprop="description">前言 在很多程式語言都會看到 memory allocator，也可以看到陸續發表的 allocator 實作方式，例如 microsoft mimalloc。與其用看 source code 的方式來了解其原理，倒不如從基本學起，並且從實作過程中了解到為什麼他們要這樣設計 allocator。</div>
-      <p class="article-meta">
-<span class="article-date">
-  <i class="icon icon-calendar-check"></i>&nbsp;
-<a href="https://yushuanhsieh.github.io/post/2019-09-24-stack-memory-allocator/" class="">
-  <time datetime="2019-09-24 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-09-24</time>
-</a>
-</span>
-<span class="article-category">
-  <i class="icon icon-folder"></i>
-  
-    <a class="article-category-link" href="/categories/c/"> C </a>
-</span>
-
-        <span class="post-comment"><i class="icon icon-comment"></i> &nbsp;<a href="/post/2019-09-24-stack-memory-allocator/#comments" class="article-comment-link">Comments</a></span>
       </p>
     </article></div>
   

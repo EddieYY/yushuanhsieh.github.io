@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        Multilingual Mode in Hugo - 文組工程師
+      </title>
+    <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  
+  <meta name="theme-color" content="#000000" />
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <meta name="description" content="紀錄用 Hugo site generator 建立多語言網站時所遇到的問題，與過程中相關的學習內容，包含 Hugo render 過程、source code trace 等。" />
+  <meta name="generator" content="Hugo 0.67.0 with theme pure" />
+  <title>Multilingual Mode in Hugo - 文組工程師</title>
+  
+  
+  <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
+  
+    
+    <link rel="stylesheet" href="https://yushuanhsieh.github.io/scss/cherie.min.25e69b63f709fdfaf070b38e72e556d2a25931840ee2fcdc62b4aa0b9803e9ba.css" async>
+  
+  <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
+  <meta property="og:title" content="Multilingual Mode in Hugo" />
+<meta property="og:description" content="紀錄用 Hugo site generator 建立多語言網站時所遇到的問題，與過程中相關的學習內容，包含 Hugo render 過程、source code trace 等。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2020-04-07-hugo-merge/" />
+<meta property="article:published_time" content="2020-04-07T08:00:00+08:00" />
+<meta property="article:modified_time" content="2020-04-07T08:00:00+08:00" />
+<meta itemprop="name" content="Multilingual Mode in Hugo">
+<meta itemprop="description" content="紀錄用 Hugo site generator 建立多語言網站時所遇到的問題，與過程中相關的學習內容，包含 Hugo render 過程、source code trace 等。">
+<meta itemprop="datePublished" content="2020-04-07T08:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-04-07T08:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="579">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Multilingual Mode in Hugo"/>
+<meta name="twitter:description" content="紀錄用 Hugo site generator 建立多語言網站時所遇到的問題，與過程中相關的學習內容，包含 Hugo render 過程、source code trace 等。"/>
+
+  <!--[if lte IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+    <![endif]-->
+
+  <!--[if lt IE 9]>
+      <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+  </head>
+
+  
+  
+
+  <body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage"><header class="header" itemscope itemtype="http://schema.org/WPHeader">
+    <div class="slimContent">
+      <div class="navbar-header">
+        <div class="profile-block text-center">
+          <a id="avatar" href="" target="_blank">
+            <img class="img-circle img-rotate" src="https://yushuanhsieh.github.io/author.jpg" width="200" height="200">
+          </a>
+          <h2 id="name" class="hidden-xs hidden-sm">Cherie Hsieh</h2>
+          <h3 id="title" class="hidden-xs hidden-sm hidden-md">Software Engineer</h3>
+          <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>Taiwan</small>
+        </div><div class="search" id="search-form-wrap">
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i
+                        class="icon icon-search"></i></button>
+            </span>
+        </div>
+        <div class="ins-search">
+            <div class="ins-search-mask"></div>
+            <div class="ins-search-container">
+                <div class="ins-input-wrapper">
+                    <input type="text" class="ins-search-input" placeholder="Type something..."
+                        x-webkit-speech />
+                    <button type="button" class="close ins-close ins-selectable" data-dismiss="modal"
+                        aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="ins-section-wrapper">
+                    <div class="ins-section-container"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+        <ul class="nav navbar-nav main-nav">
+            <li class="menu-item menu-item-home">
+                <a href="/">
+                  <span class="menu-title">Home</span>
+                </a>
+            </li>
+            <li class="menu-item menu-item-categories">
+                <a href="/categories/">
+                  <span class="menu-title">Categories</span>
+                </a>
+            </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+<aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title"> Categories</h3>
+    <div class="widget-body">
+        <ul class="category-list">
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/c/" class="category-list-link">c</a><span class="category-list-count">3</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">6</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/other/" class="category-list-link">other</a><span class="category-list-count">7</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/study/" class="category-list-link">study</a><span class="category-list-count">9</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/web/" class="category-list-link">web</a><span class="category-list-count">28</span></li>
+        </ul>
+    </div>
+</div>
+      
+<div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+        <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-04-07-hugo-merge/" class="title">Multilingual Mode in Hugo</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-04-07 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-07</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-03-31-march/" class="title">三月起，在竹北定區生活</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-03-31 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-03-31</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-02-24-february/" class="title">2月雜談</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-02-24 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-02-24</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-21-golang-router/" class="title">Go HTTP Routers - Chi/Echo/Gin/gorilla mux 實作細節與比較</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-21 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-21</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-01-19-memory-allocator-implicit-free-list/" class="title">Implement Memory Allocator - Implicit Free List</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-01-19 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-01-19</time>
+                    </p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+  </div>
+</aside>
+
+    
+    
+<main class="main" role="main"><div class="content">
+  <article id="single-" class="article article-type-single" itemscope
+    itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      <h1 itemprop="name">
+  <a
+    class="article-title"
+    href="/post/2020-04-07-hugo-merge/"
+    >
+    
+      
+        
+          <span class="title-cat">Go</span>
+        
+      
+    Multilingual Mode in Hugo</a>
+</h1>
+
+      <div class="article-meta">
+        
+<span class="article-date">
+  <i class="icon icon-calendar-check"></i>&nbsp;
+<a href="https://yushuanhsieh.github.io/post/2020-04-07-hugo-merge/" class="article-date">
+  <time datetime="2020-04-07 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-07</time>
+</a>
+</span>
+<span class="article-category">
+  <i class="icon icon-folder"></i>
+  
+    <a class="article-category-link" href="/categories/go/"> Go </a>
+</span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2020-04-07-hugo-merge/#comments"
+            class="article-comment-link">Comments</a></span>
+      </div>
+    </div>
+    <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
+      <p>紀錄用 Hugo site generator 建立多語言網站時所遇到的問題，與過程中相關的學習內容，包含 Hugo render 過程、source code trace 等。</p>
+<h2 id="預備知識">預備知識</h2>
+<h3 id="the-flow-of-hugo-render">The flow of Hugo Render</h3>
+<p>Hugo 是一個 Site Generator，那他是怎麼產出這些 static html 的呢？首先程式會先遍歷在 <code>content</code> folder 底下所有的 folder 和 file，並且組成一個 <code>contentTree</code> (題外話， contentTree 是採用 radix 資料結構)。然後再把這些 content node 根據 node type (e.g. type 可能是 sections or taxonomies) 去對應到 <code>layout</code> folder 內的 template，接著 render 出最後的 html 頁面。(也可參閱 <a href="https://github.com/gohugoio/hugo/blob/master/hugolib/site.go#L78">hugolib/site.go</a> 由 Hugo 開發者所寫的簡易流程)</p>
+<p>從上述可以大概知道整個 Sites 的基本物件內容：</p>
+<p><img src="/posts/3_hugo-multi-langs-hugo-sites.png" alt="hugo"></p>
+<h3 id="multi-language-sites">Multi-language Sites</h3>
+<p>有了前面的概念之後，就可以知道 multi-language site 是怎麼產出的了，它其實就是 render 成不同語言的獨立頁面，然後透過 path 來分類出當前的頁面是哪個語言，其目錄結構如下：</p>
+<p><img src="/posts/hugo-multi-langs.png" alt="hugo"></p>
+<p>而就是因為這樣的目錄結構，我們才可以簡單地在 path 加上 <code>/zh-tw/</code> ，就切換到繁中語言網站。</p>
+<h2 id="langs-相關-variable--function-的說明與使用範例">Langs 相關 Variable / Function 的說明與使用範例</h2>
+<p>Hugo 提供 Languages 相關的 variable 和 function，讓我們在寫 template 的時候拿來使用，所以下面會介紹幾個常用的 variable 和 function，並說明適當的使用時機。</p>
+<h3 id="site-variables">Site Variables</h3>
+<p>Site 有蠻多 Language 相關的 variable 可以使用，如下</p>
+<pre><code>.Site.IsMultiLingual
+.Site.Language.Lang
+.Site.Language.LanguageName
+.Site.Language.Weight
+.Site.Language
+.Site.LanguageCode
+.Site.LanguagePrefix
+.Site.Languages
+</code></pre><p>其中，這些 variable 的 output 大多與 hugo lang configuration 有關，例如:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#66d9ef">languages</span>:
+  <span style="color:#66d9ef">en</span>:
+    <span style="color:#66d9ef">languageName</span>: <span style="color:#e6db74">&#34;English&#34;</span>
+    <span style="color:#66d9ef">weight</span>: <span style="color:#ae81ff">1</span>
+  <span style="color:#66d9ef">tw</span>:
+    <span style="color:#66d9ef">languageName</span>: <span style="color:#e6db74">&#34;繁體中文&#34;</span>
+    <span style="color:#66d9ef">weight</span>: <span style="color:#ae81ff">2</span>
+</code></pre></div><p>對應的 <code>.Site.Language.Lang</code> 就是 <code>tw</code>；而 <code>.Site.Language.LanguageName</code> 就是 <code>繁體中文</code>。我會建議這個命名最好與其他 resources 設定一樣的命名規則，舉例來說，如果語言要顯示出對應的 icon，而 icon 的class name 是 <code>tw</code>，那麼這個名稱也要設定成 <code>tw</code>，如此一來在寫 template 的時候，就可以很方便的寫成：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#f92672">p</span>&gt;
+  &lt;<span style="color:#f92672">span</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;flag-icon-{{ .Site.Language.Lang }}&#34;</span>&gt;&lt;/<span style="color:#f92672">span</span>&gt;
+  .Site.Language.LanguageName
+&lt;/<span style="color:#f92672">p</span>&gt;
+</code></pre></div><p>(Note: Page 中也有 <code>.Language</code> variable，所以寫成 <code>.Language.Lang</code> 也是可以的。)</p>
+<h3 id="page-variables">Page Variables</h3>
+<p>Page 是 template 的 default context variable，而它所提供的 lang 相關 variable 如下：</p>
+<pre><code>.IsTranslated
+.Translations
+.TranslationKey
+.Language
+.Sites.First
+</code></pre><p><code>.Language</code> 就不提了，因為跟 <code>.Site.Language</code> 一樣，比較重要的是 <code>.IsTranslated</code> 和 <code>.Translations</code>，官方文件在介紹時會提及一個範例：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">{{ if .IsTranslated }}
+&lt;<span style="color:#f92672">h4</span>&gt;{{ i18n &#34;translations&#34; }}&lt;/<span style="color:#f92672">h4</span>&gt;
+&lt;<span style="color:#f92672">ul</span>&gt;
+    {{ range .Translations }}
+    &lt;<span style="color:#f92672">li</span>&gt;
+        &lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;{{ .Permalink }}&#34;</span>&gt;{{ .Lang }}: {{ .Title }}{{ if .IsPage }} ({{ i18n &#34;wordCount&#34; . }}){{ end }}&lt;/<span style="color:#f92672">a</span>&gt;
+    &lt;/<span style="color:#f92672">li</span>&gt;
+    {{ end }}
+&lt;/<span style="color:#f92672">ul</span>&gt;
+{{ end }}
+</code></pre></div><p><code>.IsTranslated</code> 是說這個頁面有沒有提供其他語言版本， e.g. 如果只有 about.md ，那就是 false ，反之如果有 about.md 和 about.tw.md ，那就是 true。<code>IsTranslated</code> 在各 content page 會因為你提供的文件而有所差異，不過在 home page 基本上有提供語言設定的都會是 true。</p>
+<p><code>.Translations</code> 是列出當前頁面所有翻譯版本的 Page，它 return 的結果會是 Page array，因此才會需要使用 <code>range</code>。舉例來說，我們提供 <code>about.md</code>, <code>about.tw.md</code>, <code>about.ja.md</code> 三個語言版本的頁面，而當前頁面是 en 版本，所以 <code>.Translations</code> 會回傳 <code>tw</code>, <code>ja</code> 兩語言的翻譯 Page。</p>
+<p>而在 Page 迴圈當中，印出各 Page 的 language code，因此產出結果會變成：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#f92672">ul</span>&gt;
+    &lt;<span style="color:#f92672">li</span>&gt;
+        &lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;www.example.com/tw/about&#34;</span>&gt;tw: 繁中版本字數20&lt;/<span style="color:#f92672">a</span>&gt;
+        &lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;www.example.com/ja/about&#34;</span>&gt;ja: 日文字數30&lt;/<span style="color:#f92672">a</span>&gt;
+    &lt;/<span style="color:#f92672">li</span>&gt;
+&lt;/<span style="color:#f92672">ul</span>&gt;
+</code></pre></div><p>另外，<code>.Sites.First</code> 也是另一個可能會用到的 variable，<code>.Sites.First</code> 會回傳第一個語言的網站內容，用上述的例子來說，在 <code>tw</code> Site 使用 <code>.Sites.First</code>，結果就會是 <code>en</code> Site。通常我們會用在需要取得其他語言網站內容，後面會有使用實例。</p>
+<h3 id="function">Function</h3>
+<p>Language 相關的 function 包含：</p>
+<pre><code>lang.Merge
+lang.NumFmt
+</code></pre><p>其中，<code>lang.Merge</code> 是蠻容易搞混的 function，所以特別提到它的用法和範例。根據官網文件， <code>lang.Merge</code> 的用途是結合其他語言的 page，讓沒有翻譯到的內容也可以使用其他語言來呈現。例如，當前 Site Language 是 <code>tw</code>，而某一個 Page 只有英文版本，這時候就可以使用 <code>lang.Merge</code> 功能來呈現英文內容。</p>
+<p>官網範例如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">{{ $pages := .Site.RegularPages }}
+{{ range .Site.Home.Translations }}
+  {{ $pages = $pages | lang.Merge .Site.RegularPages }}
+{{ end }}
+</code></pre></div><p><code>.Site.RegularPages</code> 是指特定語言 Site 的 leaf pages。</p>
+<h4 id="補充什麼是-regularpages">補充：什麼是 RegularPages？</h4>
+<p>RegularPages 簡單來說就是 <code>*.md</code> 這些 file 所產生的 page object，所以又被稱作 leaf page。在 Hugo 的世界中，萬物都是 Page，像是 section, taxonomy 這些也是以 Page 的型態存在 (Page 真正的型別是 Go interface)，但是真正包含文字內容的是 RegularPages，所以才會看到 template 中會有 <code>.Site.RegularPages</code> 這類的變數出現。</p>
+<p>接著，</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">{{ range .Site.Home.Translations }}
+</code></pre></div><p>如同上面提到， <code>.Translations</code> 是列出所有翻譯過的 Page，但是為什麼要特別指定 <code>.Site.Home</code> 呢？主要原因是 <code>.Site.Home</code> 意指網站的 home page ，而 home page 是每個翻譯版本都需要的 Page，所以透過 home page，才能真正的取得所有翻譯版本的 Page。如果只用 <code>.Translations</code> 的話，有可能當前 Page 並沒有其他翻譯版本，那就會回傳空 array。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">{{ $pages = $pages | lang.Merge .Site.RegularPages }}
+</code></pre></div><p>剛剛取得到其他語言的 Page 之後，再使用 <code>.Site.RegularPages</code> 來取得該語言的所有 RegularPage，並且與當前語言的 RegularPage 結合，這樣就可以從其他語言中取得缺少的 Page。</p>
+<p>再重新複習一下剛剛整段 code，我們假設當前的語言是 <code>en</code>，一樣有 <code>tw</code>, <code>ja</code> 其他兩種語言 Site。</p>
+<pre><code>{{ $pages := .Site.RegularPages }} // en Site 中所有的 RegularPages
+{{ range .Site.Home.Translations }}
+
+  // Loop 其他翻譯語言的 Page，此時 context 變成不同語言的 Page
+  // 因此 .Site.RegularPages 是表示 `tw` `ja` 這兩個語言的 RegularPage
+  // 雖然跟上面那行ㄧ樣，但實際的物件是完全不同的～
+
+  {{ $pages = $pages | lang.Merge .Site.RegularPages }}
+
+  // 將 Pages 合併，產生新的 Pages
+
+{{ end }}
+</code></pre><p>這樣聽起來 <code>lang.Merge</code> 好像很強大，如果有些內容來不及翻譯，就可以直接使用 default lang page 來替代。但實際上並沒有如此好用，使用 <code>lang.Merge</code> 的前提條件是該 page 會進入到 render 階段，我們才有辦法透過 template 來 merge 兩種語言的內容，如果那個 page 本身並不存在於 Site 當中，那他就不會 render，此時當然就無法使用 <code>lang.Merge</code> 功能。</p>
+<p>舉個例子，如果我們有 <code>en</code> 和 <code>tw</code> 兩個語言的 Site，但是只有 <code>about.md</code> 英文版本的內容，缺少了 <code>about.tw.md</code> 文件，此時即使我們在 <code>layout/about</code> 加入 <code>lang.Merge</code> ㄧ樣沒用，因為缺少 <code>about.tw.md</code>，<code>tw</code> Site 就不會有 about page object，進而就不會進入 template render。</p>
+<h2 id="問題share-a-content-to-different-language-sites">問題：share a content to different language sites</h2>
+<p>綜合以上的說明，可以發現使用 Hugo build 多語言的網站時，會遇到一個問題，就是一定要有 <code>*.tw.md</code> 這類語言頁面 file 的存在，才會產出該頁面，而 <code>lang.Merge</code> 並無法有效解決該類問題。在 Hugo issues 中也看到不少 user 建議要有 <code>merge content with default language content</code>，像是 <a href="https://github.com/gohugoio/hugo/issues/5612">Issues #5612</a>，而 Hugo 開發者也認同此建議，只是他也點出做這功能的複雜度，像是： merge 要以哪個語言為主？如果使用 merge，那 Hugo 會產出大量不同語言但是其實內容一樣的 html，Google search 表示無奈。</p>
+<p>因此雖然有這個 Proposal，但是目前被持續遞延到下一個版本。在沒有其他官方作法之前，網友有提供各種方式來暫時解決此問題，像是建立 symbolic link <code>ln -s about.md about.tw.md</code> 等。</p>
+<h2 id="結論">結論</h2>
+<p>Hugo 的多語言網站建立還是有其限制，因此在使用 Hugo 建立商業官方網站之前，最好先評估一下是否可以接受這點，不然直接使用 javascript front-end framework 搭配 i18n，可能比處理這些流程還要好些。</p>
+
+    </div>
+    <div class="article-footer">
+<blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    <li class="post-copyright-link hidden-xs">
+      <strong>Permalink: </strong>
+      <a href="https://yushuanhsieh.github.io/post/2020-04-07-hugo-merge/" title="Multilingual Mode in Hugo" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2020-04-07-hugo-merge/</a>
+    </li>
+  </ul>
+</blockquote>
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="https://yushuanhsieh.github.io/author.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">Cherie Hsieh</span><small class="ml-1x">Software Engineer</small></a></h3>
+        <div>Gopher</div>
+      </div>
+    </figure>
+  </div>
+</div>
+    </div>
+  </article>
+
+</div><nav class="bar bar-footer clearfix" data-stick-bottom>
+    <div class="bar-inner">
+        <ul class="pager pull-left">
+            <li class="prev">
+                <a href="https://yushuanhsieh.github.io/post/2020-03-31-march/" title="三月起，在竹北定區生活"><i
+                        class="icon icon-angle-left"
+                        aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
+            </li>
+            
+        </ul>
+        <div class="bar-right">
+        </div>
+    </div>
+</nav>
+
+</main><footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+  <div class="copyright">
+    &copy;2017  -
+    2020
+    <div class="publishby">
+        Theme by <a href="https://github.com/xiaoheiAh" target="_blank"> xiaoheiAh </a>base on<a href="https://github.com/xiaoheiAh/hugo-theme-pure" target="_blank"> pure</a>.
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+<script>
+    window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/javascript.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/c.min.js" defer></script><script>
+    hljs.configure({
+        tabReplace: '    ', 
+        classPrefix: ''     
+        
+    })
+    hljs.initHighlightingOnLoad();
+</script>
+<script src="https://yushuanhsieh.github.io/js/application.min.bdeb64b910570b6c41badc6a05b7afb0c8ad9efd8525de3c7257d59e786326a3.js"></script>
+<script src="https://yushuanhsieh.github.io/js/plugin.min.51ff8c7317566f82259170fa36e09c4493adc9b9378b427a01ad3f017ebac7dd.js"></script>
+
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            ROOT_URL: 'https:\/\/yushuanhsieh.github.io',
+            CONTENT_URL: 'https:\/\/yushuanhsieh.github.io\/searchindex.json ',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script type="text/javascript" src="https://yushuanhsieh.github.io/js/insight.min.a343cd9a5a7698336b28ef3a7c16a3a1b1d2d5fb17dc8ed04022bbe08cc5459073a15bdafa3a8a58cdd56080784bdd69fa70b1ae8597565c799c57ed00f0e120.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+<script>
+    tocbot.init({
+        
+        tocSelector: '.js-toc',
+        
+        contentSelector: '.js-toc-content',
+        
+        headingSelector: 'h1, h2, h3',
+        
+        hasInnerContainers: true,
+    });
+</script>
+
+
+  </body>
+</html>
