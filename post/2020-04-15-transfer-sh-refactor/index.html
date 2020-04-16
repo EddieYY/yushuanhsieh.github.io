@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <title>
-        三月起，在竹北定區生活 - 文組工程師
+        Trace transfer.sh open project - 文組工程師
       </title>
     <head>
   <meta charset="utf-8">
@@ -22,11 +22,9 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <meta name="description" content="三月一整月都在非常忙碌的情況下度過。
-搬家 在經過漫長地油漆、裝系統櫃、打掃等流程，我在竹北的新房終於裝潢完成，因此在三月初的時候就很匆忙地把租屋處退掉，並且搬來新家住。本來租屋只有十坪大小，現在換成近三十坪的生活空間，突然有點不太習慣，需要清潔的區塊也變大不少，也開始體悟掃地機器人的重要性。由於當初在買房子的時候，有點太快做決定，因此一直很擔心新家會不會有什麼不好的地方，不過現在搬進來幾個禮拜，覺得一切都還蠻美好的，樓上樓下鄰居都不會吵鬧，社區環境安靜單純，戶數不多所以整潔還不錯，主委也非常盡責。
-" />
+  <meta name="description" content="因為工作需求，需要一個透過 cli 就可以 upload 和 download 的工具，剛好 open project transfer.sh 有提供類似的功能，不過我們有額外的需求，包含每個 request 都要能 fiter IP 和執行 HTTP Basic Auth 驗證，因此就有這個機會來分析一下 transfer." />
   <meta name="generator" content="Hugo 0.67.0 with theme pure" />
-  <title>三月起，在竹北定區生活 - 文組工程師</title>
+  <title>Trace transfer.sh open project - 文組工程師</title>
   
   
   <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
@@ -36,29 +34,23 @@
   
   <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
-  <meta property="og:title" content="三月起，在竹北定區生活" />
-<meta property="og:description" content="三月一整月都在非常忙碌的情況下度過。
-搬家
-在經過漫長地油漆、裝系統櫃、打掃等流程，我在竹北的新房終於裝潢完成，因此在三月初的時候就很匆忙地把租屋處退掉，並且搬來新家住。本來租屋只有十坪大小，現在換成近三十坪的生活空間，突然有點不太習慣，需要清潔的區塊也變大不少，也開始體悟掃地機器人的重要性。由於當初在買房子的時候，有點太快做決定，因此一直很擔心新家會不會有什麼不好的地方，不過現在搬進來幾個禮拜，覺得一切都還蠻美好的，樓上樓下鄰居都不會吵鬧，社區環境安靜單純，戶數不多所以整潔還不錯，主委也非常盡責。" />
+  <meta property="og:title" content="Trace transfer.sh open project" />
+<meta property="og:description" content="因為工作需求，需要一個透過 cli 就可以 upload 和 download 的工具，剛好 open project transfer.sh 有提供類似的功能，不過我們有額外的需求，包含每個 request 都要能 fiter IP 和執行 HTTP Basic Auth 驗證，因此就有這個機會來分析一下 transfer." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://yushuanhsieh.github.io/post/2020-03-31-march/" />
-<meta property="article:published_time" content="2020-03-31T08:00:00+08:00" />
-<meta property="article:modified_time" content="2020-03-31T08:00:00+08:00" />
-<meta itemprop="name" content="三月起，在竹北定區生活">
-<meta itemprop="description" content="三月一整月都在非常忙碌的情況下度過。
-搬家
-在經過漫長地油漆、裝系統櫃、打掃等流程，我在竹北的新房終於裝潢完成，因此在三月初的時候就很匆忙地把租屋處退掉，並且搬來新家住。本來租屋只有十坪大小，現在換成近三十坪的生活空間，突然有點不太習慣，需要清潔的區塊也變大不少，也開始體悟掃地機器人的重要性。由於當初在買房子的時候，有點太快做決定，因此一直很擔心新家會不會有什麼不好的地方，不過現在搬進來幾個禮拜，覺得一切都還蠻美好的，樓上樓下鄰居都不會吵鬧，社區環境安靜單純，戶數不多所以整潔還不錯，主委也非常盡責。">
-<meta itemprop="datePublished" content="2020-03-31T08:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2020-03-31T08:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="63">
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2020-04-15-transfer-sh-refactor/" />
+<meta property="article:published_time" content="2020-04-15T08:00:00+08:00" />
+<meta property="article:modified_time" content="2020-04-15T08:00:00+08:00" />
+<meta itemprop="name" content="Trace transfer.sh open project">
+<meta itemprop="description" content="因為工作需求，需要一個透過 cli 就可以 upload 和 download 的工具，剛好 open project transfer.sh 有提供類似的功能，不過我們有額外的需求，包含每個 request 都要能 fiter IP 和執行 HTTP Basic Auth 驗證，因此就有這個機會來分析一下 transfer.">
+<meta itemprop="datePublished" content="2020-04-15T08:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-04-15T08:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="290">
 
 
 
 <meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="三月起，在竹北定區生活"/>
-<meta name="twitter:description" content="三月一整月都在非常忙碌的情況下度過。
-搬家
-在經過漫長地油漆、裝系統櫃、打掃等流程，我在竹北的新房終於裝潢完成，因此在三月初的時候就很匆忙地把租屋處退掉，並且搬來新家住。本來租屋只有十坪大小，現在換成近三十坪的生活空間，突然有點不太習慣，需要清潔的區塊也變大不少，也開始體悟掃地機器人的重要性。由於當初在買房子的時候，有點太快做決定，因此一直很擔心新家會不會有什麼不好的地方，不過現在搬進來幾個禮拜，覺得一切都還蠻美好的，樓上樓下鄰居都不會吵鬧，社區環境安靜單純，戶數不多所以整潔還不錯，主委也非常盡責。"/>
+<meta name="twitter:title" content="Trace transfer.sh open project"/>
+<meta name="twitter:description" content="因為工作需求，需要一個透過 cli 就可以 upload 和 download 的工具，剛好 open project transfer.sh 有提供類似的功能，不過我們有額外的需求，包含每個 request 都要能 fiter IP 和執行 HTTP Basic Auth 驗證，因此就有這個機會來分析一下 transfer."/>
 
   <!--[if lte IE 9]>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
@@ -225,56 +217,76 @@
       <h1 itemprop="name">
   <a
     class="article-title"
-    href="/post/2020-03-31-march/"
+    href="/post/2020-04-15-transfer-sh-refactor/"
     >
     
       
         
-          <span class="title-cat">Life</span>
+          <span class="title-cat">Go</span>
         
       
-    三月起，在竹北定區生活</a>
+    Trace transfer.sh open project</a>
 </h1>
 
       <div class="article-meta">
         
 <span class="article-date">
   <i class="icon icon-calendar-check"></i>&nbsp;
-<a href="https://yushuanhsieh.github.io/post/2020-03-31-march/" class="article-date">
-  <time datetime="2020-03-31 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-03-31</time>
+<a href="https://yushuanhsieh.github.io/post/2020-04-15-transfer-sh-refactor/" class="article-date">
+  <time datetime="2020-04-15 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-15</time>
 </a>
 </span>
 <span class="article-category">
   <i class="icon icon-folder"></i>
   
-    <a class="article-category-link" href="/categories/life/"> Life </a>
+    <a class="article-category-link" href="/categories/go/"> Go </a>
 </span>
 
-        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2020-03-31-march/#comments"
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2020-04-15-transfer-sh-refactor/#comments"
             class="article-comment-link">Comments</a></span>
       </div>
     </div>
     <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
-      <p>三月一整月都在非常忙碌的情況下度過。</p>
-<h2 id="搬家">搬家</h2>
-<p>在經過漫長地油漆、裝系統櫃、打掃等流程，我在竹北的新房終於裝潢完成，因此在三月初的時候就很匆忙地把租屋處退掉，並且搬來新家住。本來租屋只有十坪大小，現在換成近三十坪的生活空間，突然有點不太習慣，需要清潔的區塊也變大不少，也開始體悟掃地機器人的重要性。由於當初在買房子的時候，有點太快做決定，因此一直很擔心新家會不會有什麼不好的地方，不過現在搬進來幾個禮拜，覺得一切都還蠻美好的，樓上樓下鄰居都不會吵鬧，社區環境安靜單純，戶數不多所以整潔還不錯，主委也非常盡責。</p>
-<p>當初決定買房子的時候，並沒有想到要在竹北工作，只是覺得這環境很好，離大賣場和河堤都很近，醫療資源充足，又是單純的住宅區，即使離之前上班地點有些遠，還是決定買了。不過就這樣很巧合地，剛好又換到台元上班，這個地點瞬間變成我的最佳居住地區，上班只要騎車十分鐘，一切都很完美。其實現在想想，買房子真的是一種機緣，當下在看房子的時候可能條件要求很多，嫌東嫌西，不過就這樣突然有一間房子跟你特別有緣分，所以即使它的條件沒有到達百分之百，還是很快就出手買了。</p>
-<p>說了這麼多優點，如果真要說缺點的話，大概就是太貴了吧 XD</p>
-<h2 id="工作">工作</h2>
-<p><img src="/posts/march-1.jpg" alt="study"></p>
-<p>工作的部分，由於一些私人因素，不得不回到新竹工作。 Umbo 是一間很好的公司，不論是主管、技術強度、工程師文化、以及同事相處都很好，在那邊工作起來非常舒服愉快。雖然沒有緣分繼續待在 Umbo 與大神同事群工作，但是這段短暫經驗對我來說非常珍貴，它讓我真正地接觸到 cloud 相關的知識技術，並且讓我對於整個架構有基本的概念，透過這樣的實戰經驗，我在往後自學進階內容時可以更快地進入狀況。</p>
-<p>離開 Umbo 之後，我到了 IP design house 力旺子公司工作，老實說這間公司的產品對我來說根本是兩世界的東西，我沒有任何 design house 相關知識，不過在跟董事長面試時卻讓我躍躍欲試。雖然他們的 cloud 架構和服務才剛要起步，目前負責的人也相當稀少（目前負責整個 cloud 平台開發只有三個人），不過正因為才剛開始，所以有很多新技術可以引入，例如 Go, kubernetes 等，這對硬體廠來說已是相當難得的突破了。目前希望先把平台開發環境建置完整，例如基本的 CICD、測試環境這些，雖然從頭開始苦幹會遇到很多不熟悉的內容，但是卻非常有趣且有挑戰性，工作到目前為止可以說是相當開心～</p>
-<h2 id="學習">學習</h2>
-<p>即使三月生活很緊湊，不過有時間還是盡可能地多學習，目前除了 SDN 這個固定課程之外，也持續在進修 cloud 相關內容，像是 AWS 和 GCP，還有看 kernel 課程，目前預計是在六月考照，希望可以順利完成目標！</p>
-<h2 id="遷移">遷移</h2>
-<p>最後，我決定後續會逐漸把 blog 遷移到 hugo site generator，原因是因為 hugo 是用 Go 寫的，我在看 source code 的時候或是在改 template 時會更加地快速。Jekyll 用了好幾年了，雖然不捨，不過也到了該換掉它的時候，接下來轉到 hugo ，就可以有更多能力去打造自己想要的網站了 XD</p>
+      <p>因為工作需求，需要一個透過 cli 就可以 upload 和 download 的工具，剛好 open project <code>transfer.sh</code> 有提供類似的功能，不過我們有額外的需求，包含每個 request 都要能 fiter IP 和執行 HTTP Basic Auth 驗證，因此就有這個機會來分析一下 <code>transfer.sh</code> source code 並且後續可以針對我們需求來修改！</p>
+<h2 id="source-code-分析">Source code 分析</h2>
+<h3 id="http-router">HTTP Router</h3>
+<p>首先來看 <code>transfer.sh</code> 的 source code，這個 project 其實程式碼蠻少的，所以大概花個幾個小時就可以大致了解運作方式。<code>transfer.sh</code> 是一個簡單的 Web server，其 path router 是使用 <code>gorilla/mux</code>，雖然 <code>gorilla/mux</code> 的 path search 是 slice 設計， route 效率不比 radix tree router 效能好，不過因為這個 Web server 的 path 也不多，所以就還可以接受。</p>
+<h3 id="upload-files">Upload Files</h3>
+<p>下圖為 Upload 行為簡易流程圖：</p>
+<p><img src="/posts/transfer_1.png" alt="hugo"></p>
+<p>在上傳檔案的時候，可以透過一開始 start server 的 params 設定要不要有 HTTP Basic Auth 驗證 (<code>http-auth-user</code>, <code>http-auth-pass</code>)，不過這樣子的設定也意味著 Basic Auth 的帳號密碼是直接寫死在 server struct，無法透過其他方式來對帳號密碼進行驗證 (e.g. 打 API 到其他 account service)，不太符合我們的需求，因此這是要調整的地方之一。</p>
+<p>當使用者上傳檔案時，除了上傳檔案到指定的 storage 之外，也會額外儲存 <code>Metadata</code>。<code>Metadata</code> 包含了基本檔案資訊，以及下載次數、時限，和刪除檔案時所需要的 token，這樣使用者進行下載時，我們可以透過 <code>Metadata</code> 的內容來進行下載驗證，像是下載次數是不是過多、或是已經超過下載時限等。使用者在發送 request 時，可以透過 <code>Max-Downloads</code> , <code>Max-Days</code> 來設定這兩項數值，</p>
+<p>這邊要額外注意的是，在上傳檔案之前，會<strong>亂數產生一個 token</strong>，接著檔案會被上傳到 <code>&lt;token&gt;/&lt;filename&gt;</code> 的位置，以避免名稱重複所造成的衝突。此外，從 source code 可以發現，作者使用 <code>Mutex</code> 來控制 goroutine 對特定檔案進行讀寫行為，而不是發現檔案被開啟就直接回傳 error。</p>
+<p>在上傳完檔案後，發送回給使用者的 HTTP response 除了會包含 download URL 之外，也會帶有指定的 Delete URL <code>X-Url-Delete</code> ，讓前端可以進一步地設計刪除按鈕來供使用者刪除該檔案。</p>
+<h4 id="關於-http-auth-user-http-auth-pass">關於 <code>http-auth-user</code>, <code>http-auth-pass</code></h4>
+<p><code>http-auth-user</code> 和 <code>http-auth-pass</code> 的驗證只會套用在 upload 相關 API 上，並不會影響 download API。所以即使設定了這個參數， download 還是允許所有使用者使用。</p>
+<h4 id="the-difference-of-uploading-files-using-post-and-put">The difference of uploading files using <code>POST</code> and <code>PUT</code></h4>
+<p><code>transfer.sh</code> 可以使用 <code>POST</code> 和 <code>PUT</code> 兩種 HTTP Method 來上傳檔案，主要差異在於 <code>PUT</code> 預設使用者只上傳一個檔案，因此 request 的 <code>Content-Type</code> header 就是檔案的類型，而 request body 則是檔案內容，這樣使用者也可以很方便地使用以下 cmd 來上傳檔案。(Note: &ndash;upload-file 是使用 PUT HTTP Method)</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl --upload-file ./example.md <span style="color:#e6db74">&#34;http://example.com/example.md&#34;</span>
+</code></pre></div><p><code>POST</code> 則是預期 request 的 Content Type 為 <code>multipart/form-data</code>，因此使用者可以一次上傳多個檔案，而 Response 也會包含個別檔案的下載 URL。缺點是使用 <code>POST</code> 會缺少 <code>X-Url-Delete</code> 這個 Delete Header 讓使用者可以手動刪除檔案，所以雖然它提供了比較完整的上傳功能，卻也少了些便利設計。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">url -i -X POST -H <span style="color:#e6db74">&#34;Content-Type: multipart/form-data&#34;</span> -F <span style="color:#e6db74">&#34;file=@./examples.md&#34;</span> -F <span style="color:#e6db74">&#34;file=@./examples2.md&#34;</span> <span style="color:#e6db74">&#34;http://example.com/&#34;</span>
+</code></pre></div><h3 id="download-files">Download Files</h3>
+<p>剛剛有提到，上傳檔案後會從 response 得到下載的 URL，而接下來的行為會根據我們怎麼使用 URL 而有所差異：如果使用者是使用瀏覽器開啟這 URL 的話，那 server 會先回傳 preview 畫面，preview 畫面會有檔案格式和檔案大小等資訊，如果是 markdown 類型的文檔甚至還可以呈現出所有內容給使用者先預覽。（實現方式是透過 <code>mux</code> 的 MatcherFunc，比對是否含有 <code>Accept: text/html</code> 這個 header，來判斷是否使用者是不是使用瀏覽器）； 反之，如果是使用像是 curl 來開啟連接，那就會直接下載檔案，而不會出現 preview 的 html 頁面。</p>
+<p>下圖為下載檔案的簡易流程圖(省略 preview 畫面)：</p>
+<p><img src="/posts/transfer_2.png" alt="hugo"></p>
+<p>使用者發送下載的 request 後，server 會先取出 Metadata，檢查 Metadata 內的時限和下載次數是否有超過設定數值，接著再取出檔案並且回傳檔案內容。雖然取出檔案的流程比較簡單，但也有發現一些問題，例如檢查 Metadata 時發現下載已經超過時限或是下載次數時，只會直接回傳 404 Not Found，並不會主動刪除該檔案。</p>
+<h2 id="調整項目整理">調整項目整理</h2>
+<p>根據以上 source code 分析，列出幾個可以調整的地方：</p>
+<ol>
+<li>不要直接將 <code>http-auth-user</code> <code>http-auth-pass</code> 這個驗證機制直接寫死在 server struct 中，可以改用 interface 方式來處理。</li>
+<li>Metadata 的內容長度不大，如果改用 cache 的方式來記錄，可以提高性能。</li>
+<li>上傳後的檔案有很大機會不會被刪除，所以可能需要在檢查 Metadata 時發現過期時可以主動刪除，或是定期掃上傳後的檔案，檢查哪些檔案已沒在使用。</li>
+<li>目前 IP Filter 是針對整個 server，而 Basic Auth 只有在上傳檔案才會有，因此需要補足下載檔案的驗證機制。</li>
+</ol>
+<p>接下來就會實際調整 code，來讓 code 更符合我的需求 XD</p>
+
     </div>
     <div class="article-footer">
 <blockquote class="mt-2x">
   <ul class="post-copyright list-unstyled">
     <li class="post-copyright-link hidden-xs">
       <strong>Permalink: </strong>
-      <a href="https://yushuanhsieh.github.io/post/2020-03-31-march/" title="三月起，在竹北定區生活" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2020-03-31-march/</a>
+      <a href="https://yushuanhsieh.github.io/post/2020-04-15-transfer-sh-refactor/" title="Trace transfer.sh open project" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2020-04-15-transfer-sh-refactor/</a>
     </li>
   </ul>
 </blockquote>
@@ -301,14 +313,9 @@
     <div class="bar-inner">
         <ul class="pager pull-left">
             <li class="prev">
-                <a href="https://yushuanhsieh.github.io/post/2020-02-24-february/" title="2月雜談"><i
+                <a href="https://yushuanhsieh.github.io/post/2020-04-07-hugo-merge/" title="Multilingual Mode in Hugo"><i
                         class="icon icon-angle-left"
                         aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
-            </li>
-            <li class="next">
-                <a href="https://yushuanhsieh.github.io/post/2020-04-07-hugo-merge/"
-                    title="Multilingual Mode in Hugo"><span>Newer&nbsp;&nbsp;</span><i
-                        class="icon icon-angle-right" aria-hidden="true"></i></a>
             </li>
             
         </ul>
