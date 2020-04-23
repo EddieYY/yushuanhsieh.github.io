@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <title>
-        2019/05月份自我學習回顧 - 文組工程師
+        Discourse Forums Deployment - 文組工程師
       </title>
     <head>
   <meta charset="utf-8">
@@ -22,10 +22,9 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <meta name="description" content="![study]({{ site.url }}/assets/images/study-201906.png)
-前言 五月的時候，團隊來了一位經驗豐富的瑞典人，而剛好有這個機會跟他合作，除了跟他練練英文口說能力之外，順便學習一下他的程式經驗。瑞典人是一位懂很多層面的工程師，從韌體到 Web Front-end 都有實務經驗，而且為人也不錯，會很認真地看每個 Pull Request，並給予架構上或是程式寫法上的回饋，能有這樣的同事真的很開心，即使在當個碼農趕專案，也會覺得從中學習到不少。" />
+  <meta name="description" content="這兩天在試著部署 Discourse －目前主流的 forum open porject。雖然它有 cloud 版本可以用，不過因為基於一些因素，我們打算先自行部署，給團隊成員實際試用測試過後，再來看是否要使用官方提供的 Cloud 付費版本。而在部署的過程中發現蠻多問題的，所以也一併記錄下來，給想要自行部署的人參考。" />
   <meta name="generator" content="Hugo 0.67.0 with theme pure" />
-  <title>2019/05月份自我學習回顧 - 文組工程師</title>
+  <title>Discourse Forums Deployment - 文組工程師</title>
   
   
   <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
@@ -35,26 +34,23 @@
   
   <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
-  <meta property="og:title" content="2019/05月份自我學習回顧" />
-<meta property="og:description" content="![study]({{ site.url }}/assets/images/study-201906.png)
-前言 五月的時候，團隊來了一位經驗豐富的瑞典人，而剛好有這個機會跟他合作，除了跟他練練英文口說能力之外，順便學習一下他的程式經驗。瑞典人是一位懂很多層面的工程師，從韌體到 Web Front-end 都有實務經驗，而且為人也不錯，會很認真地看每個 Pull Request，並給予架構上或是程式寫法上的回饋，能有這樣的同事真的很開心，即使在當個碼農趕專案，也會覺得從中學習到不少。" />
+  <meta property="og:title" content="Discourse Forums Deployment" />
+<meta property="og:description" content="這兩天在試著部署 Discourse －目前主流的 forum open porject。雖然它有 cloud 版本可以用，不過因為基於一些因素，我們打算先自行部署，給團隊成員實際試用測試過後，再來看是否要使用官方提供的 Cloud 付費版本。而在部署的過程中發現蠻多問題的，所以也一併記錄下來，給想要自行部署的人參考。" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://yushuanhsieh.github.io/post/2019-06-04-study-201906/" />
-<meta property="article:published_time" content="2019-06-04T08:00:00+08:00" />
-<meta property="article:modified_time" content="2019-06-04T08:00:00+08:00" />
-<meta itemprop="name" content="2019/05月份自我學習回顧">
-<meta itemprop="description" content="![study]({{ site.url }}/assets/images/study-201906.png)
-前言 五月的時候，團隊來了一位經驗豐富的瑞典人，而剛好有這個機會跟他合作，除了跟他練練英文口說能力之外，順便學習一下他的程式經驗。瑞典人是一位懂很多層面的工程師，從韌體到 Web Front-end 都有實務經驗，而且為人也不錯，會很認真地看每個 Pull Request，並給予架構上或是程式寫法上的回饋，能有這樣的同事真的很開心，即使在當個碼農趕專案，也會覺得從中學習到不少。">
-<meta itemprop="datePublished" content="2019-06-04T08:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2019-06-04T08:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="338">
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2020-04-22-discourse-deployment/" />
+<meta property="article:published_time" content="2020-04-22T08:00:00+08:00" />
+<meta property="article:modified_time" content="2020-04-22T08:00:00+08:00" />
+<meta itemprop="name" content="Discourse Forums Deployment">
+<meta itemprop="description" content="這兩天在試著部署 Discourse －目前主流的 forum open porject。雖然它有 cloud 版本可以用，不過因為基於一些因素，我們打算先自行部署，給團隊成員實際試用測試過後，再來看是否要使用官方提供的 Cloud 付費版本。而在部署的過程中發現蠻多問題的，所以也一併記錄下來，給想要自行部署的人參考。">
+<meta itemprop="datePublished" content="2020-04-22T08:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-04-22T08:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="470">
 
 
 
 <meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="2019/05月份自我學習回顧"/>
-<meta name="twitter:description" content="![study]({{ site.url }}/assets/images/study-201906.png)
-前言 五月的時候，團隊來了一位經驗豐富的瑞典人，而剛好有這個機會跟他合作，除了跟他練練英文口說能力之外，順便學習一下他的程式經驗。瑞典人是一位懂很多層面的工程師，從韌體到 Web Front-end 都有實務經驗，而且為人也不錯，會很認真地看每個 Pull Request，並給予架構上或是程式寫法上的回饋，能有這樣的同事真的很開心，即使在當個碼農趕專案，也會覺得從中學習到不少。"/>
+<meta name="twitter:title" content="Discourse Forums Deployment"/>
+<meta name="twitter:description" content="這兩天在試著部署 Discourse －目前主流的 forum open porject。雖然它有 cloud 版本可以用，不過因為基於一些因素，我們打算先自行部署，給團隊成員實際試用測試過後，再來看是否要使用官方提供的 Cloud 付費版本。而在部署的過程中發現蠻多問題的，所以也一併記錄下來，給想要自行部署的人參考。"/>
 
   <!--[if lte IE 9]>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
@@ -221,101 +217,121 @@
       <h1 itemprop="name">
   <a
     class="article-title"
-    href="/post/2019-06-04-study-201906/"
+    href="/post/2020-04-22-discourse-deployment/"
     >
     
       
-        <span class="title-cat">Web</span>
+        
+          <span class="title-cat">Go</span>
+        
       
-    2019/05月份自我學習回顧</a>
+    Discourse Forums Deployment</a>
 </h1>
 
       <div class="article-meta">
         
 <span class="article-date">
   <i class="icon icon-calendar-check"></i>&nbsp;
-<a href="https://yushuanhsieh.github.io/post/2019-06-04-study-201906/" class="article-date">
-  <time datetime="2019-06-04 08:00:00 &#43;0800 CST" itemprop="datePublished">2019-06-04</time>
+<a href="https://yushuanhsieh.github.io/post/2020-04-22-discourse-deployment/" class="article-date">
+  <time datetime="2020-04-22 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-22</time>
 </a>
 </span>
 <span class="article-category">
   <i class="icon icon-folder"></i>
   
-    <a class="article-category-link" href="/categories/web/"> Web </a>
-  
+    <a class="article-category-link" href="/categories/go/"> Go </a>
 </span>
 
-        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2019-06-04-study-201906/#comments"
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2020-04-22-discourse-deployment/#comments"
             class="article-comment-link">Comments</a></span>
       </div>
     </div>
     <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
-      <p>![study]({{ site.url }}/assets/images/study-201906.png)</p>
-<h2 id="前言">前言</h2>
-<p>五月的時候，團隊來了一位經驗豐富的瑞典人，而剛好有這個機會跟他合作，除了跟他練練英文口說能力之外，順便學習一下他的程式經驗。瑞典人是一位懂很多層面的工程師，從韌體到 Web Front-end 都有實務經驗，而且為人也不錯，會很認真地看每個 Pull Request，並給予架構上或是程式寫法上的回饋，能有這樣的同事真的很開心，即使在當個碼農趕專案，也會覺得從中學習到不少。</p>
-<p>五月份確實蠻忙的，因此在中旬的時候，一度對於下班學習覺得有點力不從心，但靜下心來思考後，發現其實只是因為自己上班全程精神專注，導致下了班會不想去進修，進而逐漸拉長滑手機和躺在床上發呆的時間。於是，在察覺到自己有這個狀況之後，就開始明確訂出每日學習目標，之前都是很隨興地安排，不會強迫自己要唸到怎樣的進度，不過如果開始怠惰的話，明確的進度才會讓自己不會偷懶，甚至知道哪邊有出現進度落後，而需要做改善。</p>
-<p>在經過這樣小調整之後，學習的動力又回來了，因此在五月下旬時候又恢復到每天都有進度，而不是像中旬一樣，讀個三四天就想休息一天。</p>
-<h2 id="學習回顧">學習回顧</h2>
-<p>五月份學習以<strong>離散數學</strong>和 <strong>Linux</strong> 為主，離散數學除了看韓永楷教授的線上課程之外，還有買一本離散數學課本來練習習題。至於 Linux 目前是以 Jserv 教授的系統核心設計課程為主，不過 Jserv 每次線上課程的內容都蠻多的，所以之後還是需要反覆地看以及實驗，才能夠真正地理解，不然只光看直播其實不太能吸收這麼多資訊。</p>
-<h3 id="離散數學">離散數學</h3>
-<p>目前離散數學課程聽到 13 peg solitaire，進度蠻慢的，不過因為有邊搭配習題練習，所以這個速度也還是能接受。這次學習花比較多時間在實際證明上，因為在學的時候對於證明題總是輕忽，想說考試不太會考，但是現在自主學習沒有考試壓力，再加上理解這些內容，感覺更能讓自己去思考背後原理，每次練習完都蠻有收穫的。</p>
-<h3 id="linux-核心設計">Linux 核心設計</h3>
-<p>本月份有兩次直播課程，包含 <code>Linux 核心設計: 朝向硬即時的核心變革</code> 和 <code>Linux 核心設計: 檔案系統概念及實作手法</code>，線上講座內容都很多而且也比較偏理論說明，所以上完後一定要再花時間去實作和實驗，才能&quot;大略略&quot;了解這個功能在 Linux Kernel 的作用。不過因為要看的東西太多了，所以先從檔案系統開始實驗， Real-Time 部分預計在六月會再重新複習一次。</p>
-<h3 id="golang">Golang</h3>
-<p>這個月看 golang 的時間比較少，因為上班都在用 Golang ，所以下班就想說學點其他的內容～不過還是有花些時間看 Golang memory allocator，像是透過 cache 方式來實現 lock-free 等。以及看了一下 advanced testing，因為專案會需要寫蠻多 uint test，想說看別人怎麼寫會比較好維護。</p>
-<h2 id="下個月計畫">下個月計畫</h2>
-<p>數學部分，六月份希望能進展到數學歸納法和數論，至於 Linux Kernel 則是 <code>Linux 核心設計: 朝向硬即時的核心變革</code> 這邊要重新複習，如果有新的 linux kernel 線上講座也會追一下。實作部分預計是實作 <code>FUSE</code> ，還有把之前 side-project 改寫一下。</p>
-<h2 id="讀書日誌">讀書日誌</h2>
-<p>5 月份共 <strong>5</strong> 天沒有唸書</p>
+      <p>這兩天在試著部署 Discourse －目前主流的 forum open porject。雖然它有 cloud 版本可以用，不過因為基於一些因素，我們打算先自行部署，給團隊成員實際試用測試過後，再來看是否要使用官方提供的 Cloud 付費版本。而在部署的過程中發現蠻多問題的，所以也一併記錄下來，給想要自行部署的人參考。</p>
+<h2 id="discourse-container">Discourse Container</h2>
+<p>首先在 Discourse container 部份，我們選擇由 bitnami 所維護的 <a href="https://hub.docker.com/r/bitnami/discourse/">bitnami/discourse</a> 版本，原因是它提供相對完整的 configuration 和流程，事後證明這個選擇也是對的，因為我有嘗試使用 Discourse 所提供的 container 來部署，結果根本是場災難，畢竟官方所提供的 container 本來就不適合用在自行部署，除了流程複雜之外，size 也大許多 (2.5GB)。</p>
+<h3 id="version">Version</h3>
+<p>Discourse 版本部分，目前 (2020/04) 官方是 <code>2.5.0 beta</code>，而 bitnami/discourse 則是 <code>2.4.1</code> 也就是官方所提供的最新穩定版本，因此不會有太大的版本落差。</p>
+<h2 id="部署環境">部署環境</h2>
+<p>我們使用 GKE 作為部署環境，雖然只是供測試使用，可以簡單起個 GCE 就可以，但因為流程完整性，因此還是決定部署在 GKE 上。</p>
+<h3 id="最低資源限制">最低資源限制</h3>
+<p>Discourse 安裝建議的硬體條件：</p>
 <ul>
-<li>2019/5/1 你所不知道的 C 語言：動態連結器和執行時期行為篇 - 40 mins</li>
-<li>2019/5/3 Go presentation - Go tool present and compile server connection</li>
-<li>2019/5/4 Discrete mathematics - Valid argument forms</li>
-<li>2019/5/5 你所不知道的C語言: Stream I/O, EOF 和例外處理 - 補完之前沒跟到的進度</li>
-<li>2019/5/7 Linux 核心設計: 朝向硬即時的核心變革(上)</li>
-<li>2019/5/6 Discrete mathematics - Axiom/Lemma/Corollary/Theorem/Conjecture</li>
-<li>2019/5/8 Discrete mathematics - Indirect proofsDM(A)</li>
-<li>2019/5/9 Discrete mathematics - Indirect proofsDM(B)</li>
-<li>2019/5/10 Blog - Debugging performance issues in Go programs</li>
-<li>2019/5/11 Golang - memory allocators (span, heap, central, cache)</li>
-<li>2019/5/12 Data structure study - LinkedHashMap source code trace.</li>
-<li>2019/5/13 B Trees and B+ Trees. How they useful in Database</li>
-<li>2019/5/13 Discrete mathematics - Prove by cases</li>
-<li>2019/5/14 B tree and implementation</li>
-<li>2019/5/15 Linux 核心設計: 朝向硬即時的核心變革 (下)</li>
-<li>2019/5/16 Discrete mathematics - Pi mnemonicDM</li>
-<li>2019/5/18 Golang Weekly post</li>
-<li>2019/5/18 GopherCon 2017: Mitchell Hashimoto - Advanced Testing with Go</li>
-<li>2019/5/19 高性能队列——Disruptor</li>
-<li>2019/5/19 Discrete mathematics - 習題練習</li>
-<li>2019/5/23 Discrete mathematics- Mathematical InductionDM L11A</li>
-<li>2019/5/21 Go 學習筆記 - concurrency and reflect</li>
-<li>2019/5/24 Discrete mathematics- Mathematical InductionDM L11B</li>
-<li>2019/5/25 Golang Weekly Post</li>
-<li>2019/5/27 Linux 核心設計: 檔案系統概念及實作手法 (線上講座)</li>
-<li>2019/5/29 Computex Forum AIOT</li>
-<li>2019/5/30 Linux 核心設計: 檔案系統概念及實作手法 (Review) - file linking, linux file system model</li>
-<li>2019/5/30 Discrete mathematics- 習題 1-4 量化推導</li>
-<li>2019/5/31 Discrete mathematics- 習題練習，推論證明</li>
+<li>modern single core CPU, dual core recommended</li>
+<li>1 GB RAM minimum (with swap)</li>
+<li>64 bit Linux compatible with Docker</li>
+<li>10 GB disk space minimum</li>
 </ul>
-<h2 id="articles">Articles</h2>
-<ul>
-<li><a href="https://software.intel.com/en-us/blogs/2014/05/10/debugging-performance-issues-in-go-programs">Debugging performance issues in Go programs</a></li>
-<li><a href="https://qconsf.com/sf2017/system/files/presentation-slides/high_performance_go.pdf">High Performance Go</a></li>
-<li><a href="https://www.ardanlabs.com/blog/2018/12/garbage-collection-in-go-part1-semantics.html">Garbage Collection In Go : Part I - Semantics</a></li>
-<li><a href="https://www.youtube.com/watch?v=aZjYr87r1b8">B Trees and B+ Trees. How they useful in Database</a></li>
-<li><a href="https://faiface.github.io/post/context-should-go-away-go2/">Context should go away for Go 2</a></li>
-<li><a href="https://github.com/golang/go/wiki/TableDrivenTests">TableDrivenTests</a></li>
-<li><a href="https://www.youtube.com/watch?v=8hQG7QlcLBk">GopherCon 2017: Mitchell Hashimoto - Advanced Testing with Go</a></li>
-<li><a href="https://medium.com/dm03514-tech-blog/golang-monitors-and-mutexes-a-light-survey-84f04f9b7c09">Golang: Concurrency: Monitors and Mutexes, A (light) Survey</a></li>
-<li><a href="https://medium.com/ki-labs-engineering/rest-api-error-handling-in-go-behavioral-type-assertion-509d93636afd">REST API Error Handling in Go: Behavioral Type Assertion</a></li>
-</ul>
-<h2 id="study-counts">Study Counts</h2>
-<ul>
-<li>Others:18</li>
-<li>Linux:6</li>
-<li>Back-End:7</li>
-</ul>
+<p>Discourse 本身分成四個部分：</p>
+<ol>
+<li><code>database</code> (postgres)</li>
+<li><code>cache</code> (redis)</li>
+<li><code>web server</code></li>
+<li><code>sidekiq</code></li>
+</ol>
+<p>因為最基本就要起 4 個 pod (我習慣 1 個 container 就用  1 個 pod)，因此最少要 2 個 n1-standard 等級的 node 或是更高等級的機器。</p>
+<h2 id="configuration">Configuration</h2>
+<h3 id="1-cache">1. Cache</h3>
+<h3 id="2-cachedatabase">2. CacheDatabase</h3>
+<p>Discourse 的 cache 是採用 <code>redis</code>，而 database 則是 <code>postgres</code>，這兩個是蠻常見的部屬，所以就不多作說明。</p>
+<h3 id="3-web-server">3. Web Server</h3>
+<p>接著部屬 Discourse 的 Web server，在 <a href="https://hub.docker.com/r/bitnami/discourse/">bitnami/discourse</a> 有提供完整的 configuration 參數，可以自行查閱，以下特別提醒幾個需要注意的參數項目。</p>
+<h4 id="default-user-name-and-password-for-admin-account">Default user name and password for admin account</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">DISCOURSE_USERNAME<span style="color:#f92672">=</span>user
+DISCOURSE_PASSWORD<span style="color:#f92672">=</span>bitnami123
+DISCOURSE_EMAIL<span style="color:#f92672">=</span>user@example.com
+</code></pre></div><p>這三個參數主要是設定 <code>admin</code> 的帳號密碼，後續可以用這組帳號透過 Web 介面登入來修改 Discourse 的配置和樣式，所以一定要記得設定。</p>
+<h4 id="hostname">Hostname</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">DISCOURSE_HOSTNAME<span style="color:#f92672">=</span>www.example.com
+</code></pre></div><p>另外 <code>hostname</code> 也是必須要修改的參數，由於 asset URL 會根據 hostname 而有所不同 (簡單來說就是 Discourse 在 compile asset file 的時候，會連同 hostname 一起 compile，並且產出最後的 permalink) ，如果 hostname 設錯了，那麼 browser 就無法根據路徑正確地取回所需的資源，例如 js、 css 等。</p>
+<p>另外，官方有建議最好 hostname 是 domain name，不要是 IP address，以免出現異常錯誤。</p>
+<h4 id="skip-install-注意">SKIP INSTALL (注意！)</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">DISCOURSE_SKIP_INSTALL<span style="color:#f92672">=</span>no
+</code></pre></div><p>這個參數是部屬 Discourse 的其中一個最重要數值。 Discourse container 在 run 時，由於 default 參數是 no，因此會進行建置 database 流程，此時如果你的database 已經被建立好，那<strong>程式就會直接報錯並且中止執行</strong>！</p>
+<p>這意味著，當 Discourse 的 pod 因為不明原因中止，而 k8s 重新起一個的時候，此時沒有設定 <code>DISCOURSE_SKIP_INSTALL=yes</code>，那 pod 就永遠無法起來啦。這也變成首次部屬 Discourse 時候參數會需要調整，是我覺得稍微不友善的地方。</p>
+<h4 id="database">Database</h4>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">POSTGRESQL_ROOT_USER<span style="color:#f92672">=</span>postgres
+POSTGRESQL_ROOT_PASSWORD<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span>
+
+DISCOURSE_POSTGRESQL_USERNAME<span style="color:#f92672">=</span>bn_discourse
+DISCOURSE_POSTGRESQL_PASSWORD<span style="color:#f92672">=</span>bitnami1
+DISCOURSE_POSTGRESQL_NAME<span style="color:#f92672">=</span>bitnami_application
+</code></pre></div><p>Database 有幾個令人會搞混的設定，上面有提到 Discourse container 初始會進行 database 建置作業，因此會同時需要 postgres root account 和 discourse database account 兩個帳號資訊。</p>
+<h4 id="smtp">SMTP</h4>
+<p>SMTP 設定關係到 notification email 寄送和帳號驗證確認信，因此是必要設定項目，如果設定後發現沒有收到 email，可以參閱官方所提供的 <a href="https://meta.discourse.org/t/troubleshooting-email-on-a-new-discourse-install/16326">Troubleshooting email on a new Discourse install</a>。</p>
+<h3 id="4-sidekiq">4. Sidekiq</h3>
+<p>除了 Web server 外，還需要部屬一個 <code>sidekiq</code> 來負責處理一些 backend tasks，例如寄送驗證 email 等。要注意的地方是，它與 Web server 是使用同一個 container，只是下的指令不同。</p>
+<p>Sidekiq 的參數數值就直接 copy Web server configuration 就好，如果參數數值與 Web server 設定不一致，有可能導致系統出錯。(e.g. 系統無法寄信等)</p>
+<p>另外，sidekiq 需要與 web server 進行溝通，所以要多兩個參數設定：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">DISCOURSE_HOST<span style="color:#f92672">=</span>web-server
+DISCOURSE_PORT<span style="color:#f92672">=</span><span style="color:#ae81ff">80</span>
+</code></pre></div><p>DISCOURSE_PORT 設定要依據 web-server Service 是使用哪一個 port 而作調整。sidekiq 本身不需要與其他 pod 溝通，因此不需要建立對應的 Service。但因為會連結外面網路寄信的關係，因此要注意 VPC 設定。</p>
+<h2 id="deployment">Deployment</h2>
+<p>Discourse 的 kubernates configuration file 可以參閱 <a href="https://github.com/YuShuanHsieh/discourse-k8s-demo">Github discourse-k8s-demo</a>。</p>
+<p>可以先用</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">kubectl kustomize ./ &gt; discourse_secret.yaml
+</code></pre></div><p>來產出 secret yaml (記得不要把 secret yaml 一起 commit 上去了)，並且部屬到 GKE 上。</p>
+<p>要注意，<strong>Web server 一定要掛 volume</strong>，因為 Discourse 允許用戶上傳 avatar，以及網站所用的 logo 圖檔等，都會放在 <code>/bitnami</code> 底下。（注意：如果是官方版本，那就會在 <code>/share</code> 底下），所以記得要使用 persistant disk 去保存。更重要的是，連同加裝的 <code>plugins</code> 都會放在其中，如果沒有設定 volume 的話，pod 重啟時，除了圖檔消失造成一堆 error，連額外安裝的 plugin 都不會存在。</p>
+<h2 id="install-plugins">Install Plugins</h2>
+<p>Discourse 另一個重要功能就是能安插各式 plugin，其中像是 openID、oauth2 這些主流第三方驗證流程都要靠 plugin 才能使用。不過很可惜的是， bitnami/discourse container 無法透過 configuration 設定 plugins 來讓 container 剛起來時就去抓，而是要自己手動進入 pod 中去安裝，當 plugins 被安裝到 volume 設定好的空間後，接下來 pod 重啟時就不需要再安裝一次。</p>
+<p>總結一下安裝 plugins 流程：</p>
+<ol>
+<li>首次部屬 web server，並等 pod 狀態變成正常運作</li>
+<li>使用　<code>kubectl exec --it &lt;pod&gt; -- /bin/bash</code> 進入 pod</li>
+<li>進到指定 folder <code>cd /opt/bitnami/discourse</code></li>
+<li>安裝 plugins <code>RAILS_ENV=production bundle exec rake plugin:install repo=PLUGIN_REPO_URL</code></li>
+<li>在 pod 中直接 compile <code>RAILS_ENV=production bundle exec rake assets:precompile</code></li>
+</ol>
+<p>然後檢查 <code>/bitnami/discourse/plugins</code> 就會看到剛剛安裝的 plugin 在裡面了。</p>
+<h2 id="總結">總結</h2>
+<p>總結一下 Discourse 部屬的幾個要點：</p>
+<ol>
+<li>有 4 個 container 需要部屬： redis, postgres, web server, sidekiq</li>
+<li>web server 和 sidekiq 使用同一個 container，其中參數設定也要一致，並且 sidekiq 需要多加 web server 的連線資訊。</li>
+<li>須注意 <code>DISCOURSE_SKIP_INS TALL</code> 參數，避免 web server container 無法順利啟動</li>
+<li>web server 要掛 volume，並且 plugins 需要手動安裝進去。(當然也可以選擇 clone <a href="https://github.com/bitnami/bitnami-docker-discourse">bitnami-docker-discourse</a>)，然後把自己想要的 plugins 先預裝進去，不過這樣 container 也會比較胖。</li>
+<li>Web server 剛啟動時需要將近 1 core，後續 memory 使用也可能需要到 2.5 GB 這麼多，請先設定好 resource 限制，避免在執行時會有嚴重效能影響。</li>
+</ol>
 
     </div>
     <div class="article-footer">
@@ -323,7 +339,7 @@
   <ul class="post-copyright list-unstyled">
     <li class="post-copyright-link hidden-xs">
       <strong>Permalink: </strong>
-      <a href="https://yushuanhsieh.github.io/post/2019-06-04-study-201906/" title="2019/05月份自我學習回顧" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2019-06-04-study-201906/</a>
+      <a href="https://yushuanhsieh.github.io/post/2020-04-22-discourse-deployment/" title="Discourse Forums Deployment" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2020-04-22-discourse-deployment/</a>
     </li>
   </ul>
 </blockquote>
@@ -350,14 +366,9 @@
     <div class="bar-inner">
         <ul class="pager pull-left">
             <li class="prev">
-                <a href="https://yushuanhsieh.github.io/post/2019-05-04-study-201904/" title="2019/04月份自我學習回顧"><i
+                <a href="https://yushuanhsieh.github.io/post/2020-04-15-transfer-sh-refactor/" title="Trace transfer.sh open project"><i
                         class="icon icon-angle-left"
                         aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
-            </li>
-            <li class="next">
-                <a href="https://yushuanhsieh.github.io/post/2019-06-22-tail-recuriosn-optimization/"
-                    title="Tail Recursion in Go"><span>Newer&nbsp;&nbsp;</span><i
-                        class="icon icon-angle-right" aria-hidden="true"></i></a>
             </li>
             
         </ul>
