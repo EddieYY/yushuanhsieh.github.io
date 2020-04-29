@@ -6,10 +6,19 @@
     <description>Recent content in Go on 文組工程師</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 22 Apr 2020 08:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 29 Apr 2020 08:00:00 +0800</lastBuildDate>
     
         <atom:link href="https://yushuanhsieh.github.io/categories/go/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Go - Archive files with archive/tar lib</title>
+      <link>https://yushuanhsieh.github.io/post/2018-09-09-go-tar-file/</link>
+      <pubDate>Sun, 09 Sep 2018 08:00:00 +0800</pubDate>
+      
+      <guid>https://yushuanhsieh.github.io/post/2018-09-09-go-tar-file/</guid>
+      <description>前言 由於專案要提供 API 來讓使用者 export 匯出檔案， 因此需要將所需檔案集結成一個 archive file。這個流程是透過 Go 的標準 lib archive/tar 來處理，以下文章將簡單介紹流程和實作方式，並於最後附上完整程式碼。</description>
+    </item>
     
     <item>
       <title>Google Sign-in with OAuth 2.0</title>

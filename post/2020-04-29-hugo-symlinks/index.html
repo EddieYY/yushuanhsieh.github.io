@@ -4,7 +4,8 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <title>
-        文組工程師</title>
+        Side Project - Symlink Generator for Multi-lang Hugo Site - 文組工程師
+      </title>
     <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -21,11 +22,10 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  
+  <meta name="description" content="在 Multilingual Mode in Hugo 這篇文章中有提到目前使用 Hugo site generator 產生 multi-lang site 的問題，使用者必須要為每個語言都建立一個檔案，才不會造成最後在產生網站後，發生某一個語言的頁面遺失問題。（例如，使用者一定要建立 about." />
   <meta name="generator" content="Hugo 0.67.0 with theme pure" />
-  <title>文組工程師</title>
+  <title>Side Project - Symlink Generator for Multi-lang Hugo Site - 文組工程師</title>
   
-  <link rel="alternate" type="application/rss+xml" href="https://yushuanhsieh.github.io/categories/gnu/index.xml" title="文組工程師" />
   
   <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
   
@@ -34,15 +34,23 @@
   
   <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
-  <meta property="og:title" content="GNU" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://yushuanhsieh.github.io/categories/gnu/" />
-<meta property="og:updated_time" content="2019-08-17T08:00:00+08:00" />
-<meta itemprop="name" content="GNU">
-<meta itemprop="description" content=""><meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="GNU"/>
-<meta name="twitter:description" content=""/>
+  <meta property="og:title" content="Side Project - Symlink Generator for Multi-lang Hugo Site" />
+<meta property="og:description" content="在 Multilingual Mode in Hugo 這篇文章中有提到目前使用 Hugo site generator 產生 multi-lang site 的問題，使用者必須要為每個語言都建立一個檔案，才不會造成最後在產生網站後，發生某一個語言的頁面遺失問題。（例如，使用者一定要建立 about." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2020-04-29-hugo-symlinks/" />
+<meta property="article:published_time" content="2020-04-29T08:00:00+08:00" />
+<meta property="article:modified_time" content="2020-04-29T08:00:00+08:00" />
+<meta itemprop="name" content="Side Project - Symlink Generator for Multi-lang Hugo Site">
+<meta itemprop="description" content="在 Multilingual Mode in Hugo 這篇文章中有提到目前使用 Hugo site generator 產生 multi-lang site 的問題，使用者必須要為每個語言都建立一個檔案，才不會造成最後在產生網站後，發生某一個語言的頁面遺失問題。（例如，使用者一定要建立 about.">
+<meta itemprop="datePublished" content="2020-04-29T08:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-04-29T08:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="88">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Side Project - Symlink Generator for Multi-lang Hugo Site"/>
+<meta name="twitter:description" content="在 Multilingual Mode in Hugo 這篇文章中有提到目前使用 Hugo site generator 產生 multi-lang site 的問題，使用者必須要為每個語言都建立一個檔案，才不會造成最後在產生網站後，發生某一個語言的頁面遺失問題。（例如，使用者一定要建立 about."/>
 
   <!--[if lte IE 9]>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
@@ -201,51 +209,98 @@
 
     
     
-<main class="main" role="main">
-    <article class="article article-categories article-type-list" itemscope="">
-        <header class="article-header">
-            <h1 itemprop="name" class="hidden-xs">GNU</h1>
-            <p class="text-muted hidden-xs">Total 10 categories</p>
-            <nav role="navigation" id="nav-main" class="okayNav">
-                <ul>
-                    <li><a href="/categories/">All</a></li>
-                    <li><a href="https://yushuanhsieh.github.io/categories/c/">C</a></li>
-                    <li><a href="https://yushuanhsieh.github.io/categories/game/">Game</a></li>
-                    <li><a href="https://yushuanhsieh.github.io/categories/gnu/">GNU</a></li>
-                    <li><a href="https://yushuanhsieh.github.io/categories/go/">Go</a></li>
-                    <li><a href="https://yushuanhsieh.github.io/categories/life/">Life</a></li>
-                    <li><a href="https://yushuanhsieh.github.io/categories/meetup/">Meetup</a></li>
-                    <li><a href="https://yushuanhsieh.github.io/categories/network/">Network</a></li>
-                    <li><a href="https://yushuanhsieh.github.io/categories/other/">Other</a></li>
-                    <li><a href="https://yushuanhsieh.github.io/categories/study/">Study</a></li>
-                    <li><a href="https://yushuanhsieh.github.io/categories/web/">Web</a></li>
-                </ul>
-            </nav>
-        </header>
+<main class="main" role="main"><div class="content">
+  <article id="single-" class="article article-type-single" itemscope
+    itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      <h1 itemprop="name">
+  <a
+    class="article-title"
+    href="/post/2020-04-29-hugo-symlinks/"
+    >
+    
+      
         
-        <div class="article-body">
-            <div class="panel panel-default b-no">
-                <div class="panel-heading" role="tab">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" href="#collapseb7e89d55aa08a289aa48277386e6ff1d" aria-expanded="true">
-                            <i class="icon icon-folder text-active"></i><i class="icon icon-folder-open text"></i>GNU
-                        </a>
-                        <small class="text-muted">(Total1 articles)</small>
-                    </h4>
-                </div>
-                <div id="collapseb7e89d55aa08a289aa48277386e6ff1d" class="panel-collapse collapse in" role="tabpanel"
-                    aria-labelledby="headingb7e89d55aa08a289aa48277386e6ff1d">
-                    <div class="panel-body">
-                        <div class="collection"><a href="https://yushuanhsieh.github.io/post/2019-08-18-sem-glibc/" class="collection-item" itemprop="url" target="_blank">
-    <time datetime="2019-08-17 08:00:00 &#43;0800 CST" itemprop="datePublished" style="margin-right: 5px;">2019-08-17
-    </time>semaphore sem_post 在 glibc v2.0 v2.1 之比較
+          <span class="title-cat">Go</span>
+        
+      
+    Side Project - Symlink Generator for Multi-lang Hugo Site</a>
+</h1>
+
+      <div class="article-meta">
+        
+<span class="article-date">
+  <i class="icon icon-calendar-check"></i>&nbsp;
+<a href="https://yushuanhsieh.github.io/post/2020-04-29-hugo-symlinks/" class="article-date">
+  <time datetime="2020-04-29 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-29</time>
 </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</span>
+<span class="article-category">
+  <i class="icon icon-folder"></i>
+  
+    <a class="article-category-link" href="/categories/go/"> Go </a>
+</span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2020-04-29-hugo-symlinks/#comments"
+            class="article-comment-link">Comments</a></span>
+      </div>
+    </div>
+    <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
+      <p>在 <a href="https://yushuanhsieh.github.io/post/2020-04-07-hugo-merge/">Multilingual Mode in Hugo</a> 這篇文章中有提到目前使用 Hugo site generator 產生 multi-lang site 的問題，使用者必須要為每個語言都建立一個檔案，才不會造成最後在產生網站後，發生某一個語言的頁面遺失問題。（例如，使用者一定要建立 <code>about.md</code>, <code>about.tw.md</code>，這樣當瀏覽者在選擇中文語言的網站時，才會顯示出 about 頁面）。這樣其實會造成不少困擾，因為不是每個語言都可以這麼即時的被翻譯完成，但我們又不希望有頁面遺失，因此需要透過一些方式來解決這個問題。</p>
+<p>而其中一個方法就是建立一個 <code>symbolic link</code>，當某個語言還沒被翻譯時，就建立一個 symbolic link 來代表這個檔案，然後實際檔案則指向預設語言的檔案。</p>
+<h2 id="hugo-langs-symlinkhttpsgithubcomyushuanhsiehhugo-langs-symlink"><a href="https://github.com/YuShuanHsieh/hugo-langs-symlink">hugo langs symlink</a></h2>
+<p>因此，side project <a href="https://github.com/YuShuanHsieh/hugo-langs-symlink">github.com/YuShuanHsieh/hugo-langs-symlink</a> 就是為了這個目的而誕生的，用我熟悉的 Go 語言來編寫，使用者可以透過參數來決定要建立 <code>symbolic link</code> 的語言和檔案對象。Project 簡單地提供 <code>create</code> 和 <code>remove</code> 兩個 sub command ，這樣用戶就能直接在 local 端操作和刪除 <code>symbolic link</code>，避免產生過多的 <code>symbolic link</code> 而影響到 git commit。</p>
+<p>使用範例：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">./hslink --dir<span style="color:#f92672">=</span>/home/user/site/content --langs<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;zh&#34;</span> --langs<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;zh-tw&#34;</span> --skips<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;images&#34;</span> create
+</code></pre></div><p>相關參數設定可以查閱 <a href="https://github.com/YuShuanHsieh/hugo-langs-symlink/blob/master/README.md">README.md</a>，其實功能很單純，而且可以用在 CI/CD 流程上，對於我們目前在處理網站來說已經很夠用了。</p>
+<p>因為是小 side project，有些功能沒有寫的很齊全，例如可以直接讀 folder 中的 hugo config 檔案，這樣就可以省掉使用者需要輸入 <code>langs</code> 的問題；以及目前只支援同一時間進行一個 content file extension 的轉換，有些使用者可能有 markdown 以及其他的內容檔案，那就要無法一次轉換完成，這些都是可以改善的地方。</p>
+<p>就這樣～最近都在做 operation 的工作，整天 gcloud 和 kubectl，現在能寫點 code 還蠻開心的 :D</p>
+
+    </div>
+    <div class="article-footer">
+<blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    <li class="post-copyright-link hidden-xs">
+      <strong>Permalink: </strong>
+      <a href="https://yushuanhsieh.github.io/post/2020-04-29-hugo-symlinks/" title="Side Project - Symlink Generator for Multi-lang Hugo Site" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2020-04-29-hugo-symlinks/</a>
+    </li>
+  </ul>
+</blockquote>
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="https://yushuanhsieh.github.io/author.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">Cherie Hsieh</span><small class="ml-1x">Software Engineer</small></a></h3>
+        <div>Gopher</div>
+      </div>
+    </figure>
+  </div>
+</div>
+    </div>
+  </article>
+
+</div><nav class="bar bar-footer clearfix" data-stick-bottom>
+    <div class="bar-inner">
+        <ul class="pager pull-left">
+            <li class="prev">
+                <a href="https://yushuanhsieh.github.io/post/2020-04-22-discourse-deployment/" title="Discourse Forums Deployment"><i
+                        class="icon icon-angle-left"
+                        aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
+            </li>
+            
+        </ul>
+        <div class="bar-right">
         </div>
-    </article>
+    </div>
+</nav>
+
 </main><footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
   <div class="copyright">
     &copy;2017  -
@@ -304,6 +359,7 @@
         hasInnerContainers: true,
     });
 </script>
+
 
   </body>
 </html>
