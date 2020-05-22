@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        Side Project - Transfer.sh - 文組工程師
+      </title>
+    <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  
+  <meta name="theme-color" content="#000000" />
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <meta name="description" content="在 Trace transfer.sh open project 有提到我目前正在調整 transfer.sh 這個 open source project，把它修改成內部所需要的一個 service，而之前已經改得差不多了，所以簡單地來介紹一下修改了哪些內容：" />
+  <meta name="generator" content="Hugo 0.67.0 with theme pure" />
+  <title>Side Project - Transfer.sh - 文組工程師</title>
+  
+  
+  <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
+  
+    
+    <link rel="stylesheet" href="https://yushuanhsieh.github.io/scss/cherie.min.25e69b63f709fdfaf070b38e72e556d2a25931840ee2fcdc62b4aa0b9803e9ba.css" async>
+  
+  <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
+  <meta property="og:title" content="Side Project - Transfer.sh" />
+<meta property="og:description" content="在 Trace transfer.sh open project 有提到我目前正在調整 transfer.sh 這個 open source project，把它修改成內部所需要的一個 service，而之前已經改得差不多了，所以簡單地來介紹一下修改了哪些內容：" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2020-05-19-transfer.sh/" />
+<meta property="article:published_time" content="2020-05-19T08:00:00+08:00" />
+<meta property="article:modified_time" content="2020-05-19T08:00:00+08:00" />
+<meta itemprop="name" content="Side Project - Transfer.sh">
+<meta itemprop="description" content="在 Trace transfer.sh open project 有提到我目前正在調整 transfer.sh 這個 open source project，把它修改成內部所需要的一個 service，而之前已經改得差不多了，所以簡單地來介紹一下修改了哪些內容：">
+<meta itemprop="datePublished" content="2020-05-19T08:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-05-19T08:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="265">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Side Project - Transfer.sh"/>
+<meta name="twitter:description" content="在 Trace transfer.sh open project 有提到我目前正在調整 transfer.sh 這個 open source project，把它修改成內部所需要的一個 service，而之前已經改得差不多了，所以簡單地來介紹一下修改了哪些內容："/>
+
+  <!--[if lte IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+    <![endif]-->
+
+  <!--[if lt IE 9]>
+      <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+  </head>
+
+  
+  
+
+  <body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage"><header class="header" itemscope itemtype="http://schema.org/WPHeader">
+    <div class="slimContent">
+      <div class="navbar-header">
+        <div class="profile-block text-center">
+          <a id="avatar" href="" target="_blank">
+            <img class="img-circle img-rotate" src="https://yushuanhsieh.github.io/author.jpg" width="200" height="200">
+          </a>
+          <h2 id="name" class="hidden-xs hidden-sm">Cherie Hsieh</h2>
+          <h3 id="title" class="hidden-xs hidden-sm hidden-md">Software Engineer</h3>
+          <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>Taiwan</small>
+        </div><div class="search" id="search-form-wrap">
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i
+                        class="icon icon-search"></i></button>
+            </span>
+        </div>
+        <div class="ins-search">
+            <div class="ins-search-mask"></div>
+            <div class="ins-search-container">
+                <div class="ins-input-wrapper">
+                    <input type="text" class="ins-search-input" placeholder="Type something..."
+                        x-webkit-speech />
+                    <button type="button" class="close ins-close ins-selectable" data-dismiss="modal"
+                        aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="ins-section-wrapper">
+                    <div class="ins-section-container"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+        <ul class="nav navbar-nav main-nav">
+            <li class="menu-item menu-item-home">
+                <a href="/">
+                  <span class="menu-title">Home</span>
+                </a>
+            </li>
+            <li class="menu-item menu-item-categories">
+                <a href="/categories/">
+                  <span class="menu-title">Categories</span>
+                </a>
+            </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+<aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title"> Categories</h3>
+    <div class="widget-body">
+        <ul class="category-list">
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/c/" class="category-list-link">c</a><span class="category-list-count">3</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">10</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/other/" class="category-list-link">other</a><span class="category-list-count">7</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/study/" class="category-list-link">study</a><span class="category-list-count">9</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/web/" class="category-list-link">web</a><span class="category-list-count">28</span></li>
+        </ul>
+    </div>
+</div>
+      
+<div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+        <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-05-19-transfer.sh/" class="title">Side Project - Transfer.sh</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-05-19 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-05-19</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-04-29-hugo-symlinks/" class="title">Side Project - Symlink Generator for Multi-lang Hugo Site</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-04-29 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-29</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-04-22-discourse-deployment/" class="title">Discourse Forums Deployment</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-04-22 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-22</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-04-15-transfer-sh-refactor/" class="title">Trace transfer.sh open project</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-04-15 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-15</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-04-07-hugo-merge/" class="title">Multilingual Mode in Hugo</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-04-07 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-07</time>
+                    </p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+  </div>
+</aside>
+
+    
+    
+<main class="main" role="main"><div class="content">
+  <article id="single-" class="article article-type-single" itemscope
+    itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      <h1 itemprop="name">
+  <a
+    class="article-title"
+    href="/post/2020-05-19-transfer.sh/"
+    >
+    
+      
+        
+          <span class="title-cat">Go</span>
+        
+      
+    Side Project - Transfer.sh</a>
+</h1>
+
+      <div class="article-meta">
+        
+<span class="article-date">
+  <i class="icon icon-calendar-check"></i>&nbsp;
+<a href="https://yushuanhsieh.github.io/post/2020-05-19-transfer.sh/" class="article-date">
+  <time datetime="2020-05-19 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-05-19</time>
+</a>
+</span>
+<span class="article-category">
+  <i class="icon icon-folder"></i>
+  
+    <a class="article-category-link" href="/categories/go/"> Go </a>
+</span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2020-05-19-transfer.sh/#comments"
+            class="article-comment-link">Comments</a></span>
+      </div>
+    </div>
+    <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
+      <p>在 <a href="https://yushuanhsieh.github.io/post/2020-04-15-transfer-sh-refactor/">Trace transfer.sh open project</a> 有提到我目前正在調整 <a href="https://github.com/dutchcoders/transfer.sh">transfer.sh</a> 這個 open source project，把它修改成內部所需要的一個 service，而之前已經改得差不多了，所以簡單地來介紹一下修改了哪些內容：</p>
+<h2 id="需求">需求</h2>
+<ol>
+<li>每個 download request 能依需求驗證 IP address 和 user account / password</li>
+<li>能使用外部 service 來驗證 user account</li>
+<li>需能支援 curl cmd tool</li>
+<li>k8s deployment</li>
+</ol>
+<h2 id="修改項目">修改項目</h2>
+<h3 id="1-middleware-chain">1. Middleware Chain</h3>
+<p>根據需求 1，在 <code>getHandler</code> 前加入 middleware chain，其中包含：</p>
+<ul>
+<li>從 metadata storage 中取出 metadata 並放到 context 中</li>
+<li>IP address 驗證 (optional)</li>
+<li>HTTP basic authentication (optional)</li>
+</ul>
+<p>之所以使用 HTTP basic authentication 是因為部分用戶可能會直接使用 curl 下載，那麼用 HTTP basic authentication 流程較簡單又方便，缺點是在瀏覽器上操作會跳出預設的 basic authentication 介面，看起來有點醜。</p>
+<p><a href="https://github.com/YuShuanHsieh/transfer.sh/blob/master/server/server.go#L230">source code</a></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">HandleFunc</span>(<span style="color:#e6db74">&#34;/{token}/{filename}&#34;</span>,
+	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">AssignMetadata</span>(<span style="color:#a6e22e">MetadataAllowedIP</span>(<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">MetadataBasicAuth</span>(<span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">HandlerFunc</span>(<span style="color:#a6e22e">getHandlerFn</span>)))),
+).<span style="color:#a6e22e">Methods</span>(<span style="color:#e6db74">&#34;GET&#34;</span>)
+</code></pre></div><h3 id="2-authenticator-interface">2. Authenticator interface</h3>
+<p>增加 <code>Authenticator</code> interface，這樣就可以選擇是要透過 metadata 中的 username / password 來進行驗證，還是要使用 API 連結到其他 service 進行驗證。（目前也只實作 metadata 和API 兩個 Authenticators XD）</p>
+<p>另外，在 API Authenticator 也可以自行加入想要的 header，這是因為在 cloud service 間可能會透過 api-key 這種方式來進行 request 驗證，所以 header 設定還是有其必要。</p>
+<h3 id="3-metadata">3. Metadata</h3>
+<p>request 驗證規則會儲存在 metadata 中。原本 project 就有 metadata 的設計，其內容是放置 delete code、到期日期、下載次數等。而在這次修改中則是增加了 <code>AuthTypes</code> <code>user</code> <code>password</code> <code>IP</code> <code>net</code> 等欄位，讓我們可以進行 IP filter 和 basic authentication。</p>
+<p>正也因為 metadata 放入了驗證規則，每次 request 就必須取出對應的 metadata，因此原設計是將 metadata 存放在檔案內，現在看起來會有點不適用。在考量 metadata 的 bytes size 不大，放在 memory 中是一個可行的方式，所以額外增加了 metadata storage，並且實作了 redis storage，來加快 metadata 讀取速度。</p>
+<h3 id="4-cmd-options">4. Cmd Options</h3>
+<p>由於上面的新增項目，因此也在 cmd options 中增加對應的參數設定，並且也增加 environment variable，方便後續 deploy 。</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Value</th>
+<th>Env</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>api-endpoint</td>
+<td>the endpoint for api authenticator</td>
+<td></td>
+<td>API_ENDPOINT</td>
+</tr>
+<tr>
+<td>api-headers</td>
+<td>the HTTP(s) headers for api authenticator</td>
+<td></td>
+<td>API_HEADERS</td>
+</tr>
+<tr>
+<td>meta-provider</td>
+<td>which storage provider to use</td>
+<td>(s3, gdrive, local, redis)</td>
+<td></td>
+</tr>
+<tr>
+<td>redis-addr</td>
+<td>The address of redis server</td>
+<td>localhost:6379</td>
+<td>REDIS_ADDR</td>
+</tr>
+<tr>
+<td>redis-pwd</td>
+<td>The password of redis server</td>
+<td></td>
+<td>REDIS_PWD</td>
+</tr>
+</tbody>
+</table>
+<h2 id="usage">Usage</h2>
+<p><a href="https://hub.docker.com/r/cjamhe01385/transfer">Container: cjamhe01385/transfer</a></p>
+<p>提供 container 試用：</p>
+<ul>
+<li>啟動 container</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">docker run --rm -p 8080:8080 cjamhe01385/transfer:latest --listener<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;:8080&#34;</span> --provider<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;local&#34;</span> --basedir<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;/data&#34;</span> --http-auth-user<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;user&#34;</span> --http-auth-pass<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;password&#34;</span> --meta-provider<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;redis&#34;</span> --redis-addr<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;redis:6379&#34;</span>
+</code></pre></div><ul>
+<li>在上傳檔案同時加入驗證規則
+(記得如果 payload 有 password 要使用 HTTPS 唷 &lt;3 )</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">curl -X POST -H <span style="color:#e6db74">&#34;Content-Type: multipart/form-data&#34;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>-F <span style="color:#e6db74">&#34;user=user&#34;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>-F <span style="color:#e6db74">&#34;password=password&#34;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>-F <span style="color:#e6db74">&#34;file=@./examples.md&#34;</span> <span style="color:#e6db74">&#34;https://&lt;web server&gt;/examples.md&#34;</span>
+</code></pre></div><h2 id="source-code">source code</h2>
+<p><a href="https://github.com/YuShuanHsieh/transfer.sh">transfer.sh</a></p>
+
+    </div>
+    <div class="article-footer">
+<blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    <li class="post-copyright-link hidden-xs">
+      <strong>Permalink: </strong>
+      <a href="https://yushuanhsieh.github.io/post/2020-05-19-transfer.sh/" title="Side Project - Transfer.sh" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2020-05-19-transfer.sh/</a>
+    </li>
+  </ul>
+</blockquote>
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="https://yushuanhsieh.github.io/author.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">Cherie Hsieh</span><small class="ml-1x">Software Engineer</small></a></h3>
+        <div>Gopher</div>
+      </div>
+    </figure>
+  </div>
+</div>
+    </div>
+  </article>
+
+</div><nav class="bar bar-footer clearfix" data-stick-bottom>
+    <div class="bar-inner">
+        <ul class="pager pull-left">
+            <li class="prev">
+                <a href="https://yushuanhsieh.github.io/post/2020-04-29-hugo-symlinks/" title="Side Project - Symlink Generator for Multi-lang Hugo Site"><i
+                        class="icon icon-angle-left"
+                        aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
+            </li>
+            
+        </ul>
+        <div class="bar-right">
+        </div>
+    </div>
+</nav>
+
+</main><footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+  <div class="copyright">
+    &copy;2017  -
+    2020
+    <div class="publishby">
+        Theme by <a href="https://github.com/xiaoheiAh" target="_blank"> xiaoheiAh </a>base on<a href="https://github.com/xiaoheiAh/hugo-theme-pure" target="_blank"> pure</a>.
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+<script>
+    window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/javascript.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/c.min.js" defer></script><script>
+    hljs.configure({
+        tabReplace: '    ', 
+        classPrefix: ''     
+        
+    })
+    hljs.initHighlightingOnLoad();
+</script>
+<script src="https://yushuanhsieh.github.io/js/application.min.bdeb64b910570b6c41badc6a05b7afb0c8ad9efd8525de3c7257d59e786326a3.js"></script>
+<script src="https://yushuanhsieh.github.io/js/plugin.min.51ff8c7317566f82259170fa36e09c4493adc9b9378b427a01ad3f017ebac7dd.js"></script>
+
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            ROOT_URL: 'https:\/\/yushuanhsieh.github.io',
+            CONTENT_URL: 'https:\/\/yushuanhsieh.github.io\/searchindex.json ',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script type="text/javascript" src="https://yushuanhsieh.github.io/js/insight.min.a343cd9a5a7698336b28ef3a7c16a3a1b1d2d5fb17dc8ed04022bbe08cc5459073a15bdafa3a8a58cdd56080784bdd69fa70b1ae8597565c799c57ed00f0e120.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+<script>
+    tocbot.init({
+        
+        tocSelector: '.js-toc',
+        
+        contentSelector: '.js-toc-content',
+        
+        headingSelector: 'h1, h2, h3',
+        
+        hasInnerContainers: true,
+    });
+</script>
+
+
+  </body>
+</html>
