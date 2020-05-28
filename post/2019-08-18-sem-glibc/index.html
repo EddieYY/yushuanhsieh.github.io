@@ -23,7 +23,7 @@
   
   
   <meta name="description" content="前言 在翻 futex man document 的時候，不小心看到 Linux Futex的设计与实现 這篇文章。文章中有提到在執行 sem_post 的時候，雖然沒有與其他 thread 競爭，還是會用到 fuxtex system call。當然文章中有提到原因，不過看了原因，覺得這看起來很明顯的效能問題，應該會被提出來並改進吧？後來翻了一下目前的 source code ，看到這個是 GLIBC_2_0 的版本（那篇文章也很久了，所以能想見當時的版本應該蠻舊的），而現在 GLIBC_2_1 就有把這部分改進，因此就來簡單記錄一下差異在哪裡吧～" />
-  <meta name="generator" content="Hugo 0.67.0 with theme pure" />
+  <meta name="generator" content="Hugo 0.71.0 with theme pure" />
   <title>semaphore sem_post 在 glibc v2.0 v2.1 之比較 - 文組工程師</title>
   
   
@@ -137,6 +137,8 @@
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">10</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/google-cloud-platform/" class="category-list-link">google-cloud-platform</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/kubernetes/" class="category-list-link">kubernetes</a><span class="category-list-count">1</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
@@ -151,6 +153,16 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget-body">
         <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-05-28-ingress-gce/" class="title">Introduction to ingress-gce controller</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-05-28 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-05-28</time>
+                    </p>
+                </div>
+            </li>
             <li>
                 <div class="item-inner">
                     <p class="item-title">
@@ -188,16 +200,6 @@
                     </p>
                     <p class="item-date">
                         <time datetime="2020-04-15 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-15</time>
-                    </p>
-                </div>
-            </li>
-            <li>
-                <div class="item-inner">
-                    <p class="item-title">
-                        <a href="https://yushuanhsieh.github.io/post/2020-04-07-hugo-merge/" class="title">Multilingual Mode in Hugo</a>
-                    </p>
-                    <p class="item-date">
-                        <time datetime="2020-04-07 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-07</time>
                     </p>
                 </div>
             </li>

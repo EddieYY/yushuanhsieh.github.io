@@ -24,7 +24,7 @@
   
   <meta name="description" content="前言 最近開始接觸前端技術，預計以Angular和NodeJS為主。之前其實有稍微點一些網頁相關技能，不過大概都才Lv.1，知道大概怎麼使用，卻不太清楚背後的原理和概念。所以這次在學習的時候，會著重在框架理論和實作方式上，希望自己除了能應用這些框架之外，還可以了解這些框架背後的原理，並且進而有能力比較各框架之間的好壞。雖然Angular目前已經出到v5.1.0，但起點會從Angular1開始學起，之後文章預計會去比較新版的Angular和Angular1有怎樣的差異，以及新版的運作方式可以帶來怎樣的好處。
 Angular1主打特色之一包含 Two-way data binding (這邊先不在意這種方式帶來怎樣的壞處xD)，這篇文章紀錄 Two-way data binding 的原理和實現方式，以及對網站來說會帶來怎樣的影響。文章將不會示範如何去應用 Two-way data binding，因為我覺得隨便 Google 就可以找到很多例子，就不特別介紹了。" />
-  <meta name="generator" content="Hugo 0.67.0 with theme pure" />
+  <meta name="generator" content="Hugo 0.71.0 with theme pure" />
   <title>AngularJS - Two way data binding - 文組工程師</title>
   
   
@@ -141,6 +141,8 @@ Angular1主打特色之一包含 Two-way data binding (這邊先不在意這種�
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">10</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/google-cloud-platform/" class="category-list-link">google-cloud-platform</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/kubernetes/" class="category-list-link">kubernetes</a><span class="category-list-count">1</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
@@ -155,6 +157,16 @@ Angular1主打特色之一包含 Two-way data binding (這邊先不在意這種�
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget-body">
         <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-05-28-ingress-gce/" class="title">Introduction to ingress-gce controller</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-05-28 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-05-28</time>
+                    </p>
+                </div>
+            </li>
             <li>
                 <div class="item-inner">
                     <p class="item-title">
@@ -192,16 +204,6 @@ Angular1主打特色之一包含 Two-way data binding (這邊先不在意這種�
                     </p>
                     <p class="item-date">
                         <time datetime="2020-04-15 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-15</time>
-                    </p>
-                </div>
-            </li>
-            <li>
-                <div class="item-inner">
-                    <p class="item-title">
-                        <a href="https://yushuanhsieh.github.io/post/2020-04-07-hugo-merge/" class="title">Multilingual Mode in Hugo</a>
-                    </p>
-                    <p class="item-date">
-                        <time datetime="2020-04-07 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-07</time>
                     </p>
                 </div>
             </li>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        Introduction to ingress-gce controller - 文組工程師
+      </title>
+    <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  
+  <meta name="theme-color" content="#000000" />
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <meta name="description" content="如果想要在 Google Cloud Platform 的 GKE 上使用 Ingress 功能，最簡單的方式就是用 GKE 本身預設提供的 ingress-gce controller。不過不知道大家在設定 ingress yaml 的時候，有沒有留意到 ingress-gce 規定 service type 只能是 NodePort，但是 ingress-nginx 卻沒有這種限制呢？" />
+  <meta name="generator" content="Hugo 0.71.0 with theme pure" />
+  <title>Introduction to ingress-gce controller - 文組工程師</title>
+  
+  
+  <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
+  
+    
+    <link rel="stylesheet" href="https://yushuanhsieh.github.io/scss/cherie.min.25e69b63f709fdfaf070b38e72e556d2a25931840ee2fcdc62b4aa0b9803e9ba.css" async>
+  
+  <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
+  <meta property="og:title" content="Introduction to ingress-gce controller" />
+<meta property="og:description" content="如果想要在 Google Cloud Platform 的 GKE 上使用 Ingress 功能，最簡單的方式就是用 GKE 本身預設提供的 ingress-gce controller。不過不知道大家在設定 ingress yaml 的時候，有沒有留意到 ingress-gce 規定 service type 只能是 NodePort，但是 ingress-nginx 卻沒有這種限制呢？" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2020-05-28-ingress-gce/" />
+<meta property="article:published_time" content="2020-05-28T08:00:00+08:00" />
+<meta property="article:modified_time" content="2020-05-28T08:00:00+08:00" />
+<meta itemprop="name" content="Introduction to ingress-gce controller">
+<meta itemprop="description" content="如果想要在 Google Cloud Platform 的 GKE 上使用 Ingress 功能，最簡單的方式就是用 GKE 本身預設提供的 ingress-gce controller。不過不知道大家在設定 ingress yaml 的時候，有沒有留意到 ingress-gce 規定 service type 只能是 NodePort，但是 ingress-nginx 卻沒有這種限制呢？">
+<meta itemprop="datePublished" content="2020-05-28T08:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-05-28T08:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="543">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Introduction to ingress-gce controller"/>
+<meta name="twitter:description" content="如果想要在 Google Cloud Platform 的 GKE 上使用 Ingress 功能，最簡單的方式就是用 GKE 本身預設提供的 ingress-gce controller。不過不知道大家在設定 ingress yaml 的時候，有沒有留意到 ingress-gce 規定 service type 只能是 NodePort，但是 ingress-nginx 卻沒有這種限制呢？"/>
+
+  <!--[if lte IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+    <![endif]-->
+
+  <!--[if lt IE 9]>
+      <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+  </head>
+
+  
+  
+
+  <body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage"><header class="header" itemscope itemtype="http://schema.org/WPHeader">
+    <div class="slimContent">
+      <div class="navbar-header">
+        <div class="profile-block text-center">
+          <a id="avatar" href="" target="_blank">
+            <img class="img-circle img-rotate" src="https://yushuanhsieh.github.io/author.jpg" width="200" height="200">
+          </a>
+          <h2 id="name" class="hidden-xs hidden-sm">Cherie Hsieh</h2>
+          <h3 id="title" class="hidden-xs hidden-sm hidden-md">Software Engineer</h3>
+          <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>Taiwan</small>
+        </div><div class="search" id="search-form-wrap">
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i
+                        class="icon icon-search"></i></button>
+            </span>
+        </div>
+        <div class="ins-search">
+            <div class="ins-search-mask"></div>
+            <div class="ins-search-container">
+                <div class="ins-input-wrapper">
+                    <input type="text" class="ins-search-input" placeholder="Type something..."
+                        x-webkit-speech />
+                    <button type="button" class="close ins-close ins-selectable" data-dismiss="modal"
+                        aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="ins-section-wrapper">
+                    <div class="ins-section-container"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+        <ul class="nav navbar-nav main-nav">
+            <li class="menu-item menu-item-home">
+                <a href="/">
+                  <span class="menu-title">Home</span>
+                </a>
+            </li>
+            <li class="menu-item menu-item-categories">
+                <a href="/categories/">
+                  <span class="menu-title">Categories</span>
+                </a>
+            </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+<aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title"> Categories</h3>
+    <div class="widget-body">
+        <ul class="category-list">
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/c/" class="category-list-link">c</a><span class="category-list-count">3</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">10</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/google-cloud-platform/" class="category-list-link">google-cloud-platform</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/kubernetes/" class="category-list-link">kubernetes</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/other/" class="category-list-link">other</a><span class="category-list-count">7</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/study/" class="category-list-link">study</a><span class="category-list-count">9</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/web/" class="category-list-link">web</a><span class="category-list-count">28</span></li>
+        </ul>
+    </div>
+</div>
+      
+<div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+        <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-05-28-ingress-gce/" class="title">Introduction to ingress-gce controller</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-05-28 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-05-28</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-05-19-transfer.sh/" class="title">Side Project - Transfer.sh</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-05-19 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-05-19</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-04-29-hugo-symlinks/" class="title">Side Project - Symlink Generator for Multi-lang Hugo Site</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-04-29 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-29</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-04-22-discourse-deployment/" class="title">Discourse Forums Deployment</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-04-22 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-22</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-04-15-transfer-sh-refactor/" class="title">Trace transfer.sh open project</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-04-15 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-15</time>
+                    </p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+  </div>
+</aside>
+
+    
+    
+<main class="main" role="main"><div class="content">
+  <article id="single-" class="article article-type-single" itemscope
+    itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      <h1 itemprop="name">
+  <a
+    class="article-title"
+    href="/post/2020-05-28-ingress-gce/"
+    >
+    
+      
+        
+          <span class="title-cat">Google Cloud Platform</span>
+        
+          <span class="title-cat">Kubernetes</span>
+        
+      
+    Introduction to ingress-gce controller</a>
+</h1>
+
+      <div class="article-meta">
+        
+<span class="article-date">
+  <i class="icon icon-calendar-check"></i>&nbsp;
+<a href="https://yushuanhsieh.github.io/post/2020-05-28-ingress-gce/" class="article-date">
+  <time datetime="2020-05-28 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-05-28</time>
+</a>
+</span>
+<span class="article-category">
+  <i class="icon icon-folder"></i>
+  
+    <a class="article-category-link" href="/categories/google-cloud-platform/"> Google Cloud Platform </a>
+    <a class="article-category-link" href="/categories/kubernetes/"> Kubernetes </a>
+</span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2020-05-28-ingress-gce/#comments"
+            class="article-comment-link">Comments</a></span>
+      </div>
+    </div>
+    <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
+      <p>如果想要在 Google Cloud Platform 的 GKE 上使用 Ingress 功能，最簡單的方式就是用 GKE 本身預設提供的 <code>ingress-gce</code> controller。不過不知道大家在設定 ingress yaml 的時候，有沒有留意到 <code>ingress-gce</code> 規定 service type 只能是 <code>NodePort</code>，但是 <code>ingress-nginx</code> 卻沒有這種限制呢？</p>
+<p>本篇文章會從 Google Cloud Platform 所提供的 load balancer 服務開始說明，並且結合 <code>ingress-gce</code> controller，讓大家瞭解兩者的運作方式和限制原因。</p>
+<h2 id="google-cloud-platform-load-balancer">Google Cloud Platform Load Balancer</h2>
+<p>首先來說明 Google Cloud Platform 的 external load balancer 的運作流程：</p>
+<blockquote>
+<p><img src="https://cloud.google.com/load-balancing/images/http-load-balancer-simple.svg" alt="">
+source: <a href="https://cloud.google.com/load-balancing/docs/https/ext-http-lb-simple">Setting up a simple external HTTP load balancer</a></p>
+</blockquote>
+<ol>
+<li>user 向 server 發送 request 後，GCP 會將 package 的 dest. IP address 和 forwarding table 進行比對(match)，並將 network packages 轉送到比對成功的 forwarding rule 所指定的 proxy server。</li>
+<li>Proxy server 取出 package 中的 URL 資訊，再根據 GCP 上設定的 URL map 來決定該將 package 轉發到哪一個 backend service。(routing)</li>
+<li>最後，依據 backend service 的設定將 package 分配到對應 group 底下的 backend server。</li>
+</ol>
+<p>而實際對應到 GCP load balancer 設定，就會是：</p>
+<p><img src="/posts/ingress-gce_3.png" alt="hugo"></p>
+<p>如果是使用 GCP cloud console 的話，也可以切換到 advanced menu，就能看到上述所提到的各細節設定，包含 target proxy 和 forwarding rule 等。</p>
+<p><img src="/posts/ingress-gce_4.png" alt="hugo"></p>
+<h2 id="ingress-gce-with-gcp-load-balancer">Ingress-gce with GCP Load Balancer</h2>
+<p>了解基本 GCP load balancer 運作方式之後，接著我們來看 <code>ingress-gce</code> 如何結合 GCP load balancer 來實現 ingress 功能。</p>
+<p><code>ingress-gce</code> 是實現 Kubernetes ingress 抽象層的 controller，而實際負責管理 traffic 的 ingress server 當然就是 GCP load balancer。另外，<code>ingress-gce</code> controller 目前支援建立 L7 external / internal <strong>HTTP(S)</strong> Load Balancing，所以假如是只需要 L4(TCP/UDP) 的 load Balancing，就需要指定其他 ingress controller。</p>
+<p><img src="/posts/ingress-gce_1.png" alt="hugo"></p>
+<p>因此，當使用者部署或是更新 ingress resource 時，<code>ingress-gce</code> ingress controller 就會 call GCP compute load balancer API 來調整相關配置。</p>
+<p>而在第一部分已經有簡單介紹過 GCP load balancer 所需要的各設定，那麼這些設定該怎麼跟 Kubernetes 的 ingress resource 和機制做整合呢？</p>
+<h3 id="1-forwarding-rules">1. Forwarding Rules</h3>
+<p>建立 forwarding rule 需要 <strong>(1) external IP address</strong> 和 <strong>(2) proxy server</strong>。</p>
+<p>如果在 yaml annotation 沒有設定既有的 static external IP， <code>ingress-gce</code> controller 就會自動建立一個 global external IP，並且根據 yaml 內的 TLS 設定來決定要選擇 HTTP 或是 HTTPS proxy server。</p>
+<pre><code>apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: my-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: &lt;static-address&gt;
+</code></pre><p>仔細看 static IP 的設定，它是 <strong>global-static-ip-name</strong>，Global 這字非常重要，原因是 GCP 的 HTTP(s) load balancer 是比對 global forwarding table，因此就需要使用 global static IP， 假設既有的 static IP 是 regional static IP ，那它是不能被套用在設定上的。</p>
+<h3 id="url-map">URL map</h3>
+<p>URL map 相對來說就簡單理解，就是把 yaml 設定檔中的 host 和 path 組成 GCP load balancer 所需要的 URL map，舉例來說：</p>
+<pre><code>spec:
+  rules:
+  - host: example.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: web-server
+          servicePort: http
+  - host: beta.example.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: beta-web-server
+          servicePort: http
+</code></pre><p>就會產生三個對應 mapping rules，分別是</p>
+<ol>
+<li><code>default</code></li>
+<li><code>example.com/*</code></li>
+<li><code>beta.example.com/*</code></li>
+</ol>
+<p>而這三個 rules 會分別對應到各自不同的 backend service。</p>
+<h3 id="backend-service">Backend Service</h3>
+<p>最後一步就是要將 kubernetes cluster 中的 nodes 對應到 GCP load balancer 的 backend service。Backend service 需要關聯到至少一個 <strong>Backend Group</strong>，這個 Backend Group 可以是:</p>
+<ol>
+<li>instance group</li>
+<li>network endpoints group</li>
+</ol>
+<p>而在 <a href="https://cloud.google.com/kubernetes-engine/docs/concepts/ingress#container-native_load_balancing">GKE Ingress for HTTP(S) load balancing</a> 有提到，如果可以的話，盡可能地使用 <code>Network Endpoint Groups (NEGs)</code> 以提高 package 轉送效率，因此我們就以 network endpoints group 來做說明。</p>
+<p>在 <strong>service</strong> yaml 加入<code>{&quot;ingress&quot;: true}</code>：</p>
+<pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: neg-demo-svc
+  annotations:
+    cloud.google.com/neg: '{&quot;ingress&quot;: true}'
+spec:
+  type: NodePort
+  selector:
+    run: neg-demo-app
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 9376
+</code></pre><blockquote>
+<p>source code from <a href="https://cloud.google.com/kubernetes-engine/docs/how-to/container-native-load-balancing">Using container-native load balancing</a></p>
+</blockquote>
+<p>這樣 <code>ingress-gce</code> controller 就會根據 <strong>service selector</strong> 所選到的 pods 來組成一個 network endpoints group。示意圖如下：</p>
+<p><img src="/posts/ingress-gce_2.png" alt="hugo"></p>
+<p>每個 endpoint 是由 node ID 和 pod IP 所組成，這樣在轉送 package 的時候，就可以直接送到 pod 內，而不需要透過 node 內的 iptable 再轉發到 pod 了。</p>
+<h2 id="nodeport">NodePort</h2>
+<p>回到文章一開始的問題，為什麼 <code>ingress-gce</code> controller 的 service 必須要是 <strong>NodePort</strong> type？</p>
+<p>這原因很簡單，從上面描述可以知道 ingress server 就是 GCP load balancer，而 <code>ingress-gce</code> controller 根據 ingress resource 來更新 GCP load balancer 設定，但是 GCP load balancer 這個 ingress server 並不在我們 cluster 中，如果我們將 service type 設為 clusterIP，那麼外部的 ingress server 就無法解析出正確 IP 位置，也無法透過 <!-- raw HTML omitted -->:<!-- raw HTML omitted --> 方式來將 package 送到正確的 pod 中。</p>
+<h2 id="recap">Recap</h2>
+<p>最後，總結幾個重點：</p>
+<ol>
+<li>GKE default 的 ingress controller 是 <code>ingress-gce</code> 而 ingress server 是 GCP load balancer。</li>
+<li>GCP load balancer 有幾個必備 components，包含：forwarding rules(static IP and proxy server)、URL map、backend service。當建立 ingress 時，controller 會根據 yaml 內容建立起對應的 load balancer component。</li>
+<li>推薦在建立 cluster 時啟用 <code>VPC-native</code> 功能，並且設定 <code>NEGs(network endpoints group)</code>，有助於提升 package 轉送效率。</li>
+</ol>
+<h1 id="references">References</h1>
+<ol>
+<li><a href="https://www.hwchiu.com/ingress-1.html">Introduction to Kubernetes Ingress (Nginx)</a></li>
+<li><a href="https://cloud.google.com/kubernetes-engine/docs/concepts/container-native-load-balancing">GCP Container-native load balancing</a></li>
+</ol>
+
+    </div>
+    <div class="article-footer">
+<blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    <li class="post-copyright-link hidden-xs">
+      <strong>Permalink: </strong>
+      <a href="https://yushuanhsieh.github.io/post/2020-05-28-ingress-gce/" title="Introduction to ingress-gce controller" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2020-05-28-ingress-gce/</a>
+    </li>
+  </ul>
+</blockquote>
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="https://yushuanhsieh.github.io/author.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">Cherie Hsieh</span><small class="ml-1x">Software Engineer</small></a></h3>
+        <div>Gopher</div>
+      </div>
+    </figure>
+  </div>
+</div>
+    </div>
+  </article>
+
+</div><nav class="bar bar-footer clearfix" data-stick-bottom>
+    <div class="bar-inner">
+        <ul class="pager pull-left">
+            <li class="prev">
+                <a href="https://yushuanhsieh.github.io/post/2020-05-19-transfer.sh/" title="Side Project - Transfer.sh"><i
+                        class="icon icon-angle-left"
+                        aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
+            </li>
+            
+        </ul>
+        <div class="bar-right">
+        </div>
+    </div>
+</nav>
+
+</main><footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+  <div class="copyright">
+    &copy;2017  -
+    2020
+    <div class="publishby">
+        Theme by <a href="https://github.com/xiaoheiAh" target="_blank"> xiaoheiAh </a>base on<a href="https://github.com/xiaoheiAh/hugo-theme-pure" target="_blank"> pure</a>.
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+<script>
+    window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/javascript.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/c.min.js" defer></script><script>
+    hljs.configure({
+        tabReplace: '    ', 
+        classPrefix: ''     
+        
+    })
+    hljs.initHighlightingOnLoad();
+</script>
+<script src="https://yushuanhsieh.github.io/js/application.min.bdeb64b910570b6c41badc6a05b7afb0c8ad9efd8525de3c7257d59e786326a3.js"></script>
+<script src="https://yushuanhsieh.github.io/js/plugin.min.51ff8c7317566f82259170fa36e09c4493adc9b9378b427a01ad3f017ebac7dd.js"></script>
+
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            ROOT_URL: 'https:\/\/yushuanhsieh.github.io',
+            CONTENT_URL: 'https:\/\/yushuanhsieh.github.io\/searchindex.json ',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script type="text/javascript" src="https://yushuanhsieh.github.io/js/insight.min.a343cd9a5a7698336b28ef3a7c16a3a1b1d2d5fb17dc8ed04022bbe08cc5459073a15bdafa3a8a58cdd56080784bdd69fa70b1ae8597565c799c57ed00f0e120.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+<script>
+    tocbot.init({
+        
+        tocSelector: '.js-toc',
+        
+        contentSelector: '.js-toc-content',
+        
+        headingSelector: 'h1, h2, h3',
+        
+        hasInnerContainers: true,
+    });
+</script>
+
+
+  </body>
+</html>

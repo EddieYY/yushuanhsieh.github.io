@@ -24,7 +24,7 @@
   
   <meta name="description" content="前言 網路上有很多關於如何使用 redux and react-redux 的教學文章，所以在這邊就不寫如何去應用，而是會著重在一些可能會忽略的細節以及大概的 實作原理。其實這些細節都寫在官網上，不過一般在教學文章內較少著墨，所以特別摘錄出來，讓大家在使用 react-redux 時能注意到可能會發生的問題。
 mapStateToProps Issues 首先來談談在建立 connectHOC 常用到的 mapStateToProps，由於這個 function 關係到 component props，所以就容易產生沒有發生 render 或是 render 次數過多的問題。" />
-  <meta name="generator" content="Hugo 0.67.0 with theme pure" />
+  <meta name="generator" content="Hugo 0.71.0 with theme pure" />
   <title>使用 React-Redux 注意事項和運作原理 - 文組工程師</title>
   
   
@@ -141,6 +141,8 @@ mapStateToProps Issues 首先來談談在建立 connectHOC 常用到的 mapState
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">10</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/google-cloud-platform/" class="category-list-link">google-cloud-platform</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/kubernetes/" class="category-list-link">kubernetes</a><span class="category-list-count">1</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
             <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">1</span></li>
@@ -155,6 +157,16 @@ mapStateToProps Issues 首先來談談在建立 connectHOC 常用到的 mapState
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget-body">
         <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-05-28-ingress-gce/" class="title">Introduction to ingress-gce controller</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-05-28 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-05-28</time>
+                    </p>
+                </div>
+            </li>
             <li>
                 <div class="item-inner">
                     <p class="item-title">
@@ -192,16 +204,6 @@ mapStateToProps Issues 首先來談談在建立 connectHOC 常用到的 mapState
                     </p>
                     <p class="item-date">
                         <time datetime="2020-04-15 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-15</time>
-                    </p>
-                </div>
-            </li>
-            <li>
-                <div class="item-inner">
-                    <p class="item-title">
-                        <a href="https://yushuanhsieh.github.io/post/2020-04-07-hugo-merge/" class="title">Multilingual Mode in Hugo</a>
-                    </p>
-                    <p class="item-date">
-                        <time datetime="2020-04-07 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-04-07</time>
                     </p>
                 </div>
             </li>
@@ -397,14 +399,14 @@ function 關係到 component props，所以就容易產生沒有發生 render �
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-jsx" data-lang="jsx">
 <span style="color:#75715e">// 我們通常用這種方式來設定 redux store
 </span><span style="color:#75715e"></span>&lt;<span style="color:#f92672">Provider</span> <span style="color:#a6e22e">store</span><span style="color:#f92672">=</span>{<span style="color:#a6e22e">store</span>}&gt;
-  <span style="color:#f92672">&lt;</span>...<span style="color:#f92672">&gt;</span>
+  &lt;<span style="color:#f92672">...</span>&gt;
 &lt;/<span style="color:#f92672">Provider</span>&gt;
 
 <span style="color:#75715e">// source code from `react-redux`
 </span><span style="color:#75715e">// `this.state` contains a store property you passed
-</span><span style="color:#75715e"></span>&lt;<span style="color:#f92672">Context</span><span style="color:#a6e22e">.Provider</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span>{<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">state</span>}&gt;
+</span><span style="color:#75715e"></span>&lt;<span style="color:#f92672">Context.Provider</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span>{<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">state</span>}&gt;
   {<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">props</span>.<span style="color:#a6e22e">children</span>}
-<span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">/Context.Provider&gt;</span>
+&lt;/<span style="color:#f92672">Context.Provider</span>&gt;
 
 <span style="color:#75715e">// The store object is observable pattern to detect value change. 
 </span><span style="color:#75715e"></span><span style="color:#a6e22e">store</span>.<span style="color:#a6e22e">subscribe</span>(() =&gt; {
@@ -430,9 +432,9 @@ function 關係到 component props，所以就容易產生沒有發生 render �
   <span style="color:#75715e">// more code..
 </span><span style="color:#75715e"></span>}
 
-&lt;<span style="color:#f92672">ContextToUse</span><span style="color:#a6e22e">.Consumer</span>&gt;
+&lt;<span style="color:#f92672">ContextToUse.Consumer</span>&gt;
   {<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">renderWrappedComponent</span>}
-<span style="color:#f92672">&lt;</span><span style="color:#960050;background-color:#1e0010">/ContextToUse.Consumer&gt;</span>
+&lt;/<span style="color:#f92672">ContextToUse.Consumer</span>&gt;
 
 </code></pre></div><p>簡單來說，就是利用 React 自身機制的的 <code>&lt;Context.Provider&gt;</code> and <code>&lt;Context.Consumer&gt;</code> 來實作。當 (1) dispatch action， (2) 經過 reducer function  (3) 產生出一個新的 state 時，(4) 會透過上面 setState 來更新 context value，(5) 接著那些 subscribed context 的 component 就會接收到 state 更新訊息，然後再判斷是否要 re-render component。</p>
 <p>簡單流程說明大概是這樣。</p>
