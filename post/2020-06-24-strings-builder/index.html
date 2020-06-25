@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <title>
-        Microprocessor System Lab. - Cross Compiler - 文組工程師
+        Escape analysis issues of strings builder - 文組工程師
       </title>
     <head>
   <meta charset="utf-8">
@@ -22,9 +22,9 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <meta name="description" content="前言 其實整個課程已經看完了，只是因為寫 blog 需要準備很多資料，畢竟有些部分老師快速帶過，所以生產文章的速度遠不及看課程速度XD 這次要說的是 Cross Compiler，因為如果是安裝像是 SW4STM32 IDE，它所有 cross compiler 設定都已經備妥妥了，使用者只要按一個蟲蟲鍵便能快速 Debugger，不過實際上它背後執行許多程序，只是因為都被自動配置好了，因此使用者不太需要去處理這些額外的環境設定。" />
+  <meta name="description" content="在分享 Go string to slice 議題 文章後，有朋友(感謝@陳孝思)在社團裡面分享另一個議題，關於在 strings package 的 builder 中有避免 escape analysis 的方式。基於這個分享，我就去查閱了相關 source code 和 issues ，並且整理成此文章。" />
   <meta name="generator" content="Hugo 0.71.0 with theme pure" />
-  <title>Microprocessor System Lab. - Cross Compiler - 文組工程師</title>
+  <title>Escape analysis issues of strings builder - 文組工程師</title>
   
   
   <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
@@ -34,23 +34,23 @@
   
   <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
-  <meta property="og:title" content="Microprocessor System Lab. - Cross Compiler" />
-<meta property="og:description" content="前言 其實整個課程已經看完了，只是因為寫 blog 需要準備很多資料，畢竟有些部分老師快速帶過，所以生產文章的速度遠不及看課程速度XD 這次要說的是 Cross Compiler，因為如果是安裝像是 SW4STM32 IDE，它所有 cross compiler 設定都已經備妥妥了，使用者只要按一個蟲蟲鍵便能快速 Debugger，不過實際上它背後執行許多程序，只是因為都被自動配置好了，因此使用者不太需要去處理這些額外的環境設定。" />
+  <meta property="og:title" content="Escape analysis issues of strings builder" />
+<meta property="og:description" content="在分享 Go string to slice 議題 文章後，有朋友(感謝@陳孝思)在社團裡面分享另一個議題，關於在 strings package 的 builder 中有避免 escape analysis 的方式。基於這個分享，我就去查閱了相關 source code 和 issues ，並且整理成此文章。" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://yushuanhsieh.github.io/post/2018-11-04-mcu-cross-compiler/" />
-<meta property="article:published_time" content="2018-11-04T08:00:00+08:00" />
-<meta property="article:modified_time" content="2018-11-04T08:00:00+08:00" />
-<meta itemprop="name" content="Microprocessor System Lab. - Cross Compiler">
-<meta itemprop="description" content="前言 其實整個課程已經看完了，只是因為寫 blog 需要準備很多資料，畢竟有些部分老師快速帶過，所以生產文章的速度遠不及看課程速度XD 這次要說的是 Cross Compiler，因為如果是安裝像是 SW4STM32 IDE，它所有 cross compiler 設定都已經備妥妥了，使用者只要按一個蟲蟲鍵便能快速 Debugger，不過實際上它背後執行許多程序，只是因為都被自動配置好了，因此使用者不太需要去處理這些額外的環境設定。">
-<meta itemprop="datePublished" content="2018-11-04T08:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2018-11-04T08:00:00&#43;08:00" />
-<meta itemprop="wordCount" content="223">
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2020-06-24-strings-builder/" />
+<meta property="article:published_time" content="2020-06-24T08:00:00+08:00" />
+<meta property="article:modified_time" content="2020-06-24T08:00:00+08:00" />
+<meta itemprop="name" content="Escape analysis issues of strings builder">
+<meta itemprop="description" content="在分享 Go string to slice 議題 文章後，有朋友(感謝@陳孝思)在社團裡面分享另一個議題，關於在 strings package 的 builder 中有避免 escape analysis 的方式。基於這個分享，我就去查閱了相關 source code 和 issues ，並且整理成此文章。">
+<meta itemprop="datePublished" content="2020-06-24T08:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-06-24T08:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="404">
 
 
 
 <meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Microprocessor System Lab. - Cross Compiler"/>
-<meta name="twitter:description" content="前言 其實整個課程已經看完了，只是因為寫 blog 需要準備很多資料，畢竟有些部分老師快速帶過，所以生產文章的速度遠不及看課程速度XD 這次要說的是 Cross Compiler，因為如果是安裝像是 SW4STM32 IDE，它所有 cross compiler 設定都已經備妥妥了，使用者只要按一個蟲蟲鍵便能快速 Debugger，不過實際上它背後執行許多程序，只是因為都被自動配置好了，因此使用者不太需要去處理這些額外的環境設定。"/>
+<meta name="twitter:title" content="Escape analysis issues of strings builder"/>
+<meta name="twitter:description" content="在分享 Go string to slice 議題 文章後，有朋友(感謝@陳孝思)在社團裡面分享另一個議題，關於在 strings package 的 builder 中有避免 escape analysis 的方式。基於這個分享，我就去查閱了相關 source code 和 issues ，並且整理成此文章。"/>
 
   <!--[if lte IE 9]>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
@@ -219,66 +219,103 @@
       <h1 itemprop="name">
   <a
     class="article-title"
-    href="/post/2018-11-04-mcu-cross-compiler/"
+    href="/post/2020-06-24-strings-builder/"
     >
     
       
-        <span class="title-cat">Other</span>
+        
+          <span class="title-cat">Go</span>
+        
       
-    Microprocessor System Lab. - Cross Compiler</a>
+    Escape analysis issues of strings builder</a>
 </h1>
 
       <div class="article-meta">
         
 <span class="article-date">
   <i class="icon icon-calendar-check"></i>&nbsp;
-<a href="https://yushuanhsieh.github.io/post/2018-11-04-mcu-cross-compiler/" class="article-date">
-  <time datetime="2018-11-04 08:00:00 &#43;0800 CST" itemprop="datePublished">2018-11-04</time>
+<a href="https://yushuanhsieh.github.io/post/2020-06-24-strings-builder/" class="article-date">
+  <time datetime="2020-06-24 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-06-24</time>
 </a>
 </span>
 <span class="article-category">
   <i class="icon icon-folder"></i>
   
-    <a class="article-category-link" href="/categories/other/"> Other </a>
-  
+    <a class="article-category-link" href="/categories/go/"> Go </a>
 </span>
 
-        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2018-11-04-mcu-cross-compiler/#comments"
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2020-06-24-strings-builder/#comments"
             class="article-comment-link">Comments</a></span>
       </div>
     </div>
     <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
-      <h2 id="前言">前言</h2>
-<p>其實整個課程已經看完了，只是因為寫 blog 需要準備很多資料，畢竟有些部分老師快速帶過，所以生產文章的速度遠不及看課程速度XD 這次要說的是 Cross Compiler，因為如果是安裝像是 <code>SW4STM32</code> IDE，它所有 cross compiler 設定都已經備妥妥了，使用者只要按一個蟲蟲鍵便能快速 Debugger，不過實際上它背後執行許多程序，只是因為都被自動配置好了，因此使用者不太需要去處理這些額外的環境設定。</p>
-<h2 id="cross-compiler">Cross compiler</h2>
-<p>當我們在開發 Embedded software 時，通常情況下，都是在自己所使用、性能比較好的 host PC 進行程式碼編寫和 compile，接著把 compile 過後的執行檔燒在開發板上（畢竟開發板的執行效率不如自己手上的電腦好，如果直接使用開發板來 compile，會 compile 到天荒地老吧）。</p>
-<p>不過，大部分人使用的電腦都是 x86 系列，如果直接在電腦上使用一般 compiler，就只會編出僅供 x86 辨識的執行檔，而想要 compile 出其他 CPU 可以辨識的執行檔，就必須透過 <strong>cross compiler</strong> 的協助才行。</p>
-<p><img src="http://1.bp.blogspot.com/-vcFB6vudSTs/UvIFwsB5zMI/AAAAAAAADw8/sIuPoi6Fkes/s1600/toolchain_definintion.bmp" alt="img">
-<em>source: <a href="http://abhishekmourya.blogspot.com/2014/02/cross-compiling-toolchain.html">http://abhishekmourya.blogspot.com/2014/02/cross-compiling-toolchain.html</a></em></p>
-<p>至於 cross compiler 取得方式也很簡單，像是使用 ARM 系列 CPU，就能直接在官網上下載到專屬的 <a href="https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads">GNU Embedded Toolchain for Arm</a> 來幫你處理這些 cross compile 問題。</p>
-<p>如果使用 IDE，我們也可以查看他的 builder 設定，來得知 IDE 是怎樣設定 cross compiler 。以 <code>SW4STM32</code> 為例，打開它 project setting，並點選 C/C++ builder，就會看到相關的 compiler 設置。</p>
-<pre><code>arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DSTM32F4 -DSTM32F401RETx -DNUCLEO_F401RE -DDEBUG -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c
-</code></pre><h3 id="what-is-arm-none-eabi--">What is arm-none-eabi- ?</h3>
-<p>從上面可以發現，同樣是使用 gcc，上面的 gcc 加了 <code>arm-none-eabi-</code> 這個 prefix，那麼 <code>arm-none-eabi-</code> 是什麼呢？簡單來說， cross compiler 有通俗的命名原則。</p>
-<p><strong>arch-vendor-(os-)abi</strong></p>
-<ul>
-<li>arch is for architecture: arm, mips, x86, i686&hellip;</li>
-<li>vendor is tool chain supplier: apple, Codesourcery, Linux, os is for operating system: linux, none (bare metal)</li>
-<li>abi is for application binary interface convention: eabi(embedded application binary interface), gnueabi, gnueabihf</li>
-</ul>
-<p>如此一來，只要看到 cross compiler 的命名方式，很快就可以知道它 compile 出來的檔案適合用在怎樣的平台上。</p>
-<p>舉例來說，我的 STM32F4 project 最基本就包含 <code>arm-none-eabi-gcc</code> 和 <code>arm-none-eabi-as</code> (for assembly language)，讓我可以編寫 C 和 assembly 兩種語言的程式碼。</p>
-<h2 id="config-linker-script-with-cross-compiler">Config Linker script with cross compiler</h2>
-<p>通常我們在把 C code file compile 成可以被執行的 binary 執行檔，會經過以下流程，其中很重要的是，我們必須把所需的 object files 透過 Linker 連結在一起，才能 compile 出完整的執行檔。所以在使用 cross compiler 時，也必須告知其 linker file。</p>
-<pre><code>arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -T&quot;/my-project/MCU/mcu-example/LinkerScript.ld&quot; -Wl,-Map=output.map -Wl,--gc-sections -lm
-</code></pre><p><img src="https://images.slideplayer.com/27/9191896/slides/slide_6.jpg" alt="imgs"></p>
-<h2 id="結論">結論</h2>
-<p>Cross compiler 可以讓我們在開發不同平台的軟體時， compile 出其對應的執行檔案。除了上面例子有提到的 <code>arm-none-eabi-gcc</code>，還有其他像是 <code>arm-none-linux-gnueabi-gcc</code> 這些不同 compiler，如果之後接觸到 Embedded Linux System，就必須換用到適合 Linux 的 cross compiler 了！</p>
-<h2 id="reference">Reference</h2>
-<ul>
-<li><a href="https://slideplayer.com/slide/9191896/">https://slideplayer.com/slide/9191896/</a></li>
-<li><a href="http://ocw.nctu.edu.tw/course_detail-v.php?bgid=9&amp;gid=0&amp;nid=246&amp;v5=1_MWy4ReHIE">http://ocw.nctu.edu.tw/course_detail-v.php?bgid=9&amp;gid=0&amp;nid=246&amp;v5=1_MWy4ReHIE</a></li>
-</ul>
+      <p>在分享 <a href="https://yushuanhsieh.github.io/post/2020-06-01-string-to-slice/">Go string to slice 議題</a> 文章後，有朋友(感謝@陳孝思)在社團裡面分享另一個議題，關於在 strings package 的 builder 中有避免 escape analysis 的方式。基於這個分享，我就去查閱了相關 source code 和 issues ，並且整理成此文章。</p>
+<h2 id="escape-analysis">Escape analysis</h2>
+<p>escape analysis 是協助 Go compiler 判斷要將 variable 分配在 goroutine stack 還是 heap 的方式，而由於變數的分配位置會關係到 garbage collection 進而影響效能，因此 escape analysis 也是 Gopher 所在意的議題之一。</p>
+<p>平常我們在 build Go 程式時，可以透過調整 compiler 的 flag 來印出 escape analysis 的過程結果。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># -m: print optimization decisions</span>
+go run -gcflags<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;-m&#39;</span> main.go
+</code></pre></div><p>如果想要知道 compiler 的所有 flag 資訊，可以透過 cmd</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">go tool compile -help
+</code></pre></div><p>就可以知道各支援的 flags 和詳細說明。</p>
+<p>escape analysis 是非常強大的分析工具，但也因為如此，如果 escape analysis 將可能不需要在 heap 的變數判定成要分配在 heap 區域，就會產生效能上的疑慮，因此就產生一些 hack workaround 做法，來規避 escape analysis 的分析。</p>
+<h2 id="hack-workaround-of-go-strings-builder">Hack workaround of Go strings builder</h2>
+<p>在 Go strings/builder.go 裡面就有一個 hack workaround 的例子：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#75715e">// noescape hides a pointer from escape analysis.  noescape is
+</span><span style="color:#75715e">// the identity function but escape analysis doesn&#39;t think the
+</span><span style="color:#75715e">// output depends on the input. noescape is inlined and currently
+</span><span style="color:#75715e">// compiles down to zero instructions.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">noescape</span>(<span style="color:#a6e22e">p</span> <span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>) <span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span> {
+	<span style="color:#a6e22e">x</span> <span style="color:#f92672">:=</span> uintptr(<span style="color:#a6e22e">p</span>)
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#a6e22e">x</span> ^ <span style="color:#ae81ff">0</span>)
+    <span style="color:#75715e">// x^0 implicitly convert expressions to an integer
+</span><span style="color:#75715e"></span>}
+
+<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">b</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Builder</span>) <span style="color:#a6e22e">copyCheck</span>() {
+	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">addr</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">nil</span> {
+		<span style="color:#75715e">// This hack works around a failing of Go&#39;s escape analysis
+</span><span style="color:#75715e"></span>		<span style="color:#75715e">// that was causing b to escape and be heap allocated.
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">addr</span> = (<span style="color:#f92672">*</span><span style="color:#a6e22e">Builder</span>)(<span style="color:#a6e22e">noescape</span>(<span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span>(<span style="color:#a6e22e">b</span>)))
+	} <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">addr</span> <span style="color:#f92672">!=</span> <span style="color:#a6e22e">b</span> {
+		panic(<span style="color:#e6db74">&#34;strings: illegal use of non-zero Builder copied by value&#34;</span>)
+	}
+}
+</code></pre></div><p>首先來看 strings Builder struct，為了防止使用者誤用 Builder，因此在 Builder struct 中會有一個 addr pointer 指向自己。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Builder</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">addr</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Builder</span> <span style="color:#75715e">// of receiver, to detect copies by value
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">buf</span>  []<span style="color:#66d9ef">byte</span>
+}
+</code></pre></div><p>在每次執行 Builder method 前，透過 <code>copyCheck()</code> 檢查 addr pointer 來判斷當前這個 Builder 是不是 copy 來的。</p>
+<h2 id="a-self-referential-issue-of-escape-analysis">A self-referential Issue of escape analysis</h2>
+<p>但這樣的做法，卻產生 <strong>self-reference</strong> 問題，導致 escape analysis 會誤判，進而把有 self-reference 的變數都歸類在 heap 分配。</p>
+<p>早在 2014 年 的 7921 issue <a href="https://github.com/golang/go/issues/7921">cmd/compile, bytes: bootstrap array causes bytes.Buffer to always be heap-allocated</a> 就有提到此問題，而其中舉出一些簡單的 self-reference 例子，都會導致 escape analysis 誤判，例如：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Go" data-lang="Go"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">B</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">p</span> <span style="color:#f92672">*</span><span style="color:#66d9ef">int</span>
+	<span style="color:#a6e22e">n</span> <span style="color:#66d9ef">int</span>
+}
+
+<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">b</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">B</span>) <span style="color:#a6e22e">X</span>() {
+	<span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">p</span> = <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">n</span>
+}
+
+<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">b</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">B</span>) <span style="color:#a6e22e">Y</span>() {
+	<span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">4</span>
+	<span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">p</span> = <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">n</span>
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">a</span>, <span style="color:#a6e22e">b</span> <span style="color:#a6e22e">B</span>
+	<span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">X</span>() <span style="color:#75715e">// escape
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">Y</span>() <span style="color:#75715e">// non-escape
+</span><span style="color:#75715e"></span>}
+</code></pre></div><p>觀察 escap analysis 結果：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">./main.go:13:7: b does not escape
+./main.go:14:2: moved to heap: n
+./main.go:19:6: moved to heap: a
+</code></pre></div><p><code>Y()</code> 是把一個在 heap 的變數 n assign 給 struct member ，所以不會影想 escap analysis 判斷，但反之 <code>X()</code> 是自身 struct member reference，導致 escap analysis 誤將變數歸在 heap 中。</p>
+<p>雖然從 2014 年發現這個 issue 到現在，目前 Go 1.14 版本還是存在此問題，不過根據 issue 裡面的討論，看來還是有進展的，在 escap analysis 被重新改寫後，大神們是有機會重新 review 此問題並解決。</p>
+<h2 id="結語">結語</h2>
+<p>self-reference 所產生的問題，會根據各語言實作方式不同，而有不同層面的影響，而對 Go 來說，則是會影響 escap analysis 判斷結果，也算是一個不錯的學習。</p>
 
     </div>
     <div class="article-footer">
@@ -286,7 +323,7 @@
   <ul class="post-copyright list-unstyled">
     <li class="post-copyright-link hidden-xs">
       <strong>Permalink: </strong>
-      <a href="https://yushuanhsieh.github.io/post/2018-11-04-mcu-cross-compiler/" title="Microprocessor System Lab. - Cross Compiler" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2018-11-04-mcu-cross-compiler/</a>
+      <a href="https://yushuanhsieh.github.io/post/2020-06-24-strings-builder/" title="Escape analysis issues of strings builder" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2020-06-24-strings-builder/</a>
     </li>
   </ul>
 </blockquote>
@@ -313,14 +350,9 @@
     <div class="bar-inner">
         <ul class="pager pull-left">
             <li class="prev">
-                <a href="https://yushuanhsieh.github.io/post/2018-11-02-aug-study/" title="10月份自我學習日誌回顧"><i
+                <a href="https://yushuanhsieh.github.io/post/2020-06-01-string-to-slice/" title="Go string to slice 議題"><i
                         class="icon icon-angle-left"
                         aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
-            </li>
-            <li class="next">
-                <a href="https://yushuanhsieh.github.io/post/2018-11-15-node-red/"
-                    title="Node-Red - Node 坑坑紀錄"><span>Newer&nbsp;&nbsp;</span><i
-                        class="icon icon-angle-right" aria-hidden="true"></i></a>
             </li>
             
         </ul>
