@@ -12,6 +12,16 @@
     
     
     <item>
+      <title>2020/05 月份自我學習回顧</title>
+      <link>https://yushuanhsieh.github.io/post/2020-06-25-study-05/</link>
+      <pubDate>Thu, 25 Jun 2020 08:00:00 +0800</pubDate>
+      
+      <guid>https://yushuanhsieh.github.io/post/2020-06-25-study-05/</guid>
+      <description>間隔了好一陣子沒有寫自我學習回顧，其實還是有持續在記錄，不過因為剛換新工作的關係，就忙著適應～以及學校那邊的課程也是如火如荼的進展中，就沒更新這種閒聊性質的文章了，不過技術相關的還是有努力撰寫唷 ・ω・
+5 月份主要都在念兩大項目：SDN 和 GCP cloud 線上課程。本來是預期在六月的時候去考試的，沒想到 SDN 期末考就先到來了，因此預計 GCP 考試就會延到七月份。另外，七月也要開始準備 COSCUP 分享，這次題目我很喜歡，但是卻也不好準備，希望不要讓底下的聽眾失望，我會好好加油的！</description>
+    </item>
+    
+    <item>
       <title>Escape analysis issues of strings builder</title>
       <link>https://yushuanhsieh.github.io/post/2020-06-24-strings-builder/</link>
       <pubDate>Wed, 24 Jun 2020 08:00:00 +0800</pubDate>
@@ -193,16 +203,6 @@ Front-End to Back-End 首先，最大的轉變大概是從專職 front-end 變�
       
       <guid>https://yushuanhsieh.github.io/post/2019-09-07-201908-study/</guid>
       <description>前言 8月份有蠻多事情要處理，首先是 Go Taipei 社群和 DigitalOcean Hsinchu 合辦 Meetup，這也是我第二次在 Go 社群分享主題。而這次探討的主題和 Lock 相關，再加上會涉及一些系統相關議題，因此花了蠻多時間在看相關素材和實作細節，非常怕在 QA 時間被問到什麼很艱深的問題XD 其實每次分享，對分享者來說都是一個蠻有挑戰性的任務，主要是因為這些內容都需要蠻多時間去準備，而這次在工程師大本營新竹來分享，更是膽戰心驚，深怕不能帶給聽者有幫助的知識。不過，幸好這次 Meetup 安然度過了（所以才有時間來整理 8 月份的學習心得），當面認識了一些人，也交流了不少，很開心 :)</description>
-    </item>
-    
-    <item>
-      <title>Start HTTP/2 running over cleartext TCP</title>
-      <link>https://yushuanhsieh.github.io/post/2019-08-27-http2-h2c/</link>
-      <pubDate>Tue, 27 Aug 2019 08:00:00 +0800</pubDate>
-      
-      <guid>https://yushuanhsieh.github.io/post/2019-08-27-http2-h2c/</guid>
-      <description>![flow]({{ site.url }}/assets/images/h2c-flow.png)
-前言 主流使用 HTTP/2 時都是基於 TLS protocol，不過在 HTTP/2 RFC7540 規範中， HTTP/2 其實也可以直接基於 cleartext TCP 來溝通。這次主要介紹 based on cleartext TCP 的 HTTP/2 server 與 client 實作，後續會再加入 HTTP/2 結合 TLS protocol 的相關內容。</description>
     </item>
     
   </channel>

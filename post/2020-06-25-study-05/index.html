@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <title>
-        How Does JavaScript Engine (V8) Optimize JavaScript code - Fast Property Access - 文組工程師
+        2020/05 月份自我學習回顧 - 文組工程師
       </title>
     <head>
   <meta charset="utf-8">
@@ -22,9 +22,10 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <meta name="description" content="Properties Access in V8 前言 傳統的 JavaScript 引擎，在抓取 object 內的 property 位置時，常常是利用 object 內的 hash table 來取得對應 property (通常稱為 dictionary )。不過這樣需要花費搜尋時間，相對來說效率就不是太好。也因此在現代的 JavaScript 引擎，會根據 object 內的 property 架構來進行不同方式的效能處理，避免一直使用 hash table，而是改採其他更有效率的結構，來達成快速得到 property 的目的。" />
+  <meta name="description" content="間隔了好一陣子沒有寫自我學習回顧，其實還是有持續在記錄，不過因為剛換新工作的關係，就忙著適應～以及學校那邊的課程也是如火如荼的進展中，就沒更新這種閒聊性質的文章了，不過技術相關的還是有努力撰寫唷 ・ω・
+5 月份主要都在念兩大項目：SDN 和 GCP cloud 線上課程。本來是預期在六月的時候去考試的，沒想到 SDN 期末考就先到來了，因此預計 GCP 考試就會延到七月份。另外，七月也要開始準備 COSCUP 分享，這次題目我很喜歡，但是卻也不好準備，希望不要讓底下的聽眾失望，我會好好加油的！" />
   <meta name="generator" content="Hugo 0.71.0 with theme pure" />
-  <title>How Does JavaScript Engine (V8) Optimize JavaScript code - Fast Property Access - 文組工程師</title>
+  <title>2020/05 月份自我學習回顧 - 文組工程師</title>
   
   
   <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
@@ -34,23 +35,26 @@
   
   <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
-  <meta property="og:title" content="How Does JavaScript Engine (V8) Optimize JavaScript code - Fast Property Access" />
-<meta property="og:description" content="Properties Access in V8 前言 傳統的 JavaScript 引擎，在抓取 object 內的 property 位置時，常常是利用 object 內的 hash table 來取得對應 property (通常稱為 dictionary )。不過這樣需要花費搜尋時間，相對來說效率就不是太好。也因此在現代的 JavaScript 引擎，會根據 object 內的 property 架構來進行不同方式的效能處理，避免一直使用 hash table，而是改採其他更有效率的結構，來達成快速得到 property 的目的。" />
+  <meta property="og:title" content="2020/05 月份自我學習回顧" />
+<meta property="og:description" content="間隔了好一陣子沒有寫自我學習回顧，其實還是有持續在記錄，不過因為剛換新工作的關係，就忙著適應～以及學校那邊的課程也是如火如荼的進展中，就沒更新這種閒聊性質的文章了，不過技術相關的還是有努力撰寫唷 ・ω・
+5 月份主要都在念兩大項目：SDN 和 GCP cloud 線上課程。本來是預期在六月的時候去考試的，沒想到 SDN 期末考就先到來了，因此預計 GCP 考試就會延到七月份。另外，七月也要開始準備 COSCUP 分享，這次題目我很喜歡，但是卻也不好準備，希望不要讓底下的聽眾失望，我會好好加油的！" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://yushuanhsieh.github.io/post/2018-05-16-javascript-optimization-property/" />
-<meta property="article:published_time" content="2018-05-16T12:00:00+08:00" />
-<meta property="article:modified_time" content="2018-05-16T12:00:00+08:00" />
-<meta itemprop="name" content="How Does JavaScript Engine (V8) Optimize JavaScript code - Fast Property Access">
-<meta itemprop="description" content="Properties Access in V8 前言 傳統的 JavaScript 引擎，在抓取 object 內的 property 位置時，常常是利用 object 內的 hash table 來取得對應 property (通常稱為 dictionary )。不過這樣需要花費搜尋時間，相對來說效率就不是太好。也因此在現代的 JavaScript 引擎，會根據 object 內的 property 架構來進行不同方式的效能處理，避免一直使用 hash table，而是改採其他更有效率的結構，來達成快速得到 property 的目的。">
-<meta itemprop="datePublished" content="2018-05-16T12:00:00&#43;08:00" />
-<meta itemprop="dateModified" content="2018-05-16T12:00:00&#43;08:00" />
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2020-06-25-study-05/" />
+<meta property="article:published_time" content="2020-06-25T08:00:00+08:00" />
+<meta property="article:modified_time" content="2020-06-25T08:00:00+08:00" />
+<meta itemprop="name" content="2020/05 月份自我學習回顧">
+<meta itemprop="description" content="間隔了好一陣子沒有寫自我學習回顧，其實還是有持續在記錄，不過因為剛換新工作的關係，就忙著適應～以及學校那邊的課程也是如火如荼的進展中，就沒更新這種閒聊性質的文章了，不過技術相關的還是有努力撰寫唷 ・ω・
+5 月份主要都在念兩大項目：SDN 和 GCP cloud 線上課程。本來是預期在六月的時候去考試的，沒想到 SDN 期末考就先到來了，因此預計 GCP 考試就會延到七月份。另外，七月也要開始準備 COSCUP 分享，這次題目我很喜歡，但是卻也不好準備，希望不要讓底下的聽眾失望，我會好好加油的！">
+<meta itemprop="datePublished" content="2020-06-25T08:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-06-25T08:00:00&#43;08:00" />
 <meta itemprop="wordCount" content="301">
 
 
 
 <meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="How Does JavaScript Engine (V8) Optimize JavaScript code - Fast Property Access"/>
-<meta name="twitter:description" content="Properties Access in V8 前言 傳統的 JavaScript 引擎，在抓取 object 內的 property 位置時，常常是利用 object 內的 hash table 來取得對應 property (通常稱為 dictionary )。不過這樣需要花費搜尋時間，相對來說效率就不是太好。也因此在現代的 JavaScript 引擎，會根據 object 內的 property 架構來進行不同方式的效能處理，避免一直使用 hash table，而是改採其他更有效率的結構，來達成快速得到 property 的目的。"/>
+<meta name="twitter:title" content="2020/05 月份自我學習回顧"/>
+<meta name="twitter:description" content="間隔了好一陣子沒有寫自我學習回顧，其實還是有持續在記錄，不過因為剛換新工作的關係，就忙著適應～以及學校那邊的課程也是如火如荼的進展中，就沒更新這種閒聊性質的文章了，不過技術相關的還是有努力撰寫唷 ・ω・
+5 月份主要都在念兩大項目：SDN 和 GCP cloud 線上課程。本來是預期在六月的時候去考試的，沒想到 SDN 期末考就先到來了，因此預計 GCP 考試就會延到七月份。另外，七月也要開始準備 COSCUP 分享，這次題目我很喜歡，但是卻也不好準備，希望不要讓底下的聽眾失望，我會好好加油的！"/>
 
   <!--[if lte IE 9]>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
@@ -219,75 +223,85 @@
       <h1 itemprop="name">
   <a
     class="article-title"
-    href="/post/2018-05-16-javascript-optimization-property/"
+    href="/post/2020-06-25-study-05/"
     >
     
       
-        <span class="title-cat">Web</span>
+        
+          <span class="title-cat">Study</span>
+        
       
-    How Does JavaScript Engine (V8) Optimize JavaScript code - Fast Property Access</a>
+    2020/05 月份自我學習回顧</a>
 </h1>
 
       <div class="article-meta">
         
 <span class="article-date">
   <i class="icon icon-calendar-check"></i>&nbsp;
-<a href="https://yushuanhsieh.github.io/post/2018-05-16-javascript-optimization-property/" class="article-date">
-  <time datetime="2018-05-16 12:00:00 &#43;0800 CST" itemprop="datePublished">2018-05-16</time>
+<a href="https://yushuanhsieh.github.io/post/2020-06-25-study-05/" class="article-date">
+  <time datetime="2020-06-25 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-06-25</time>
 </a>
 </span>
 <span class="article-category">
   <i class="icon icon-folder"></i>
   
-    <a class="article-category-link" href="/categories/web/"> Web </a>
-  
+    <a class="article-category-link" href="/categories/study/"> Study </a>
 </span>
 
-        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2018-05-16-javascript-optimization-property/#comments"
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2020-06-25-study-05/#comments"
             class="article-comment-link">Comments</a></span>
       </div>
     </div>
     <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
-      <h1 id="properties-access-in-v8">Properties Access in V8</h1>
-<h2 id="前言">前言</h2>
-<p>傳統的 JavaScript 引擎，在抓取 object 內的 property 位置時，常常是利用 object 內的 <code>hash table</code> 來取得對應 property (通常稱為 dictionary )。不過這樣需要花費搜尋時間，相對來說效率就不是太好。也因此在現代的 JavaScript 引擎，會根據 object 內的 property 架構來進行不同方式的效能處理，避免一直使用 hash table，而是改採其他更有效率的結構，來達成快速得到 property 的目的。</p>
-<h2 id="property-definition-in-v8">Property definition in V8</h2>
+      <p>間隔了好一陣子沒有寫自我學習回顧，其實還是有持續在記錄，不過因為剛換新工作的關係，就忙著適應～以及學校那邊的課程也是如火如荼的進展中，就沒更新這種閒聊性質的文章了，不過技術相關的還是有努力撰寫唷 ・ω・</p>
+<p>5 月份主要都在念兩大項目：SDN 和 GCP cloud 線上課程。本來是預期在六月的時候去考試的，沒想到 SDN 期末考就先到來了，因此預計 GCP 考試就會延到七月份。另外，七月也要開始準備 COSCUP 分享，這次題目我很喜歡，但是卻也不好準備，希望不要讓底下的聽眾失望，我會好好加油的！</p>
+<h2 id="學習回顧">學習回顧</h2>
+<h3 id="1-軟體定義網路與網路功能虛擬化">1. 軟體定義網路與網路功能虛擬化</h3>
+<p>因為同事推薦，於是去選了交大曾建超教授的 SDN/NFV 相關課程，上了幾次課程下來，覺得教授是一個非常認真的人，而且也因為底下學生很上進的關係，在教授的課程中會看到許多跟業界技術結合的應用，還看到 cloud native 夥伴們的論文展示，給我蠻大的衝擊，也希望自己能夠有這樣的機會可以出去國外 demo。雖然工作上並不會直接接觸到這類議題，不過卻也增進了對網路世界的認識，同時也會比較清楚 GCP 的網路模型，整體來說是一個結合理論和實務的課程，很慶幸自己有修習這堂課。（不過就沒有修到編譯器，等到下次開課再來修 QQ）</p>
+<h3 id="2-google-cloud-platform">2. Google Cloud Platform</h3>
+<p>GCP 相關服務的學習和網路架構也是五月份學習重點，其實蠻喜歡他們的線上實驗課程，除了文字敘述之外，還可以透過實作來真的了解這些服務的運作方式。而在這次學習中，比較重要的是嘗試 google cloud deployment manager，由於之前工作經驗是使用 Terraform 來管理 deployment，這次改試用 GCP 原生 manager，看會不會比較好用。整體設定下來覺得還不錯，不過官方推薦要使用 python 來寫，這樣彈性會是比較好，對於不會 python 的我來說是有一點點困擾，哈，該是好好學 python 了。</p>
+<h2 id="其他閒聊">其他閒聊</h2>
+<p>因為曾建超教授大力推廣 cloud native 夥伴成果的關係，所以就開始嘗試寫一些關於網路和 kubernetes 的分享文章，目前還是超級菜鳥階段，期望自己可以慢慢進步，然後有機會也能夠在 cloud native 上分享自己經驗！</p>
+<h2 id="links">Links</h2>
 <ul>
-<li>Property: 命名不為 indexed integer 的 property。
-<code>const student = {id: 'B123456'}</code></li>
-<li>Elements: 命名為 indexed integer 的 property。
-<code>const students = {1: 'student1', 2: 'student2'}</code></li>
+<li><a href="https://www.redhat.com/en/blog/understanding-red-hat-enterprise-linux-random-number-generator-interface">Understanding the Red Hat Enterprise Linux random number generator interface</a></li>
+<li><a href="https://www.coursera.org/professional-certificates/gcp-cloud-architect">Cloud Architecture with Google Cloud</a></li>
 </ul>
-<p>為了有效率地讀取 property，V8 會使用不同的方式來儲存 property 位置。首先會依據 property 的命名方式，如同上一篇有提到，V8 將 indexed integer property 視為 <code>elements</code>，elements 和 一般 property 就會以不同架構來處理。在這邊僅討論一般命名之 property。</p>
-<h2 id="in-object-property">in-object property</h2>
-<p>要最快速可以 acccess 到 property 的方式，就是直接在 object 內放置 property 的值，也就是 <code>in-object property</code>。<code>in-object property</code> 在 Object initializer  就會建立，所以如果是在 object 建立後才加入的 property ，那就不會是 in-object property 了。</p>
-<p>![in-object.png]({{ site.url }}/assets/images/in-object.png)</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">student</span> <span style="color:#f92672">=</span> {<span style="color:#a6e22e">id</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;1234&#39;</span>, <span style="color:#a6e22e">name</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;student&#39;</span>} <span style="color:#75715e">// in-object property
-</span></code></pre></div><h2 id="fast-property">Fast Property</h2>
-<p>當有其他 property 加入到 object 時，通常情況下，V8 會將其儲存在 property store (Fixed Array)，這就是所謂的 <code>Fast Property</code>。透過 array 的 index ，可以直接讀取 property。不過由於我們是透過 property 的命名來取得 property，因此需要一份名單來紀錄 property 的 key / 值以及其他資訊。這份名單叫做 <code>Descriptor Array</code>。</p>
-<blockquote>
-<p>The descriptor array contains information about named properties like the name itself and the position where the value is stored. Note that we do not keep track of integer indexed properties here, hence there is no entry in the descriptor array.</p>
-</blockquote>
-<p><code>Descriptor Array</code> 存在於 <code>Hidden Class</code> 內，至於為什麼要大費周章地維護 <code>Descriptor Array</code> 並從其中讀取 property 的位置，主要是因為 inline cache 機制，所以藉由 <code>Descriptor Array</code> 可以比傳統 <code>Dictionary</code> 方式更有效率。</p>
-<p>上面有提到 <code>Hidden Class</code>，現代 JavaScript Engine，在創建 JavaSsript object 時，是利用 hidden class 的方式，並用於實作 inline cache 機制。不過這說起來會很長，所以先快速帶過。</p>
-<blockquote>
-<p>The HiddenClass stores information about the shape of an object, and among other things, a mapping from property names to indices into the properties(descriptor array).</p>
-</blockquote>
-<p><a href="https://github.com/sq/JSIL/wiki/Optimizing-dynamic-JavaScript-with-inline-caches">Read More Inline Cache</a></p>
-<p>![fast-property.png]({{ site.url }}/assets/images/fast-property.png)</p>
-<h2 id="slow-property">Slow Property</h2>
-<p>但是，如果當 object 內的 property 新增刪除頻繁時，維護 <code>Descriptor Array</code> 就會需要很大的成本，因此這時候 JavaScript engine 會嘗試將這類 object 的 property store 轉成 property dictionary ，就是使用傳統的方式來讀取 property。</p>
-<p>![dict-property.png]({{ site.url }}/assets/images/dict-property.png)</p>
-<p>要注意的時，由於這時候是直接透過 property dictionary 來取得 property，因此 <code>Descriptor Array</code> 失去其作用，不會有 inline cache 的優化效果，整體效率就會相較慢。</p>
-<h2 id="結論">結論</h2>
-<ol>
-<li>在非必要情況下，減少重複刪除 property，讓 JavaScript engine 能透過內部機制來優化。</li>
-<li>一些必要又不會經刪減的 property，可以在 object initialize 階段就先設置好，以利用 in-object 的特性。</li>
-</ol>
-<h1 id="reference">Reference</h1>
-<ol>
-<li><a href="https://v8project.blogspot.tw/2017/08/fast-properties.html">https://v8project.blogspot.tw/2017/08/fast-properties.html</a></li>
-</ol>
+<h2 id="每日學習紀錄">每日學習紀錄</h2>
+<ul>
+<li>2020/05/01 [coursera] Google Cloud Platform</li>
+<li>2020/05/02 [coursera] Google Cloud Platform</li>
+<li>2020/05/03 [coursera] Google Cloud Platform - Finished</li>
+<li>2020/05/04 ACME protocol and cert manager study</li>
+<li>2020/05/04 [網路虛擬化] Ch 07-Disaggregation and Virtual Routers</li>
+<li>2020/05/05 [網路虛擬化] Ch 07-Disaggregation and Virtual Routers</li>
+<li>2020/05/06 ACME protocol study</li>
+<li>2020/05/08 WTM Meetup 準備</li>
+<li>2020/05/07 [網路虛擬化] Ch 07-Disaggregation and Virtual Routers</li>
+<li>2020/05/14 GDG meeting and discussion</li>
+<li>2020/05/12 [Projects] transfer.sh refactor components and cmd</li>
+<li>2020/05/16 [網路虛擬化] Chapter 9 Network Function Virtualization (NFV)</li>
+<li>2020/05/17 [網路虛擬化] Chapter 9 Network Function Virtualization (NFV)</li>
+<li>2020/05/15 Google cloud deployment management study (IaC)</li>
+<li>2020/05/15 [網路虛擬化] Ch 09 - Introduction to NFV</li>
+<li>2020/05/18 Google cloud deployment management study (IaC)</li>
+<li>2020/05/23 [網路虛擬化] virtual networks and project implementation</li>
+<li>2020/05/21 GDG 新竹 - 女性工程師 Meetup</li>
+<li>2020/05/18 [網路虛擬化] Chapter 9 Network Function Virtualization (NFV) P19-P33</li>
+<li>2020/05/19 Understanding the Red Hat Enterprise Linux random number generator interface</li>
+<li>2020/05/19 [coursera] ssential Google Cloud Infrastructure: Foundation in GCP</li>
+<li>2020/05/20 Blog and side project: transfer.sh</li>
+<li>2020/05/21 Essential Google Cloud Infrastructure: Foundation finished</li>
+<li>2020/05/22 Essential Google Cloud Infrastructure: Foundation - certificated</li>
+<li>2020/05/24 [網路虛擬化] virtual networks and project implementation / VNF and NFV</li>
+<li>2020/05/25 [網路虛擬化] Chapter 10 and 11 edge bridge and open vswitch</li>
+<li>2020/05/26 Essential Google Cloud Infrastructure: Core Services | Module 1: Cloud IAM</li>
+<li>2020/05/30 武陵農場遊</li>
+<li>2020/05/31 武陵農場遊</li>
+<li>2020/05/28 Ingress controller - ingress-gce with GCP load balancer</li>
+<li>2020/05/29 Ingress controller - ingress-gce with GCP load balancer</li>
+<li>2020/05/27 WTM 開會</li>
+</ul>
 
     </div>
     <div class="article-footer">
@@ -295,7 +309,7 @@
   <ul class="post-copyright list-unstyled">
     <li class="post-copyright-link hidden-xs">
       <strong>Permalink: </strong>
-      <a href="https://yushuanhsieh.github.io/post/2018-05-16-javascript-optimization-property/" title="How Does JavaScript Engine (V8) Optimize JavaScript code - Fast Property Access" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2018-05-16-javascript-optimization-property/</a>
+      <a href="https://yushuanhsieh.github.io/post/2020-06-25-study-05/" title="2020/05 月份自我學習回顧" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2020-06-25-study-05/</a>
     </li>
   </ul>
 </blockquote>
@@ -322,14 +336,9 @@
     <div class="bar-inner">
         <ul class="pager pull-left">
             <li class="prev">
-                <a href="https://yushuanhsieh.github.io/post/2018-05-15-javascript-optimization-elements/" title="How Does JavaScript Engine (V8) Optimize JavaScript code - Elements"><i
+                <a href="https://yushuanhsieh.github.io/post/2020-06-24-strings-builder/" title="Escape analysis issues of strings builder"><i
                         class="icon icon-angle-left"
                         aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
-            </li>
-            <li class="next">
-                <a href="https://yushuanhsieh.github.io/post/2018-05-24-angular-6-router/"
-                    title="Understanding Router in Angular 6"><span>Newer&nbsp;&nbsp;</span><i
-                        class="icon icon-angle-right" aria-hidden="true"></i></a>
             </li>
             
         </ul>

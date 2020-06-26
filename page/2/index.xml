@@ -6,10 +6,20 @@
     <description>Recent content on 文組工程師</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 24 Jun 2020 08:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 25 Jun 2020 08:00:00 +0800</lastBuildDate>
     
         <atom:link href="https://yushuanhsieh.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Start HTTP/2 running over cleartext TCP</title>
+      <link>https://yushuanhsieh.github.io/post/2019-08-27-http2-h2c/</link>
+      <pubDate>Tue, 27 Aug 2019 08:00:00 +0800</pubDate>
+      
+      <guid>https://yushuanhsieh.github.io/post/2019-08-27-http2-h2c/</guid>
+      <description>![flow]({{ site.url }}/assets/images/h2c-flow.png)
+前言 主流使用 HTTP/2 時都是基於 TLS protocol，不過在 HTTP/2 RFC7540 規範中， HTTP/2 其實也可以直接基於 cleartext TCP 來溝通。這次主要介紹 based on cleartext TCP 的 HTTP/2 server 與 client 實作，後續會再加入 HTTP/2 結合 TLS protocol 的相關內容。</description>
+    </item>
     
     <item>
       <title>semaphore sem_post 在 glibc v2.0 v2.1 之比較</title>
@@ -196,15 +206,6 @@ mapStateToProps Issues 首先來談談在建立 connectHOC 常用到的 mapState
       <guid>https://yushuanhsieh.github.io/post/2018-11-15-node-red/</guid>
       <description>前言 最近工作接觸到 Node-RED，需要建立專屬的 Node，而在這過程中遇到蠻多坑的，所以特別紀錄一下。
 相關技術  Node.js v10.11.0 node-gyp docker arm cross compile Node-RED node development  坑坑相連 1.</description>
-    </item>
-    
-    <item>
-      <title>Microprocessor System Lab. - Cross Compiler</title>
-      <link>https://yushuanhsieh.github.io/post/2018-11-04-mcu-cross-compiler/</link>
-      <pubDate>Sun, 04 Nov 2018 08:00:00 +0800</pubDate>
-      
-      <guid>https://yushuanhsieh.github.io/post/2018-11-04-mcu-cross-compiler/</guid>
-      <description>前言 其實整個課程已經看完了，只是因為寫 blog 需要準備很多資料，畢竟有些部分老師快速帶過，所以生產文章的速度遠不及看課程速度XD 這次要說的是 Cross Compiler，因為如果是安裝像是 SW4STM32 IDE，它所有 cross compiler 設定都已經備妥妥了，使用者只要按一個蟲蟲鍵便能快速 Debugger，不過實際上它背後執行許多程序，只是因為都被自動配置好了，因此使用者不太需要去處理這些額外的環境設定。</description>
     </item>
     
   </channel>
