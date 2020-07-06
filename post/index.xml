@@ -6,10 +6,19 @@
     <description>Recent content in Posts on 文組工程師</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 25 Jun 2020 08:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Sun, 05 Jul 2020 08:00:00 +0800</lastBuildDate>
     
         <atom:link href="https://yushuanhsieh.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Cross-Network Container Communication</title>
+      <link>https://yushuanhsieh.github.io/post/2020-07-05-docker-network/</link>
+      <pubDate>Sun, 05 Jul 2020 08:00:00 +0800</pubDate>
+      
+      <guid>https://yushuanhsieh.github.io/post/2020-07-05-docker-network/</guid>
+      <description>在 Docker 的網路規則中，由於 DOCKER-ISOLATION-STAGE-1、DOCKER-ISOLATION-STAGE-2 兩個 iptables chain 的關係，因此不同 Docker network 連結的 container 是無法互相溝通的。不過，我們可以透過建立 router 的手段來規避掉 chain 的限制，讓 container 收到其他 container 來的packages。此方式涉及到 Linux Bridge 處理封包的方式和基本網路知識，希望透過此介紹，來更了解 network stack 與 packages 處理流程。</description>
+    </item>
     
     <item>
       <title>2020/05 月份自我學習回顧</title>
@@ -194,15 +203,6 @@ Front-End to Back-End 首先，最大的轉變大概是從專職 front-end 變�
       
       <guid>https://yushuanhsieh.github.io/post/2019-09-24-stack-memory-allocator/</guid>
       <description>前言 在很多程式語言都會看到 memory allocator，也可以看到陸續發表的 allocator 實作方式，例如 microsoft mimalloc。與其用看 source code 的方式來了解其原理，倒不如從基本學起，並且從實作過程中了解到為什麼他們要這樣設計 allocator。</description>
-    </item>
-    
-    <item>
-      <title>2019/08月份自我學習回顧</title>
-      <link>https://yushuanhsieh.github.io/post/2019-09-07-201908-study/</link>
-      <pubDate>Sat, 07 Sep 2019 08:00:00 +0800</pubDate>
-      
-      <guid>https://yushuanhsieh.github.io/post/2019-09-07-201908-study/</guid>
-      <description>前言 8月份有蠻多事情要處理，首先是 Go Taipei 社群和 DigitalOcean Hsinchu 合辦 Meetup，這也是我第二次在 Go 社群分享主題。而這次探討的主題和 Lock 相關，再加上會涉及一些系統相關議題，因此花了蠻多時間在看相關素材和實作細節，非常怕在 QA 時間被問到什麼很艱深的問題XD 其實每次分享，對分享者來說都是一個蠻有挑戰性的任務，主要是因為這些內容都需要蠻多時間去準備，而這次在工程師大本營新竹來分享，更是膽戰心驚，深怕不能帶給聽者有幫助的知識。不過，幸好這次 Meetup 安然度過了（所以才有時間來整理 8 月份的學習心得），當面認識了一些人，也交流了不少，很開心 :)</description>
     </item>
     
   </channel>

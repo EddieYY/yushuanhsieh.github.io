@@ -12,6 +12,15 @@
     
     
     <item>
+      <title>AngularJS - angular-formly study notes</title>
+      <link>https://yushuanhsieh.github.io/post/2018-01-06-angular-formly-basic-usage/</link>
+      <pubDate>Fri, 05 Jan 2018 12:00:00 +0800</pubDate>
+      
+      <guid>https://yushuanhsieh.github.io/post/2018-01-06-angular-formly-basic-usage/</guid>
+      <description>Angular formly 運作原理 將 form 中的每個 field 獨立出來寫成共用 template，並供整個 app 使用。使用者先在 angular-formly 中進行 configuration，包含設定 type 和 wrapper ，接著只要在 component 的 controller 中建立指定 type 的 field objects 之後，angular-formly 就會結合之前設定好的 field template 和 objects， render 出完整的表單。 !</description>
+    </item>
+    
+    <item>
       <title>AngularJS - Two way data binding</title>
       <link>https://yushuanhsieh.github.io/post/2017-12-08-two-way-binding/</link>
       <pubDate>Fri, 08 Dec 2017 21:00:00 +0800</pubDate>

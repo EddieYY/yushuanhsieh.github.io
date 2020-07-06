@@ -12,6 +12,15 @@
     
     
     <item>
+      <title>2019/08月份自我學習回顧</title>
+      <link>https://yushuanhsieh.github.io/post/2019-09-07-201908-study/</link>
+      <pubDate>Sat, 07 Sep 2019 08:00:00 +0800</pubDate>
+      
+      <guid>https://yushuanhsieh.github.io/post/2019-09-07-201908-study/</guid>
+      <description>前言 8月份有蠻多事情要處理，首先是 Go Taipei 社群和 DigitalOcean Hsinchu 合辦 Meetup，這也是我第二次在 Go 社群分享主題。而這次探討的主題和 Lock 相關，再加上會涉及一些系統相關議題，因此花了蠻多時間在看相關素材和實作細節，非常怕在 QA 時間被問到什麼很艱深的問題XD 其實每次分享，對分享者來說都是一個蠻有挑戰性的任務，主要是因為這些內容都需要蠻多時間去準備，而這次在工程師大本營新竹來分享，更是膽戰心驚，深怕不能帶給聽者有幫助的知識。不過，幸好這次 Meetup 安然度過了（所以才有時間來整理 8 月份的學習心得），當面認識了一些人，也交流了不少，很開心 :)</description>
+    </item>
+    
+    <item>
       <title>Start HTTP/2 running over cleartext TCP</title>
       <link>https://yushuanhsieh.github.io/post/2019-08-27-http2-h2c/</link>
       <pubDate>Tue, 27 Aug 2019 08:00:00 +0800</pubDate>
@@ -196,16 +205,6 @@ mapStateToProps Issues 首先來談談在建立 connectHOC 常用到的 mapState
       
       <guid>https://yushuanhsieh.github.io/post/2018-12-01-11-study/</guid>
       <description>前言 這個月學習內容主要集中在 Embedded System 和 Network，說來慚愧，雖然大學有修網際網路，但是過了這麼久，很多知識都還給老師了。因為目前在網通廠工作，常常會接觸到 Application Layer Protocol 和使用 UNIX Socket，所以趁這機會再一次把網路課程複習一下，混搭上個月沒有學完的 Embedded System。</description>
-    </item>
-    
-    <item>
-      <title>Node-Red - Node 坑坑紀錄</title>
-      <link>https://yushuanhsieh.github.io/post/2018-11-15-node-red/</link>
-      <pubDate>Thu, 15 Nov 2018 08:00:00 +0800</pubDate>
-      
-      <guid>https://yushuanhsieh.github.io/post/2018-11-15-node-red/</guid>
-      <description>前言 最近工作接觸到 Node-RED，需要建立專屬的 Node，而在這過程中遇到蠻多坑的，所以特別紀錄一下。
-相關技術  Node.js v10.11.0 node-gyp docker arm cross compile Node-RED node development  坑坑相連 1.</description>
     </item>
     
   </channel>
