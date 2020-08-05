@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        COSCUP 2020 - Goroutine stack and local variable allocation in Go - 文組工程師
+      </title>
+    <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  
+  <meta name="theme-color" content="#000000" />
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <meta name="description" content="Q&amp;amp;A 補充 Slides: Goroutine stack and local variable allocation in Go" />
+  <meta name="generator" content="Hugo 0.71.0 with theme pure" />
+  <title>COSCUP 2020 - Goroutine stack and local variable allocation in Go - 文組工程師</title>
+  
+  
+  <link rel="stylesheet" href="https://yushuanhsieh.github.io/css/style.min.79b82cf2077bdd3aae7894025fd832885b1bf052912b6efa30dfdc42d7b09d22.css">
+  
+    
+    <link rel="stylesheet" href="https://yushuanhsieh.github.io/scss/cherie.min.3669452615b597915c93c0200031dbc594c748097c6d3903e07a6f3c65024666.css" async>
+  
+  <link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css" async>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css" async>
+  <meta property="og:title" content="COSCUP 2020 - Goroutine stack and local variable allocation in Go" />
+<meta property="og:description" content="Q&amp;A 補充 Slides: Goroutine stack and local variable allocation in Go" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://yushuanhsieh.github.io/post/2020-08-04-coscup-go/" />
+<meta property="article:published_time" content="2020-08-04T08:00:00+08:00" />
+<meta property="article:modified_time" content="2020-08-04T08:00:00+08:00" />
+<meta itemprop="name" content="COSCUP 2020 - Goroutine stack and local variable allocation in Go">
+<meta itemprop="description" content="Q&amp;A 補充 Slides: Goroutine stack and local variable allocation in Go">
+<meta itemprop="datePublished" content="2020-08-04T08:00:00&#43;08:00" />
+<meta itemprop="dateModified" content="2020-08-04T08:00:00&#43;08:00" />
+<meta itemprop="wordCount" content="198">
+
+
+
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="COSCUP 2020 - Goroutine stack and local variable allocation in Go"/>
+<meta name="twitter:description" content="Q&amp;A 補充 Slides: Goroutine stack and local variable allocation in Go"/>
+
+  <!--[if lte IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+    <![endif]-->
+
+  <!--[if lt IE 9]>
+      <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+  </head>
+
+  
+  
+
+  <body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage"><header class="header" itemscope itemtype="http://schema.org/WPHeader">
+    <div class="slimContent">
+      <div class="navbar-header">
+        <div class="profile-block text-center">
+          <a id="avatar" href="" target="_blank">
+            <img class="img-circle img-rotate" src="https://yushuanhsieh.github.io/author.jpg" width="200" height="200">
+          </a>
+          <h2 id="name" class="hidden-xs hidden-sm">Cherie Hsieh</h2>
+          <h3 id="title" class="hidden-xs hidden-sm hidden-md">Software Engineer</h3>
+          <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>Taiwan</small>
+        </div><div class="search" id="search-form-wrap">
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="Search" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i
+                        class="icon icon-search"></i></button>
+            </span>
+        </div>
+        <div class="ins-search">
+            <div class="ins-search-mask"></div>
+            <div class="ins-search-container">
+                <div class="ins-input-wrapper">
+                    <input type="text" class="ins-search-input" placeholder="Type something..."
+                        x-webkit-speech />
+                    <button type="button" class="close ins-close ins-selectable" data-dismiss="modal"
+                        aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="ins-section-wrapper">
+                    <div class="ins-section-container"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+        <ul class="nav navbar-nav main-nav">
+            <li class="menu-item menu-item-home">
+                <a href="/">
+                  <span class="menu-title">Home</span>
+                </a>
+            </li>
+            <li class="menu-item menu-item-categories">
+                <a href="/categories/">
+                  <span class="menu-title">Categories</span>
+                </a>
+            </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+<aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title"> Categories</h3>
+    <div class="widget-body">
+        <ul class="category-list">
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/c/" class="category-list-link">c</a><span class="category-list-count">3</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/coscup/" class="category-list-link">coscup</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/docker/" class="category-list-link">docker</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/game/" class="category-list-link">game</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/gnu/" class="category-list-link">gnu</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/go/" class="category-list-link">go</a><span class="category-list-count">13</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/google-cloud-platform/" class="category-list-link">google-cloud-platform</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/kubernetes/" class="category-list-link">kubernetes</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/life/" class="category-list-link">life</a><span class="category-list-count">2</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/meetup/" class="category-list-link">meetup</a><span class="category-list-count">1</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/network/" class="category-list-link">network</a><span class="category-list-count">2</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/other/" class="category-list-link">other</a><span class="category-list-count">7</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/study/" class="category-list-link">study</a><span class="category-list-count">10</span></li>
+            <li class="category-list-item"><a href="https://yushuanhsieh.github.io/categories/web/" class="category-list-link">web</a><span class="category-list-count">28</span></li>
+        </ul>
+    </div>
+</div>
+      
+<div class="widget">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget-body">
+        <ul class="recent-post-list list-unstyled no-thumbnail">
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-08-04-coscup-go/" class="title">COSCUP 2020 - Goroutine stack and local variable allocation in Go</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-08-04 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-08-04</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-07-05-docker-network/" class="title">Cross-Network Container Communication</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-07-05 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-07-05</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-06-25-study-05/" class="title">2020/05 月份自我學習回顧</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-06-25 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-06-25</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-06-24-strings-builder/" class="title">Escape analysis issues of strings builder</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-06-24 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-06-24</time>
+                    </p>
+                </div>
+            </li>
+            <li>
+                <div class="item-inner">
+                    <p class="item-title">
+                        <a href="https://yushuanhsieh.github.io/post/2020-06-01-string-to-slice/" class="title">Go string to slice 議題</a>
+                    </p>
+                    <p class="item-date">
+                        <time datetime="2020-06-01 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-06-01</time>
+                    </p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+  </div>
+</aside>
+
+    
+    
+<main class="main" role="main"><div class="content">
+  <article id="single-" class="article article-type-single" itemscope
+    itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      <h1 itemprop="name">
+  <a
+    class="article-title"
+    href="/post/2020-08-04-coscup-go/"
+    >
+    
+      
+        
+          <span class="title-cat">Go</span>
+        
+          <span class="title-cat">COSCUP</span>
+        
+      
+    COSCUP 2020 - Goroutine stack and local variable allocation in Go</a>
+</h1>
+
+      <div class="article-meta">
+        
+<span class="article-date">
+  <i class="icon icon-calendar-check"></i>&nbsp;
+<a href="https://yushuanhsieh.github.io/post/2020-08-04-coscup-go/" class="article-date">
+  <time datetime="2020-08-04 08:00:00 &#43;0800 CST" itemprop="datePublished">2020-08-04</time>
+</a>
+</span>
+<span class="article-category">
+  <i class="icon icon-folder"></i>
+  
+    <a class="article-category-link" href="/categories/go/"> Go </a>
+    <a class="article-category-link" href="/categories/coscup/"> COSCUP </a>
+</span>
+
+        <span class="post-comment"><i class="icon icon-comment"></i>&nbsp;<a href="/post/2020-08-04-coscup-go/#comments"
+            class="article-comment-link">Comments</a></span>
+      </div>
+    </div>
+    <div class="article-entry marked-body js-toc-content" itemprop="articleBody">
+      <h2 id="qa-補充">Q&amp;A 補充</h2>
+<p>Slides: <a href="https://www.slideshare.net/CherrieHsieh/goroutine-stack-and-local-variable-allocation-in-go">Goroutine stack and local variable allocation in Go</a></p>
+<p>這次分享中，有人詢問我在 stack growing 的時候， user stack 和 system stack 是如何交替切換的。由於當時沒有仔細看 switch 流程，無法很清楚地答覆他，所以事後又看了一下這段，並且畫出簡圖：</p>
+<p><img src="/posts/coscup-go_2.png" alt="hugo"></p>
+<p>首先，在 curg (current goroutine) func1 呼叫 func2 後，發現 user stack 空間不足，此時先儲存 func1 的 state 到 M 的 morebuf struct 中（用來 bug tracing），接著把 func2 的 state （就是當前 goroutine 的執行狀態，包含 stack pointer, program counter 等）存在 curg 的 sched struct 中，接著 switch 到 g0，從 g0 的 sched 取出 stack pointer 的值 (system stack) 並且設定，接著就可以執行 newstack function。</p>
+<p>執行 newstack function，除了 (1) 建立一個新 user stack、 (2) 把舊 user stack 的 stack frames 複製到新 user stack 上，並且 (3) 調整 pointer 值之外，還需要調整 <code>curg.sched</code> 的 stack pointer 值，讓它指到新 user stack 的正確位置。</p>
+<p>最後，從 g0 switch 回去 curg ，同樣地，把 g0 的 state 儲存到 g0 的 sched struct 中，接著取出 curg sched 中的值 (sp, pc, ctx)，然後重置 sched 的值，並且從回復後的 pc 位置開始執行。</p>
+<h2 id="coscup-心得">COSCUP 心得</h2>
+<p><img src="/posts/coscup-go_1.jpg" alt="hugo"></p>
+<p>加入 Go 社群當小志工大約一年多的時間，在去年 COSCUP 舉辦的時候，因為還不太熟悉社群再加上又是菜雞，所以去年就只是幫忙社群擺攤和管場地。而今年 Go 在 COSCUP 有自己的議程軌，同時自己也在這一年多的時間當過三次 Meetup 講者，想想覺得是時候去嘗試看看擔任 COSCUP 講者了，也希望能從準備簡報中釐清自己的觀念是否有哪些地方不夠清楚。</p>
+<p>這次選擇的主題是我非常感興趣的記憶體管理，而且我很喜歡把 Go 和 C program 拿出來比較，透過差異性來更了解 Go 語言。在思考題目時，我很快地就決定要講 user stack ，主要原因是這個題目我在之前的 Meetup 有大略準備過，不過這次會更專注在說明 Go 的 stack 機制和實驗證明。為了這次分享，我花了很多時間在閱讀 source code 和實驗 corner case，部分實驗內容並不會放在分享上，但是透過實驗卻可以更清楚地知道 stack 運作，我覺得非常值得。</p>
+<p>由於本次分享內容有包含 source code 和實驗展示，所以有改過 go present tool，包含調整 theme 和加入 markdown extension ，以便讓 present slides 可以全部使用 mardown 來完成。不過可惜最後有點小失敗，因為 present 是使用 remote debug server，而當場剛好手機網路連不上，要使用場地所提供的網路又要花時間輸入帳號密碼，因此只好捨棄讓聽眾能當場看實驗結果，真的很可惜，這樣的 live demo 也會失敗，有點淒慘 QQ</p>
+<p>不過，總結來說，自己覺得自己在這場表現還算不錯，講話速度不會太快（雖然還是被同事說太緊張XD），講的也還算清楚易懂，自己在分享的時候，下面的聽眾也表現地專注而不是一臉無聊樣。很開心自己願意給自己一個機會站出來分享給其他人聽，畢竟站上來當講者還是需要一點勇氣，包含事前要花時間準備簡報、又要擔心分享的內容會不會不吸引人。雖然事前緊張，但講完之後會發覺就只是這樣而已，其實沒有想像中難，下次可以挑戰更有深度的主題 XD</p>
+
+    </div>
+    <div class="article-footer">
+<blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    <li class="post-copyright-link hidden-xs">
+      <strong>Permalink: </strong>
+      <a href="https://yushuanhsieh.github.io/post/2020-08-04-coscup-go/" title="COSCUP 2020 - Goroutine stack and local variable allocation in Go" target="_blank" rel="external">https://yushuanhsieh.github.io/post/2020-08-04-coscup-go/</a>
+    </li>
+  </ul>
+</blockquote>
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="https://yushuanhsieh.github.io/author.jpg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="" target="_blank"><span class="text-dark">Cherie Hsieh</span><small class="ml-1x">Software Engineer</small></a></h3>
+        <div>Gopher</div>
+      </div>
+    </figure>
+  </div>
+</div>
+    </div>
+  </article>
+
+</div><nav class="bar bar-footer clearfix" data-stick-bottom>
+    <div class="bar-inner">
+        <ul class="pager pull-left">
+            <li class="prev">
+                <a href="https://yushuanhsieh.github.io/post/2020-07-05-docker-network/" title="Cross-Network Container Communication"><i
+                        class="icon icon-angle-left"
+                        aria-hidden="true"></i><span>&nbsp;&nbsp;Older</span></a>
+            </li>
+            
+        </ul>
+        <div class="bar-right">
+        </div>
+    </div>
+</nav>
+
+</main><footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+  <div class="copyright">
+    &copy;2017  -
+    2020
+    <div class="publishby">
+        Theme by <a href="https://github.com/xiaoheiAh" target="_blank"> xiaoheiAh </a>base on<a href="https://github.com/xiaoheiAh/hugo-theme-pure" target="_blank"> pure</a>.
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+<script>
+    window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/javascript.min.js" defer></script>
+<script type="text/javascript" src="https://cdn.staticfile.org/highlight.js/9.15.10/languages/c.min.js" defer></script><script>
+    hljs.configure({
+        tabReplace: '    ', 
+        classPrefix: ''     
+        
+    })
+    hljs.initHighlightingOnLoad();
+</script>
+<script src="https://yushuanhsieh.github.io/js/application.min.bdeb64b910570b6c41badc6a05b7afb0c8ad9efd8525de3c7257d59e786326a3.js"></script>
+<script src="https://yushuanhsieh.github.io/js/plugin.min.51ff8c7317566f82259170fa36e09c4493adc9b9378b427a01ad3f017ebac7dd.js"></script>
+
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: 'Posts',
+                PAGES: 'Pages',
+                CATEGORIES: 'Categories',
+                TAGS: 'Tags',
+                UNTITLED: '(Untitled)',
+            },
+            ROOT_URL: 'https:\/\/yushuanhsieh.github.io',
+            CONTENT_URL: 'https:\/\/yushuanhsieh.github.io\/searchindex.json ',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script type="text/javascript" src="https://yushuanhsieh.github.io/js/insight.min.a343cd9a5a7698336b28ef3a7c16a3a1b1d2d5fb17dc8ed04022bbe08cc5459073a15bdafa3a8a58cdd56080784bdd69fa70b1ae8597565c799c57ed00f0e120.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+<script>
+    tocbot.init({
+        
+        tocSelector: '.js-toc',
+        
+        contentSelector: '.js-toc-content',
+        
+        headingSelector: 'h1, h2, h3',
+        
+        hasInnerContainers: true,
+    });
+</script>
+
+
+  </body>
+</html>

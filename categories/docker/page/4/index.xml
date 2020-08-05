@@ -12,6 +12,15 @@
     
     
     <item>
+      <title>Cypress &amp; Cucumber Introduction</title>
+      <link>https://yushuanhsieh.github.io/post/2018-01-29-cypress-basic-usage/</link>
+      <pubDate>Mon, 29 Jan 2018 12:00:00 +0800</pubDate>
+      
+      <guid>https://yushuanhsieh.github.io/post/2018-01-29-cypress-basic-usage/</guid>
+      <description>Cypress E2E Testing Framework Features  No more async hell</description>
+    </item>
+    
+    <item>
       <title>AngularJS - angular-formly study notes</title>
       <link>https://yushuanhsieh.github.io/post/2018-01-06-angular-formly-basic-usage/</link>
       <pubDate>Fri, 05 Jan 2018 12:00:00 +0800</pubDate>

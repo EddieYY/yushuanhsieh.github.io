@@ -6,10 +6,19 @@
     <description>Recent content in Posts on 文組工程師</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 05 Jul 2020 08:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 04 Aug 2020 08:00:00 +0800</lastBuildDate>
     
         <atom:link href="https://yushuanhsieh.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>11月份自我學習回顧</title>
+      <link>https://yushuanhsieh.github.io/post/2018-12-01-11-study/</link>
+      <pubDate>Sat, 01 Dec 2018 08:00:00 +0800</pubDate>
+      
+      <guid>https://yushuanhsieh.github.io/post/2018-12-01-11-study/</guid>
+      <description>前言 這個月學習內容主要集中在 Embedded System 和 Network，說來慚愧，雖然大學有修網際網路，但是過了這麼久，很多知識都還給老師了。因為目前在網通廠工作，常常會接觸到 Application Layer Protocol 和使用 UNIX Socket，所以趁這機會再一次把網路課程複習一下，混搭上個月沒有學完的 Embedded System。</description>
+    </item>
     
     <item>
       <title>Node-Red - Node 坑坑紀錄</title>
@@ -182,15 +191,6 @@ The Main Flow of Rendering Engines 在寫 HTML 的時候，我們很理所當然
       
       <guid>https://yushuanhsieh.github.io/post/2018-05-07-javascript-basic-concept/</guid>
       <description>前言 這篇文章起源於我為了瞭解瀏覽器的運作原理，以利針對瀏覽器進行效能優化時，所延伸出來的基礎文章。剛開始學習切入點是 Chrome 的 V8 JavaScript Engine，看到有一位作者仔細地說明 V8 Engine 如何 Compile JavaScript 的流程，進而引發我對 JavaScript Memory Allocation 的興趣。此外，剛好最近也在用 TypeScript 寫類 static type object，所以想更清楚知道使用 TypeScript 這個 pre-processor，在瀏覽器中會怎樣提高 JavaScript Compile 的性能。</description>
-    </item>
-    
-    <item>
-      <title>Cypress &amp; Cucumber Introduction</title>
-      <link>https://yushuanhsieh.github.io/post/2018-01-29-cypress-basic-usage/</link>
-      <pubDate>Mon, 29 Jan 2018 12:00:00 +0800</pubDate>
-      
-      <guid>https://yushuanhsieh.github.io/post/2018-01-29-cypress-basic-usage/</guid>
-      <description>Cypress E2E Testing Framework Features  No more async hell</description>
     </item>
     
   </channel>

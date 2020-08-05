@@ -6,10 +6,19 @@
     <description>Recent content in Categories on 文組工程師</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 05 Jul 2020 08:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 04 Aug 2020 08:00:00 +0800</lastBuildDate>
     
         <atom:link href="https://yushuanhsieh.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>COSCUP 2020 - Goroutine stack and local variable allocation in Go</title>
+      <link>https://yushuanhsieh.github.io/post/2020-08-04-coscup-go/</link>
+      <pubDate>Tue, 04 Aug 2020 08:00:00 +0800</pubDate>
+      
+      <guid>https://yushuanhsieh.github.io/post/2020-08-04-coscup-go/</guid>
+      <description>Q&amp;amp;A 補充 Slides: Goroutine stack and local variable allocation in Go</description>
+    </item>
     
     <item>
       <title>Cross-Network Container Communication</title>
@@ -194,15 +203,6 @@ Front-End to Back-End 首先，最大的轉變大概是從專職 front-end 變�
       <guid>https://yushuanhsieh.github.io/post/2019-10-05-study/</guid>
       <description>前言 這個月是一個比較多事的月份，主要原因是重新調整了生涯規劃。雖然自己出社會也快要十年了，但是轉職成 Engineer 也才不過這兩年的事情，因此自己還像是一名剛出社會的半新鮮人一樣，到處地探索自己喜歡的事物，不斷地從過程中試圖挖掘出自己的熱情所在。
 很好運的是，我覺得我在這過程中一直有貴人相助，例如我加入 Moxa，再因緣際會地加入趨勢科技，進而進入 Golang 社群開始與其他 co-organizer 辦活動等。老實說，我在群體中一直都是最菜的那位，但是大家給予我很多機會成長，讓我有機會接觸到各種事務，雖然依舊還是很菜，但至少開始有點經驗，知道自己該用什麼方式來找出問題點，在面對新技術的時候，可以從哪個方向下手讓自己快速學習。</description>
-    </item>
-    
-    <item>
-      <title>Implement Memory Allocator</title>
-      <link>https://yushuanhsieh.github.io/post/2019-09-24-stack-memory-allocator/</link>
-      <pubDate>Tue, 24 Sep 2019 08:00:00 +0800</pubDate>
-      
-      <guid>https://yushuanhsieh.github.io/post/2019-09-24-stack-memory-allocator/</guid>
-      <description>前言 在很多程式語言都會看到 memory allocator，也可以看到陸續發表的 allocator 實作方式，例如 microsoft mimalloc。與其用看 source code 的方式來了解其原理，倒不如從基本學起，並且從實作過程中了解到為什麼他們要這樣設計 allocator。</description>
     </item>
     
   </channel>

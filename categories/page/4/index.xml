@@ -6,10 +6,19 @@
     <description>Recent content in Categories on 文組工程師</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 05 Jul 2020 08:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 04 Aug 2020 08:00:00 +0800</lastBuildDate>
     
         <atom:link href="https://yushuanhsieh.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Cypress &amp; Cucumber Introduction</title>
+      <link>https://yushuanhsieh.github.io/post/2018-01-29-cypress-basic-usage/</link>
+      <pubDate>Mon, 29 Jan 2018 12:00:00 +0800</pubDate>
+      
+      <guid>https://yushuanhsieh.github.io/post/2018-01-29-cypress-basic-usage/</guid>
+      <description>Cypress E2E Testing Framework Features  No more async hell</description>
+    </item>
     
     <item>
       <title>AngularJS - angular-formly study notes</title>

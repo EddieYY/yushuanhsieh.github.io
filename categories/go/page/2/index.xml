@@ -6,10 +6,19 @@
     <description>Recent content in Go on 文組工程師</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 24 Jun 2020 08:00:00 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 04 Aug 2020 08:00:00 +0800</lastBuildDate>
     
         <atom:link href="https://yushuanhsieh.github.io/categories/go/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Implement Memory Allocator</title>
+      <link>https://yushuanhsieh.github.io/post/2019-09-24-stack-memory-allocator/</link>
+      <pubDate>Tue, 24 Sep 2019 08:00:00 +0800</pubDate>
+      
+      <guid>https://yushuanhsieh.github.io/post/2019-09-24-stack-memory-allocator/</guid>
+      <description>前言 在很多程式語言都會看到 memory allocator，也可以看到陸續發表的 allocator 實作方式，例如 microsoft mimalloc。與其用看 source code 的方式來了解其原理，倒不如從基本學起，並且從實作過程中了解到為什麼他們要這樣設計 allocator。</description>
+    </item>
     
     <item>
       <title>2019/08月份自我學習回顧</title>
@@ -196,15 +205,6 @@ mapStateToProps Issues 首先來談談在建立 connectHOC 常用到的 mapState
       <guid>https://yushuanhsieh.github.io/post/2019-01-01-12-study/</guid>
       <description>前言 其實可以看到，我從 11 月開始發文量變少（雖然本來就不多XD），主要是因為目前在複習一些理論課程，我又是手寫筆記派，所以自然地就比較少用 blog 記錄，反而是都寫成筆記，不但能強化當下的記憶，也方便日後複習。 ![12-study]({{ site.url }}/assets/images/12-study.jpg)
 學習回顧 Network Principle 本月份主力衝刺在 Network 基本概念，這個月複習 Network Layer 和 Data Link Layer，雖然對於其中所使用到的 algorithm implementation 方式不熟悉，不過至少找回了概念，之後在 trace network protocol code 的時候也會更有方向。</description>
-    </item>
-    
-    <item>
-      <title>11月份自我學習回顧</title>
-      <link>https://yushuanhsieh.github.io/post/2018-12-01-11-study/</link>
-      <pubDate>Sat, 01 Dec 2018 08:00:00 +0800</pubDate>
-      
-      <guid>https://yushuanhsieh.github.io/post/2018-12-01-11-study/</guid>
-      <description>前言 這個月學習內容主要集中在 Embedded System 和 Network，說來慚愧，雖然大學有修網際網路，但是過了這麼久，很多知識都還給老師了。因為目前在網通廠工作，常常會接觸到 Application Layer Protocol 和使用 UNIX Socket，所以趁這機會再一次把網路課程複習一下，混搭上個月沒有學完的 Embedded System。</description>
     </item>
     
   </channel>
